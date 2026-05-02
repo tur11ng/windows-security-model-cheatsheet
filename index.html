@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windows Security — Auth, Permissions &amp; Offensive Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #131620;
+    --bg3: #1a1d28;
+    --bg4: #21253a;
+    --line: rgba(255,255,255,0.07);
+    --line2: rgba(255,255,255,0.13);
+    --text: #d4d8e8;
+    --text2: #8890aa;
+    --text3: #555e78;
+    --white: #eef0f8;
+    --c-blue: #4e9eff;
+    --c-blue-dim: rgba(78,158,255,0.12);
+    --c-blue-border: rgba(78,158,255,0.3);
+    --c-teal: #2dd4a4;
+    --c-teal-dim: rgba(45,212,164,0.1);
+    --c-teal-border: rgba(45,212,164,0.28);
+    --c-amber: #f5b642;
+    --c-amber-dim: rgba(245,182,66,0.1);
+    --c-amber-border: rgba(245,182,66,0.28);
+    --c-red: #f16363;
+    --c-red-dim: rgba(241,99,99,0.1);
+    --c-red-border: rgba(241,99,99,0.28);
+    --c-purple: #a78bfa;
+    --c-purple-dim: rgba(167,139,250,0.1);
+    --c-purple-border: rgba(167,139,250,0.28);
+    --c-green: #6ee79a;
+    --c-green-dim: rgba(110,231,154,0.1);
+    --c-green-border: rgba(110,231,154,0.28);
+    --c-coral: #ff8c69;
+    --c-coral-dim: rgba(255,140,105,0.1);
+    --c-coral-border: rgba(255,140,105,0.28);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .layout { display: flex; min-height: 100vh; }
+  .nav {
+    width: 240px;
+    min-width: 240px;
+    background: var(--bg2);
+    border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 0 24px;
+    flex-shrink: 0;
+  }
+  .nav-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 18px 16px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 12px;
+  }
+  .nav a {
+    display: block;
+    padding: 6px 18px;
+    font-size: 11.5px;
+    color: var(--text2);
+    text-decoration: none;
+    font-family: var(--mono);
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .nav a:hover { color: var(--white); background: var(--line); }
+  .nav .nav-section { margin-top: 14px; }
+  .nav .nav-section-label {
+    font-size: 9.5px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 18px 3px;
+    font-weight: 600;
+  }
+  .nav .nav-part {
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 16px 18px 4px;
+    font-weight: 600;
+    border-top: 1px solid var(--line);
+    margin-top: 10px;
+  }
+  .nav .nav-part:first-of-type { border-top: none; margin-top: 4px; }
+  .nav .nav-part.def { color: var(--c-blue); }
+  .nav .nav-part.auth { color: var(--c-teal); }
+  .nav .nav-part.off { color: var(--c-red); }
+  .nav a.accent-blue { border-left-color: var(--c-blue); color: var(--c-blue); }
+  .nav a.accent-teal { border-left-color: var(--c-teal); color: var(--c-teal); }
+  .nav a.accent-amber { border-left-color: var(--c-amber); color: var(--c-amber); }
+  .nav a.accent-red { border-left-color: var(--c-red); color: var(--c-red); }
+  .nav a.accent-purple { border-left-color: var(--c-purple); color: var(--c-purple); }
+  .nav a.accent-green { border-left-color: var(--c-green); color: var(--c-green); }
+  .nav a.accent-coral { border-left-color: var(--c-coral); color: var(--c-coral); }
+
+  .content { flex: 1; padding: 0 36px 80px; max-width: 1100px; }
+
+  .header {
+    padding: 40px 0 32px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 40px;
+  }
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .header p {
+    color: var(--text2);
+    font-size: 13px;
+    max-width: 700px;
+  }
+  .header-tags { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+  .tag-blue { background: var(--c-blue-dim); color: var(--c-blue); border: 1px solid var(--c-blue-border); }
+  .tag-teal { background: var(--c-teal-dim); color: var(--c-teal); border: 1px solid var(--c-teal-border); }
+  .tag-amber { background: var(--c-amber-dim); color: var(--c-amber); border: 1px solid var(--c-amber-border); }
+  .tag-purple { background: var(--c-purple-dim); color: var(--c-purple); border: 1px solid var(--c-purple-border); }
+  .tag-red { background: var(--c-red-dim); color: var(--c-red); border: 1px solid var(--c-red-border); }
+
+  .part-banner {
+    margin: 60px 0 32px;
+    padding: 28px 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line2);
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+  }
+  .part-banner::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .part-banner.def::before { background: var(--c-blue); }
+  .part-banner.auth::before { background: var(--c-teal); }
+  .part-banner.off::before { background: var(--c-red); }
+  .part-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .part-banner.def .part-eyebrow { color: var(--c-blue); }
+  .part-banner.auth .part-eyebrow { color: var(--c-teal); }
+  .part-banner.off .part-eyebrow { color: var(--c-red); }
+  .part-banner h2 {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .part-banner p {
+    color: var(--text2);
+    font-size: 13px;
+    max-width: 760px;
+  }
+
+  .section { margin-bottom: 52px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-blue { background: var(--c-blue); }
+  .dot-teal { background: var(--c-teal); }
+  .dot-amber { background: var(--c-amber); }
+  .dot-red { background: var(--c-red); }
+  .dot-purple { background: var(--c-purple); }
+  .dot-green { background: var(--c-green); }
+  .dot-coral { background: var(--c-coral); }
+  .section-header h3 {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+  .section-id {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    margin-left: auto;
+    letter-spacing: 0.08em;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .span-2 { grid-column: span 2; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 18px;
+  }
+  .card.attack {
+    border-left: 3px solid var(--c-red);
+  }
+  .card-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .card-title.c-blue { color: var(--c-blue); }
+  .card-title.c-teal { color: var(--c-teal); }
+  .card-title.c-amber { color: var(--c-amber); }
+  .card-title.c-red { color: var(--c-red); }
+  .card-title.c-purple { color: var(--c-purple); }
+  .card-title.c-green { color: var(--c-green); }
+  .card-title.c-coral { color: var(--c-coral); }
+
+  .mono-block {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--c-blue);
+    margin: 8px 0;
+    word-break: break-all;
+  }
+  .mono-block.amber { color: var(--c-amber); }
+  .mono-block.teal { color: var(--c-teal); }
+  .mono-block.red { color: var(--c-red); }
+  .mono-block.purple { color: var(--c-purple); }
+  .mono-block.green { color: var(--c-green); }
+
+  .field-list { list-style: none; }
+  .field-list li {
+    display: flex;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: flex-start;
+  }
+  .field-list li:last-child { border-bottom: none; }
+  .field-key {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--c-teal);
+    min-width: 160px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .field-key.amber { color: var(--c-amber); }
+  .field-key.blue { color: var(--c-blue); }
+  .field-key.purple { color: var(--c-purple); }
+  .field-key.coral { color: var(--c-coral); }
+  .field-key.red { color: var(--c-red); }
+  .field-key.green { color: var(--c-green); }
+  .field-val { color: var(--text); font-size: 12px; line-height: 1.5; }
+
+  .badge-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .badge-blue { background: var(--c-blue-dim); color: var(--c-blue); border-color: var(--c-blue-border); }
+  .badge-teal { background: var(--c-teal-dim); color: var(--c-teal); border-color: var(--c-teal-border); }
+  .badge-amber { background: var(--c-amber-dim); color: var(--c-amber); border-color: var(--c-amber-border); }
+  .badge-red { background: var(--c-red-dim); color: var(--c-red); border-color: var(--c-red-border); }
+  .badge-purple { background: var(--c-purple-dim); color: var(--c-purple); border-color: var(--c-purple-border); }
+  .badge-green { background: var(--c-green-dim); color: var(--c-green); border-color: var(--c-green-border); }
+  .badge-coral { background: var(--c-coral-dim); color: var(--c-coral); border-color: var(--c-coral-border); }
+
+  .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 10px 0; }
+  .flow-step {
+    background: var(--bg3);
+    border: 1px solid var(--line2);
+    border-radius: 4px;
+    padding: 7px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-arrow {
+    color: var(--text3);
+    padding: 0 6px;
+    font-size: 14px;
+  }
+
+  .callout {
+    border-left: 3px solid;
+    padding: 10px 14px;
+    border-radius: 0 4px 4px 0;
+    margin: 10px 0;
+    font-size: 12px;
+  }
+  .callout-red { border-color: var(--c-red); background: var(--c-red-dim); color: var(--text); }
+  .callout-amber { border-color: var(--c-amber); background: var(--c-amber-dim); color: var(--text); }
+  .callout-blue { border-color: var(--c-blue); background: var(--c-blue-dim); color: var(--text); }
+  .callout-teal { border-color: var(--c-teal); background: var(--c-teal-dim); color: var(--text); }
+  .callout-green { border-color: var(--c-green); background: var(--c-green-dim); color: var(--text); }
+  .callout-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .callout-red .callout-label { color: var(--c-red); }
+  .callout-amber .callout-label { color: var(--c-amber); }
+  .callout-blue .callout-label { color: var(--c-blue); }
+  .callout-teal .callout-label { color: var(--c-teal); }
+  .callout-green .callout-label { color: var(--c-green); }
+
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .ref-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line2);
+    text-align: left;
+  }
+  .ref-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:hover td { background: var(--bg3); }
+  .ref-table .mono-cell { font-family: var(--mono); font-size: 11px; color: var(--c-teal); }
+  .ref-table .mono-cell.amber { color: var(--c-amber); }
+  .ref-table .mono-cell.blue { color: var(--c-blue); }
+  .ref-table .mono-cell.red { color: var(--c-red); }
+  .ref-table .mono-cell.purple { color: var(--c-purple); }
+  .ref-table .mono-cell.green { color: var(--c-green); }
+
+  .phase-row { display: flex; gap: 12px; margin: 12px 0; }
+  .phase-box {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--line2);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .phase-num {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    opacity: 0.25;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .phase-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  .phase-body { font-size: 12px; color: var(--text); line-height: 1.6; }
+  .phase-box.p1 { border-top: 2px solid var(--c-purple); }
+  .phase-box.p1 .phase-title { color: var(--c-purple); }
+  .phase-box.p2 { border-top: 2px solid var(--c-amber); }
+  .phase-box.p2 .phase-title { color: var(--c-amber); }
+  .phase-box.p3 { border-top: 2px solid var(--c-teal); }
+  .phase-box.p3 .phase-title { color: var(--c-teal); }
+
+  .il-table { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .il-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+  }
+  .il-bar { height: 6px; border-radius: 2px; flex-shrink: 0; }
+  .il-label { font-family: var(--mono); font-size: 11px; min-width: 90px; color: var(--white); }
+  .il-sid { font-family: var(--mono); font-size: 10px; color: var(--text3); min-width: 110px; }
+  .il-note { font-size: 11px; color: var(--text2); }
+
+  .divider { height: 1px; background: var(--line); margin: 20px 0; }
+
+  h4.sub {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 16px 0 8px;
+  }
+
+  p.note { font-size: 12px; color: var(--text2); margin: 8px 0; line-height: 1.6; }
+  strong.hl { color: var(--white); font-weight: 500; }
+  code { font-family: var(--mono); font-size: 11px; background: var(--bg3); padding: 1px 5px; border-radius: 3px; color: var(--c-teal); }
+
+  .attack-block {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--c-red);
+    border-radius: 0 6px 6px 0;
+    background: var(--bg2);
+    margin: 14px 0;
+    overflow: hidden;
+  }
+  .attack-head {
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .attack-name {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--c-red);
+    letter-spacing: 0.02em;
+  }
+  .attack-mitre {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    background: var(--bg3);
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+  .attack-body { padding: 12px 16px; font-size: 12px; line-height: 1.6; }
+  .attack-body p { margin-bottom: 8px; }
+  .attack-mitigations {
+    border-top: 1px solid var(--line);
+    background: var(--bg3);
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+  .mit-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--c-green);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mit-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--c-green);
+    border-radius: 50%;
+  }
+  .attack-mitigations ul { list-style: none; }
+  .attack-mitigations li {
+    padding: 3px 0 3px 14px;
+    position: relative;
+  }
+  .attack-mitigations li::before {
+    content: '+';
+    position: absolute;
+    left: 0;
+    color: var(--c-green);
+    font-family: var(--mono);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─────────── NAV ─────────── -->
+<nav class="nav">
+  <div class="nav-title">Win Security Ref</div>
+
+  <div class="nav-part def">Part I · Foundations</div>
+  <a href="#architecture" class="accent-blue">01 Architecture</a>
+  <a href="#sids" class="accent-teal">02 SIDs</a>
+  <a href="#tokens" class="accent-amber">03 Access Tokens</a>
+  <a href="#descriptors" class="accent-purple">04 Security Descriptors</a>
+  <a href="#access-check" class="accent-teal">05 Access Check</a>
+  <a href="#privileges" class="accent-coral">06 Privileges</a>
+  <a href="#service-accounts" class="accent-blue">07 Service Accts &amp; URA</a>
+
+  <div class="nav-part auth">Part II · Authentication</div>
+  <a href="#local-auth" class="accent-blue">08 Local Auth</a>
+  <a href="#ntlm" class="accent-amber">09 NTLM</a>
+  <a href="#kerberos" class="accent-teal">10 Kerberos</a>
+  <a href="#active-directory" class="accent-purple">11 Active Directory</a>
+  <a href="#auditing" class="accent-green">12 Auditing</a>
+
+  <div class="nav-part off">Part III · Offensive</div>
+  <a href="#privesc" class="accent-red">13 Privilege Escalation</a>
+  <a href="#vuln-services" class="accent-red">14 Vulnerable Services</a>
+  <a href="#cred-access" class="accent-red">15 Credential Access</a>
+  <a href="#ntlm-attacks" class="accent-red">16 NTLM Attacks</a>
+  <a href="#kerberos-attacks" class="accent-red">17 Kerberos Attacks</a>
+  <a href="#ad-abuse" class="accent-red">18 AD ACL Abuse</a>
+  <a href="#detection" class="accent-red">19 Detection &amp; Telemetry</a>
+</nav>
+
+<!-- ─────────── CONTENT ─────────── -->
+<main class="content">
+
+  <div class="header">
+    <div class="header-eyebrow">Technical Reference · Cybersecurity Engineering</div>
+    <h1>Windows Security Model</h1>
+    <p>Authentication, authorization &amp; permissions — local and network. A complete reference covering the kernel security architecture, token model, access check pipeline, NTLM and Kerberos protocols, and the offensive techniques that exploit each layer.</p>
+    <div class="header-tags">
+      <span class="tag tag-blue">Foundations</span>
+      <span class="tag tag-teal">Authentication</span>
+      <span class="tag tag-purple">Active Directory</span>
+      <span class="tag tag-red">Offensive Security</span>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       PART I — FOUNDATIONS
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="part-banner def">
+    <div class="part-eyebrow">Part I</div>
+    <h2>Foundations — The Windows Security Model</h2>
+    <p>How the kernel enforces identity and access. Pure engineering reference: the components that exist, the data structures they manipulate, and the rules they follow when an access decision is made.</p>
+  </div>
+
+  <!-- ── 01 ARCHITECTURE ───────────────────────────────────────── -->
+  <section class="section" id="architecture">
+    <div class="section-header">
+      <div class="section-dot dot-blue"></div>
+      <h3>01 — Windows Security Architecture</h3>
+      <span class="section-id">ARCH</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title c-blue">Kernel Security Components</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">SRM</span><span class="field-val"><strong class="hl">Security Reference Monitor</strong> — sole kernel authority for enforcing access control. All object open requests pass through SRM's access check algorithm.</span></li>
+          <li><span class="field-key blue">Object Manager</span><span class="field-val">Manages all kernel objects (files, processes, mutexes, tokens…) and their security descriptors. Controls handle creation and duplication.</span></li>
+          <li><span class="field-key blue">Executive</span><span class="field-val">Collection of kernel subsystems: Process Manager, Memory Manager, I/O Manager, Configuration Manager (registry), ALPC.</span></li>
+          <li><span class="field-key blue">Token</span><span class="field-val">Every process/thread carries an access token — the SRM's identity carrier.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">User-Mode Security Processes</div>
+        <ul class="field-list">
+          <li><span class="field-key">LSASS.exe</span><span class="field-val"><strong class="hl">Local Security Authority Subsystem</strong>. Hosts authentication packages, manages logon sessions, enforces LSA policy, stores credential secrets in protected memory.</span></li>
+          <li><span class="field-key">Winlogon.exe</span><span class="field-val">Orchestrates interactive logon. Captures Secure Attention Sequence (Ctrl+Alt+Del). Creates user desktops. Calls <code>LsaLogonUser</code>.</span></li>
+          <li><span class="field-key">SCM (services.exe)</span><span class="field-val">Service Control Manager. Launches services with configured tokens (SYSTEM, Local Service, Network Service, or named accounts).</span></li>
+          <li><span class="field-key">SAM (samss)</span><span class="field-val">Security Account Manager — local user/group database. Hosted in LSASS. Backed by HKLM\SAM.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-amber">Authentication Packages (in LSASS)</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">MSV1_0</span><span class="field-val">NTLM authentication. Local accounts, NTLMv1/v2.</span></li>
+          <li><span class="field-key amber">Kerberos</span><span class="field-val">Kerberos v5. Domain accounts. Default for domain-joined.</span></li>
+          <li><span class="field-key amber">Negotiate</span><span class="field-val">SPNEGO broker. Selects Kerberos first, falls back to NTLM.</span></li>
+          <li><span class="field-key amber">TSSSP / CredSSP</span><span class="field-val">RDP NLA — delegates full credentials to remote host over TLS.</span></li>
+          <li><span class="field-key amber">WDigest</span><span class="field-val">Deprecated. Originally stored cleartext passwords in LSASS memory.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-purple">Key Security Databases</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">HKLM\SAM</span><span class="field-val">Local accounts, NT hashes, group memberships. ACL: SYSTEM only.</span></li>
+          <li><span class="field-key purple">HKLM\SECURITY</span><span class="field-val">LSA secrets (service passwords, cached domain credentials, DPAPI master keys). ACL: SYSTEM only.</span></li>
+          <li><span class="field-key purple">NTDS.dit</span><span class="field-val">AD domain database on DCs. Contains all domain user hashes, objects, attributes.</span></li>
+          <li><span class="field-key purple">SYSVOL</span><span class="field-val">Group Policy templates. Replicated to all DCs via DFSR/FRS.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-red">Security Boundaries</div>
+        <ul class="field-list">
+          <li><span class="field-key red">Forest</span><span class="field-val">True security boundary in AD. Separate forests cannot implicitly trust each other.</span></li>
+          <li><span class="field-key red">Kernel/User mode</span><span class="field-val">Ring 0 vs Ring 3. User mode cannot directly bypass SRM or write to kernel memory.</span></li>
+          <li><span class="field-key red">Integrity Level</span><span class="field-val">Mandatory control. Lower IL processes cannot write to higher IL objects.</span></li>
+          <li><span class="field-key red">AppContainer</span><span class="field-val">Sandboxed IL=Low + capability-gated access. UWP apps, browsers.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 02 SIDs ───────────────────────────────────────── -->
+  <section class="section" id="sids">
+    <div class="section-header">
+      <div class="section-dot dot-teal"></div>
+      <h3>02 — Security Identifiers (SIDs)</h3>
+      <span class="section-id">SID</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title c-teal">SID Structure</div>
+        <p class="note">Every security principal (user, group, computer, service, built-in identity) has a unique SID.</p>
+        <div class="mono-block teal">S - R - I - SA1 - SA2 - ... - RID</div>
+        <ul class="field-list" style="margin-top:8px">
+          <li><span class="field-key">S</span><span class="field-val">Literal prefix</span></li>
+          <li><span class="field-key">R (Revision)</span><span class="field-val">Always <code>1</code></span></li>
+          <li><span class="field-key">I (Identifier Authority)</span><span class="field-val"><code>5</code> = NT Authority (most accounts). <code>16</code> = Mandatory Label Authority.</span></li>
+          <li><span class="field-key">SA (Sub-authorities)</span><span class="field-val">Up to 15. For domain accounts, first sub-authorities form the domain SID.</span></li>
+          <li><span class="field-key">RID (last SA)</span><span class="field-val">Relative Identifier — unique within domain. 500=Administrator, 501=Guest, 512=Domain Admins, 1000+=created users.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Well-Known SIDs</div>
+        <table class="ref-table">
+          <thead><tr><th>SID</th><th>Identity</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell">S-1-0-0</td><td>Null / Nobody</td></tr>
+            <tr><td class="mono-cell">S-1-1-0</td><td>Everyone (all authenticated + anonymous)</td></tr>
+            <tr><td class="mono-cell">S-1-2-0</td><td>Local (interactive logon users)</td></tr>
+            <tr><td class="mono-cell">S-1-5-2</td><td>Network (net logon users)</td></tr>
+            <tr><td class="mono-cell">S-1-5-7</td><td>Anonymous Logon</td></tr>
+            <tr><td class="mono-cell">S-1-5-11</td><td>Authenticated Users</td></tr>
+            <tr><td class="mono-cell">S-1-5-18</td><td>SYSTEM (LocalSystem)</td></tr>
+            <tr><td class="mono-cell">S-1-5-19</td><td>Local Service</td></tr>
+            <tr><td class="mono-cell">S-1-5-20</td><td>Network Service</td></tr>
+            <tr><td class="mono-cell">S-1-5-32-544</td><td>BUILTIN\Administrators</td></tr>
+            <tr><td class="mono-cell">S-1-5-32-545</td><td>BUILTIN\Users</td></tr>
+            <tr><td class="mono-cell">S-1-5-32-551</td><td>BUILTIN\Backup Operators</td></tr>
+            <tr><td class="mono-cell">S-1-16-0</td><td>Integrity: Untrusted</td></tr>
+            <tr><td class="mono-cell">S-1-16-4096</td><td>Integrity: Low</td></tr>
+            <tr><td class="mono-cell">S-1-16-8192</td><td>Integrity: Medium (default users)</td></tr>
+            <tr><td class="mono-cell">S-1-16-12288</td><td>Integrity: High (elevated admins)</td></tr>
+            <tr><td class="mono-cell">S-1-16-16384</td><td>Integrity: System</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 03 TOKENS ───────────────────────────────────────── -->
+  <section class="section" id="tokens">
+    <div class="section-header">
+      <div class="section-dot dot-amber"></div>
+      <h3>03 — Security Access Tokens</h3>
+      <span class="section-id">TOKEN</span>
+    </div>
+
+    <p class="note">The access token is the kernel's representation of a security context. The SRM reads the token when deciding whether to grant access. Every process has a <strong class="hl">primary token</strong>; threads can carry an <strong class="hl">impersonation token</strong> that temporarily overrides the process context.</p>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-amber">Token Fields</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">User SID</span><span class="field-val">The authenticated user's SID. Basis for identity.</span></li>
+          <li><span class="field-key amber">Group SIDs</span><span class="field-val">List of group memberships. Each with attribute flags (see below).</span></li>
+          <li><span class="field-key amber">Privileges</span><span class="field-val">Special rights (e.g. SeDebugPrivilege). Each is Enabled or Disabled.</span></li>
+          <li><span class="field-key amber">Default Owner</span><span class="field-val">SID assigned as owner when this token creates a new object.</span></li>
+          <li><span class="field-key amber">Default DACL</span><span class="field-val">Applied to new objects if no DACL is specified at creation.</span></li>
+          <li><span class="field-key amber">Logon Session ID</span><span class="field-val">Links token to a logon session; determines credential cache and drive mappings.</span></li>
+          <li><span class="field-key amber">Token Type</span><span class="field-val">Primary (process) or Impersonation (thread).</span></li>
+          <li><span class="field-key amber">Impersonation Level</span><span class="field-val">Anonymous / Identification / Impersonation / Delegation.</span></li>
+          <li><span class="field-key amber">Integrity Level</span><span class="field-val">Mandatory Integrity Control label (Medium, High, System…).</span></li>
+          <li><span class="field-key amber">UAC Flags</span><span class="field-val">Elevation type, UI Access, virtualization enabled.</span></li>
+          <li><span class="field-key amber">AppContainer SID</span><span class="field-val">Present only in sandboxed tokens; defines the container identity.</span></li>
+          <li><span class="field-key amber">Capabilities</span><span class="field-val">AppContainer only. Capability SIDs grant specific permissions.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Group SID Attribute Flags</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">Enabled</span><span class="field-val">SID is active in this token — contributes to access checks.</span></li>
+          <li><span class="field-key blue">EnabledByDefault</span><span class="field-val">SID is enabled at logon unless explicitly removed.</span></li>
+          <li><span class="field-key blue">Mandatory</span><span class="field-val">Cannot be disabled. Always participates in access checks.</span></li>
+          <li><span class="field-key blue">UseForDenyOnly</span><span class="field-val">SID only matches Deny ACEs, never Allow ACEs.</span></li>
+          <li><span class="field-key blue">Integrity</span><span class="field-val">Marks the SID as the integrity level for MIC.</span></li>
+          <li><span class="field-key blue">IntegrityEnabled</span><span class="field-val">The integrity SID is active for enforcement.</span></li>
+          <li><span class="field-key blue">Resource</span><span class="field-val">SID from a resource domain, used in cross-domain scenarios.</span></li>
+          <li><span class="field-key blue">LogonId</span><span class="field-val">Refers to the logon session identifier SID.</span></li>
+        </ul>
+        <div class="divider"></div>
+        <div class="card-title c-teal" style="margin-top:8px">Impersonation Levels</div>
+        <ul class="field-list">
+          <li><span class="field-key">Anonymous</span><span class="field-val">Server cannot learn caller's identity.</span></li>
+          <li><span class="field-key">Identification</span><span class="field-val">Server can query identity but cannot act as the caller on remote resources.</span></li>
+          <li><span class="field-key">Impersonation</span><span class="field-val">Server can act as caller on <em>local</em> resources only.</span></li>
+          <li><span class="field-key">Delegation</span><span class="field-val">Server can act as caller on <em>remote</em> resources too. Requires Kerberos delegation.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-red">UAC &amp; Linked Tokens</div>
+        <p class="note">When an administrator logs in interactively, UAC splits the session into <strong class="hl">two linked tokens</strong>:</p>
+        <ul class="field-list" style="margin-top:8px">
+          <li><span class="field-key red">Filtered token</span><span class="field-val">Medium IL. Admin groups marked UseForDenyOnly. Dangerous privileges removed. Assigned by default to all user processes.</span></li>
+          <li><span class="field-key red">Full token</span><span class="field-val">High IL. All privileges and admin groups present. Only assigned on explicit elevation consent.</span></li>
+          <li><span class="field-key red">Elevation Type</span><span class="field-val">Default (manifest), Full (auto-elevate), Limited (UAC filtered).</span></li>
+          <li><span class="field-key red">UI Access</span><span class="field-val">Allows a process to interact with higher IL UI elements. Requires signed binary in secure location.</span></li>
+          <li><span class="field-key red">Virtualization</span><span class="field-val">Legacy compatibility — file/registry writes by non-UAC-aware apps silently redirected to per-user VirtualStore.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-purple">Restricted &amp; Sandbox Tokens</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Restricted Token</span><span class="field-val">A copy of an existing token with groups marked UseForDenyOnly, privileges removed, and/or a list of <em>Restricting SIDs</em> added. Access check must pass <em>both</em> the normal ACE walk <em>and</em> the Restricting SIDs walk (intersection).</span></li>
+          <li><span class="field-key purple">Write-Restricted</span><span class="field-val">Only Restricting SIDs check applies for write access, not reads.</span></li>
+          <li><span class="field-key purple">AppContainer (Lowbox)</span><span class="field-val">Strongest sandbox: IL=Low + AppContainer SID + Capability SIDs. Used by UWP apps and browsers.</span></li>
+          <li><span class="field-key purple">Capability SIDs</span><span class="field-val">e.g., internetClient, microphone, camera. Capabilities gate access to protected resources.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-green">Mandatory Integrity Levels (MIC)</div>
+        <div class="il-table">
+          <div class="il-row"><div class="il-bar" style="width:8px;background:#ff6b6b"></div><span class="il-label">Protected</span><span class="il-sid">S-1-16-20480</span><span class="il-note">Protected Process Light</span></div>
+          <div class="il-row"><div class="il-bar" style="width:8px;background:#f5b642"></div><span class="il-label">System</span><span class="il-sid">S-1-16-16384</span><span class="il-note">SYSTEM/kernel processes</span></div>
+          <div class="il-row"><div class="il-bar" style="width:8px;background:#4e9eff"></div><span class="il-label">High</span><span class="il-sid">S-1-16-12288</span><span class="il-note">Elevated (UAC) processes</span></div>
+          <div class="il-row"><div class="il-bar" style="width:8px;background:#6ee79a"></div><span class="il-label">Med-High</span><span class="il-sid">S-1-16-8448</span><span class="il-note">Admin w/ integrity flag</span></div>
+          <div class="il-row"><div class="il-bar" style="width:8px;background:#2dd4a4"></div><span class="il-label">Medium</span><span class="il-sid">S-1-16-8192</span><span class="il-note">Default for users</span></div>
+          <div class="il-row"><div class="il-bar" style="width:8px;background:#a78bfa"></div><span class="il-label">Low</span><span class="il-sid">S-1-16-4096</span><span class="il-note">AppContainer / sandboxed</span></div>
+          <div class="il-row"><div class="il-bar" style="width:8px;background:#555e78"></div><span class="il-label">Untrusted</span><span class="il-sid">S-1-16-0</span><span class="il-note">Anonymous / minimum</span></div>
+        </div>
+        <div class="callout callout-blue" style="margin-top:10px">
+          <div class="callout-label">MIC Policy</div>
+          <strong class="hl">No-Write-Up</strong> is default: a token at IL=Low cannot write to objects labeled Medium or higher. Read-up and execute-up are allowed by default but can be blocked with NoReadUp / NoExecuteUp flags on the object label.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 04 SECURITY DESCRIPTORS ───────────────────────────────────────── -->
+  <section class="section" id="descriptors">
+    <div class="section-header">
+      <div class="section-dot dot-purple"></div>
+      <h3>04 — Security Descriptors</h3>
+      <span class="section-id">SD</span>
+    </div>
+
+    <p class="note">Every securable kernel object carries a security descriptor. The SRM reads it during every access check. A descriptor can be in <strong class="hl">absolute</strong> form (pointers to separate ACL buffers) or <strong class="hl">relative</strong> form (self-contained flat buffer — used for persistence in registry/file).</p>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">Security Descriptor Components</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Owner SID</span><span class="field-val">Identity that owns the object. Owner automatically gets ReadControl + WriteDac regardless of DACL.</span></li>
+          <li><span class="field-key purple">Primary Group SID</span><span class="field-val">POSIX compatibility field. Rarely enforced on Windows but present.</span></li>
+          <li><span class="field-key purple">DACL</span><span class="field-val"><strong class="hl">Discretionary ACL</strong> — controls who can access the object. A <em>NULL DACL</em> grants everyone full access. An <em>empty DACL</em> denies all access.</span></li>
+          <li><span class="field-key purple">SACL</span><span class="field-val"><strong class="hl">System ACL</strong> — controls auditing and integrity labels. Requires SeSecurityPrivilege to read/write.</span></li>
+          <li><span class="field-key purple">Control Flags</span><span class="field-val">Bitfield: DaclPresent, SaclPresent, DaclProtected, SaclProtected, DaclAutoInherited, etc.</span></li>
+        </ul>
+        <div class="callout callout-blue" style="margin-top:10px">
+          <div class="callout-label">Critical Distinction</div>
+          A <strong class="hl">NULL DACL</strong> (absent) = unrestricted access to everyone. An <strong class="hl">empty DACL</strong> (present but zero ACEs) = no access to anyone. Missing DACL ≠ secure — it is maximally permissive.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">ACE Types &amp; Structure</div>
+        <p class="note" style="margin-bottom:8px">An ACE (Access Control Entry) is one rule in an ACL.</p>
+        <table class="ref-table">
+          <thead><tr><th>Type</th><th>ACL</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell">AccessAllowed</td><td>DACL</td><td>Grant specified access rights</td></tr>
+            <tr><td class="mono-cell">AccessDenied</td><td>DACL</td><td>Explicitly deny access rights</td></tr>
+            <tr><td class="mono-cell">SystemAudit</td><td>SACL</td><td>Log access attempts to Security log</td></tr>
+            <tr><td class="mono-cell">SystemMandatoryLabel</td><td>SACL</td><td>Set integrity level + NoWrite/NoRead/NoExec policy</td></tr>
+            <tr><td class="mono-cell">Callback variants</td><td>DACL/SACL</td><td>Pass extra data to auth callback (Central Access Policy)</td></tr>
+            <tr><td class="mono-cell">Object ACE variants</td><td>DACL/SACL</td><td>Scoped to a specific object class or attribute (AD only)</td></tr>
+          </tbody>
+        </table>
+        <div class="divider"></div>
+        <div class="card-title c-blue" style="margin-top:6px">ACE Inheritance Flags</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">ObjectInherit (OI)</span><span class="field-val">Propagate to child leaf objects (files in a folder).</span></li>
+          <li><span class="field-key blue">ContainerInherit (CI)</span><span class="field-val">Propagate to child containers (sub-folders).</span></li>
+          <li><span class="field-key blue">InheritOnly (IO)</span><span class="field-val">ACE does not apply to this object, only to children.</span></li>
+          <li><span class="field-key blue">NoPropagateInherit (NP)</span><span class="field-val">Inherited ACE is not further propagated beyond first level.</span></li>
+          <li><span class="field-key blue">Inherited (I)</span><span class="field-val">This ACE was inherited, not explicitly set.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-amber">ACE Ordering (Mandatory)</div>
+        <p class="note">The OS enforces strict ordering when building a DACL. Evaluation stops at first full match.</p>
+        <div class="flow" style="margin:12px 0; flex-direction:column; align-items:flex-start; gap:5px">
+          <div class="flow-step" style="width:100%">1 · Explicit Deny ACEs (non-inherited)</div>
+          <div class="flow-step" style="width:100%">2 · Explicit Allow ACEs (non-inherited)</div>
+          <div class="flow-step" style="width:100%">3 · Inherited Deny ACEs</div>
+          <div class="flow-step" style="width:100%">4 · Inherited Allow ACEs</div>
+        </div>
+        <p class="note">Explicit ACEs always take precedence over inherited ones. Within explicit ACEs, Deny beats Allow.</p>
+        <div class="callout callout-blue" style="margin-top:8px">
+          <div class="callout-label">Access Rights Taxonomy</div>
+          <strong class="hl">Generic</strong> (GRFA: GenericRead/Write/Execute/All) — mapped to specific rights via GenericMapping.<br>
+          <strong class="hl">Standard</strong> — Delete, ReadControl, WriteDac, WriteOwner, Synchronize. Present on all object types.<br>
+          <strong class="hl">Specific</strong> — Defined per object type (FILE_READ_DATA, KEY_SET_VALUE, etc.).
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-coral">SDDL — Security Descriptor Definition Language</div>
+        <p class="note">Text representation of a security descriptor. Used in policies, SCE templates, and AD.</p>
+        <div class="mono-block" style="color: var(--c-coral); font-size:11px">O:owner_sid G:group_sid D:dacl_flags(ace_list) S:sacl_flags(ace_list)</div>
+        <p class="note" style="margin-top:8px"><strong class="hl">ACE format:</strong></p>
+        <div class="mono-block" style="color: var(--c-coral); font-size:11px">(ace_type; ace_flags; rights; object_guid; inherit_guid; account_sid)</div>
+        <ul class="field-list" style="margin-top:8px">
+          <li><span class="field-key coral">D:AI</span><span class="field-val">DACL, auto-inherited from parent</span></li>
+          <li><span class="field-key coral">D:P</span><span class="field-val">DACL protected — inheritance blocked</span></li>
+          <li><span class="field-key coral">A;OICI;GA;;;BA</span><span class="field-val">Allow, ObjInherit+ContainerInherit, GenericAll, Builtin Admins</span></li>
+          <li><span class="field-key coral">D;;0x10000;;;WD</span><span class="field-val">Deny SYNCHRONIZE to Everyone</span></li>
+          <li><span class="field-key coral">ML;;NW;;;LW</span><span class="field-val">SACL: Mandatory Label — NoWriteUp, Low integrity</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 05 ACCESS CHECK ───────────────────────────────────────── -->
+  <section class="section" id="access-check">
+    <div class="section-header">
+      <div class="section-dot dot-teal"></div>
+      <h3>05 — The Access Check Process</h3>
+      <span class="section-id">AC</span>
+    </div>
+
+    <p class="note">When a thread opens a handle to a kernel object, the SRM runs a deterministic three-phase check. All three phases must pass. The SRM is the <em>only</em> component that performs this — no kernel subsystem bypasses it.</p>
+
+    <div class="phase-row" style="margin-top:16px">
+      <div class="phase-box p1">
+        <div class="phase-num">01</div>
+        <div class="phase-title">Mandatory Integrity Check</div>
+        <div class="phase-body">
+          Compare the token's <strong class="hl">Integrity Level</strong> against the object's <strong class="hl">Mandatory Label</strong> in the SACL.<br><br>
+          <strong class="hl">No-Write-Up (default):</strong> if token IL &lt; object IL → deny write access.<br>
+          <strong class="hl">No-Read-Up:</strong> optional — blocks reads from lower IL.<br>
+          <strong class="hl">No-Execute-Up:</strong> optional — blocks execute from lower IL.<br><br>
+          This check <em>precedes</em> DACL evaluation — even if the DACL would grant access, a MIC violation blocks it.
+        </div>
+      </div>
+      <div class="phase-box p2">
+        <div class="phase-num">02</div>
+        <div class="phase-title">Token Access Check</div>
+        <div class="phase-body">
+          <strong class="hl">Owner Check:</strong> if the token's user SID (or any enabled group SID) matches the object's Owner, the caller is automatically granted <code>ReadControl</code> + <code>WriteDac</code>.<br><br>
+          <strong class="hl">Privilege Check:</strong> certain privileges grant additional implicit access:<br>
+          <code>SeBackupPrivilege</code> → read any file regardless of DACL.<br>
+          <code>SeRestorePrivilege</code> → write any file regardless of DACL.<br>
+          <code>SeTakeOwnershipPrivilege</code> → WriteOwner on any object.<br>
+          <code>SeSecurityPrivilege</code> → read/write SACL.
+        </div>
+      </div>
+      <div class="phase-box p3">
+        <div class="phase-num">03</div>
+        <div class="phase-title">Discretionary Access Check</div>
+        <div class="phase-body">
+          Walk the DACL ACE list in order. For each ACE, check if the ACE's SID is present (enabled) in the token.<br><br>
+          <strong class="hl">Deny ACE match:</strong> any requested bit denied → immediately DENY entire request.<br>
+          <strong class="hl">Allow ACE match:</strong> granted bits accumulate in a running bitmask.<br>
+          <strong class="hl">Result:</strong> GRANT if all requested bits are in accumulated allows and none were denied.<br><br>
+          NULL DACL → GRANT all. Empty DACL → DENY all.
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-red">Sandboxed Token Access Checks</div>
+        <ul class="field-list">
+          <li><span class="field-key red">Restricted Token</span><span class="field-val">Two parallel DACL walks: one with normal token SIDs, one with the Restricting SIDs list. Access granted only if <em>both</em> walks independently grant access.</span></li>
+          <li><span class="field-key red">Lowbox / AppContainer</span><span class="field-val">Third additional check: the resource must have an ACE allowing the <strong class="hl">AppContainer SID</strong> and/or the required <strong class="hl">Capability SID</strong>.</span></li>
+          <li><span class="field-key red">Enterprise Checks</span><span class="field-val">Central Access Policies (from AD) can add an additional claim-based check layer using callback ACEs.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title c-amber">Traversal &amp; Other Checks</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">Traversal Check</span><span class="field-val">Opening <code>C:\A\B\C.txt</code> requires Traverse on <code>\A</code> and <code>\A\B</code>. <code>SeChangeNotifyPrivilege</code> (held by all users) bypasses per-directory traversal.</span></li>
+          <li><span class="field-key amber">Handle Duplication</span><span class="field-val">Duplicating a handle requires access to the source process object. Cannot exceed original rights.</span></li>
+          <li><span class="field-key amber">Limited Checks</span><span class="field-val">Some operations (e.g., listing directory contents) perform abbreviated checks.</span></li>
+          <li><span class="field-key amber">Object Type Check</span><span class="field-val">For AD/some kernel objects, ACEs can be scoped to a specific object type or attribute GUID.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 06 PRIVILEGES ───────────────────────────────────────── -->
+  <section class="section" id="privileges">
+    <div class="section-header">
+      <div class="section-dot dot-coral"></div>
+      <h3>06 — Privileges</h3>
+      <span class="section-id">PRIV</span>
+    </div>
+    <p class="note">Privileges are special rights in a token that override normal access checks. They must be <strong class="hl">enabled</strong> in the token (some are disabled by default and must be explicitly activated) and are distinct from access rights (which are checked against object DACLs). Privileges are assigned via <em>User Rights Assignment</em> security policy — see Section 07.</p>
+
+    <div class="card" style="margin-top:12px">
+      <table class="ref-table">
+        <thead>
+          <tr><th>Privilege</th><th>Effect</th><th>Default Holders</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono-cell amber">SeDebugPrivilege</td><td>Open any process/thread regardless of DACL. Read/write memory of any process.</td><td>Administrators (disabled)</td></tr>
+          <tr><td class="mono-cell amber">SeImpersonatePrivilege</td><td>Impersonate any user who authenticates to the local machine, including SYSTEM via named pipe or RPC.</td><td>Service accounts, Admins</td></tr>
+          <tr><td class="mono-cell amber">SeAssignPrimaryTokenPrivilege</td><td>Replace the primary token of a process — effectively run code as another user.</td><td>SYSTEM, SCM</td></tr>
+          <tr><td class="mono-cell amber">SeCreateTokenPrivilege</td><td>Create arbitrary access tokens with any SIDs/privileges.</td><td>SYSTEM only</td></tr>
+          <tr><td class="mono-cell">SeTcbPrivilege</td><td>Act as part of the OS (Trusted Computing Base). Required to create tokens for arbitrary users.</td><td>SYSTEM</td></tr>
+          <tr><td class="mono-cell">SeBackupPrivilege</td><td>Read any file/registry key regardless of DACL.</td><td>Backup Operators, Admins</td></tr>
+          <tr><td class="mono-cell">SeRestorePrivilege</td><td>Write any file/registry key regardless of DACL.</td><td>Backup Operators, Admins</td></tr>
+          <tr><td class="mono-cell">SeTakeOwnershipPrivilege</td><td>Take ownership of any object (grants WriteDac → can then rewrite DACL).</td><td>Administrators</td></tr>
+          <tr><td class="mono-cell">SeLoadDriverPrivilege</td><td>Load/unload kernel drivers — direct code execution in Ring 0.</td><td>Administrators</td></tr>
+          <tr><td class="mono-cell">SeSecurityPrivilege</td><td>Read/write SACL on any object. View/clear Security event log.</td><td>Administrators</td></tr>
+          <tr><td class="mono-cell">SeChangeNotifyPrivilege</td><td>Bypass traversal checking (directory access check skipped). Held by all users.</td><td>All users (mandatory)</td></tr>
+          <tr><td class="mono-cell">SeRelabelPrivilege</td><td>Raise or lower the integrity label of an object.</td><td>Administrators</td></tr>
+          <tr><td class="mono-cell">SeEnableDelegationPrivilege</td><td>Mark user/computer accounts as trusted for Kerberos delegation in AD.</td><td>Domain Admins</td></tr>
+          <tr><td class="mono-cell">SeSyncAgentPrivilege</td><td>Synchronize directory data (DirSync).</td><td>SYSTEM on DCs</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── 07 SERVICE ACCOUNTS & USER RIGHTS ASSIGNMENT ───────────────── -->
+  <section class="section" id="service-accounts">
+    <div class="section-header">
+      <div class="section-dot dot-blue"></div>
+      <h3>07 — Service Accounts &amp; User Rights Assignment</h3>
+      <span class="section-id">URA</span>
+    </div>
+
+    <p class="note">Windows defines three categories of accounts relevant to authorization. Service accounts are particularly important because they back nearly every system process and are not visible in normal account enumeration tools (<code>net user</code>, etc.) — their authority comes from <strong class="hl">User Rights Assignment</strong> security policy rather than group membership.</p>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-blue">Account Categories</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">Users</span><span class="field-val">Standard low-privilege accounts. Permissions limited to their own profile and explicitly granted resources.</span></li>
+          <li><span class="field-key blue">Administrators</span><span class="field-val">Members of the local Administrators group. Hold Full Control over most computer objects (files, services, registry).</span></li>
+          <li><span class="field-key blue">Service Accounts</span><span class="field-val">Built-in pseudo-identities used by SCM. Not enumerable via <code>net user</code> — privileges derive from URA rather than group membership.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">Built-in Service Identities</div>
+        <ul class="field-list">
+          <li>
+            <span class="field-key">LocalService</span>
+            <span class="field-val">SID <code>S-1-5-19</code>. Minimum privileges on the local machine. On the network, authenticates as <strong class="hl">anonymous</strong> — cannot access remote resources requiring auth.</span>
+          </li>
+          <li>
+            <span class="field-key">NetworkService</span>
+            <span class="field-val">SID <code>S-1-5-20</code>. Minimum privileges locally, but on the network authenticates as the <strong class="hl">computer account</strong> — uses the machine's credentials for outbound connections.</span>
+          </li>
+          <li>
+            <span class="field-key">LocalSystem</span>
+            <span class="field-val">SID <code>S-1-5-18</code> (also called SYSTEM). Full Control over most system objects, equivalent to or stronger than Administrators. On the network, authenticates as the computer account. <strong class="hl">Highest level of access on Windows.</strong></span>
+          </li>
+          <li>
+            <span class="field-key">Virtual Accounts</span>
+            <span class="field-val">Per-service automatic accounts (NT SERVICE\&lt;ServiceName&gt;). Same network identity as NetworkService but isolated locally.</span>
+          </li>
+          <li>
+            <span class="field-key">MSA / gMSA</span>
+            <span class="field-val">Managed Service Accounts (per-machine) and group Managed Service Accounts (multi-host). Passwords automatically rotated by AD; never known to administrators.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-amber">URA Categories</div>
+        <p class="note">User Rights Assignments split into two categories:</p>
+        <ul class="field-list" style="margin-top:8px">
+          <li>
+            <span class="field-key amber">Logon Rights</span>
+            <span class="field-val">Control how and from where an account may authenticate. Examples: <code>SeInteractiveLogonRight</code>, <code>SeNetworkLogonRight</code>, <code>SeBatchLogonRight</code>, <code>SeServiceLogonRight</code>, <code>SeRemoteInteractiveLogonRight</code>. Also includes the corresponding <em>Deny</em> rights which take precedence.</span>
+          </li>
+          <li>
+            <span class="field-key amber">User Rights (Privileges)</span>
+            <span class="field-val">Control access to objects and can override explicit DACL permissions. The Se*Privilege list in Section 06 enumerates these. Built-in service accounts inherit their effective authority from URA, not group membership.</span>
+          </li>
+        </ul>
+        <div class="callout callout-blue" style="margin-top:10px">
+          <div class="callout-label">Configuration Surface</div>
+          URA is configured via Group Policy (<em>Computer Configuration → Windows Settings → Security Settings → Local Policies → User Rights Assignment</em>) or directly via the Local Security Authority policy database. Modifications require <code>SeSecurityPrivilege</code>.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-purple">Logon Rights Reference</div>
+      <table class="ref-table">
+        <thead><tr><th>Right</th><th>Permits</th><th>Corresponding Deny</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell purple">SeInteractiveLogonRight</td><td>Log on at the console (physical keyboard).</td><td>SeDenyInteractiveLogonRight</td></tr>
+          <tr><td class="mono-cell purple">SeRemoteInteractiveLogonRight</td><td>Log on via Remote Desktop / Terminal Services.</td><td>SeDenyRemoteInteractiveLogonRight</td></tr>
+          <tr><td class="mono-cell purple">SeNetworkLogonRight</td><td>Access this computer from the network (SMB, RPC, etc.).</td><td>SeDenyNetworkLogonRight</td></tr>
+          <tr><td class="mono-cell purple">SeBatchLogonRight</td><td>Log on as a batch job (Task Scheduler).</td><td>SeDenyBatchLogonRight</td></tr>
+          <tr><td class="mono-cell purple">SeServiceLogonRight</td><td>Log on as a service (required for SCM-managed services).</td><td>SeDenyServiceLogonRight</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-blue" style="margin-top:10px">
+        <div class="callout-label">Tiered Administration Model</div>
+        Microsoft's recommended hardening model uses Deny logon rights to enforce tiering: Tier 0 (DCs, identity systems) accounts denied logon to Tier 1 (servers) and Tier 2 (workstations); Tier 1 denied logon to Tier 2; etc. Prevents credential exposure on lower-tier hosts.
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       PART II — AUTHENTICATION
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="part-banner auth">
+    <div class="part-eyebrow">Part II</div>
+    <h2>Authentication — Local &amp; Network Identity</h2>
+    <p>How Windows establishes identity, both on a single machine and across a domain. Pure protocol and component reference — credential validation, ticket issuance, directory services, and the audit machinery that records each event.</p>
+  </div>
+
+  <!-- ── 08 LOCAL AUTH ───────────────────────────────────────── -->
+  <section class="section" id="local-auth">
+    <div class="section-header">
+      <div class="section-dot dot-blue"></div>
+      <h3>08 — Local Authentication</h3>
+      <span class="section-id">LAUTH</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title c-blue">Logon Types</div>
+        <table class="ref-table">
+          <thead><tr><th>Type</th><th>ID</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Interactive</td><td class="mono-cell blue">2</td><td>Physical console / local keyboard. Creates new logon session. Cached secrets in LSASS.</td></tr>
+            <tr><td>Network</td><td class="mono-cell blue">3</td><td>SMB shares, WMI, etc. No interactive logon. Credentials not stored in LSASS. Token destroyed on disconnect.</td></tr>
+            <tr><td>Batch</td><td class="mono-cell blue">4</td><td>Scheduled tasks. Non-interactive. Logon as service right required for service accounts.</td></tr>
+            <tr><td>Service</td><td class="mono-cell blue">5</td><td>SCM service startup. Uses stored credentials or virtual accounts.</td></tr>
+            <tr><td>NetworkCleartext</td><td class="mono-cell blue">8</td><td>IIS Basic Auth, WDigest. Cleartext credentials may be present in LSASS.</td></tr>
+            <tr><td>NewCredentials</td><td class="mono-cell blue">9</td><td><code>runas /netonly</code>. Local uses existing token; network connections use new credentials.</td></tr>
+            <tr><td>RemoteInteractive</td><td class="mono-cell blue">10</td><td>RDP / Terminal Services. Creates interactive session on remote host.</td></tr>
+            <tr><td>CachedInteractive</td><td class="mono-cell blue">11</td><td>Offline domain logon using cached verifier (DCC2). Default 10 hashes stored.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">Interactive Logon Flow</div>
+        <div class="flow" style="flex-direction:column; align-items:flex-start; gap:5px; margin:8px 0 12px">
+          <div class="flow-step">1 · User presses Ctrl+Alt+Del (SAS captured by Winlogon)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">2 · Winlogon collects credentials via Credential Provider</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">3 · Winlogon calls LsaLogonUser() in LSASS</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">4 · LSA routes to auth package (MSV1_0 local / Kerberos domain)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">5 · Auth package validates credentials (SAM or DC)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">6 · LSA creates logon session + access token (NtCreateToken)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">7 · Winlogon creates desktop and spawns userinit.exe with the token</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">SAM Database Internals</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Location</span><span class="field-val">HKLM\SAM — mapped to <code>%WINDIR%\System32\config\SAM</code>. Locked during runtime. Read requires SYSTEM or backup privilege.</span></li>
+          <li><span class="field-key purple">Password Storage</span><span class="field-val">NT hash = MD4(UTF-16LE(password)). No per-hash salt. Historically protected with SysKey; modernized in Win10 v1709+.</span></li>
+          <li><span class="field-key purple">RID Allocation</span><span class="field-val">500=Administrator, 501=Guest. New local accounts start at 1000.</span></li>
+          <li><span class="field-key purple">Remote Access</span><span class="field-val">SAM accessible remotely via MS-SAMR (named pipe over SMB). Restricted by default since Win10 1607.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title c-amber">LSASS Credential Cache</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">What's cached</span><span class="field-val">Interactive logons store: NT hash, LM hash if enabled, Kerberos tickets (TGT + service tickets), DES/AES keys derived from password.</span></li>
+          <li><span class="field-key amber">WDigest</span><span class="field-val">Legacy protocol that stored cleartext password reversibly in LSASS. Disabled by default since Win8.1.</span></li>
+          <li><span class="field-key amber">Credential Guard</span><span class="field-val">VSM (Virtual Secure Mode) isolates LSA secrets in a Hyper-V container (LSAIso). Kerberos keys and NT hashes protected from userspace.</span></li>
+          <li><span class="field-key amber">Protected Process Light</span><span class="field-val">LSASS can run as PPL — even processes with SeDebugPrivilege cannot open it for injection without a signed driver.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 09 NTLM ───────────────────────────────────────── -->
+  <section class="section" id="ntlm">
+    <div class="section-header">
+      <div class="section-dot dot-amber"></div>
+      <h3>09 — NTLM Network Authentication</h3>
+      <span class="section-id">NTLM</span>
+    </div>
+
+    <p class="note">NTLM is a challenge-response protocol used when Kerberos is unavailable (workgroup, non-SPN targets, IP-based connections). The NT hash is derived from the user's password and never leaves the client — instead, a hash-based response to a server challenge is sent.</p>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-amber">NTLM 3-Way Handshake</div>
+        <div class="flow" style="flex-direction:column; align-items:flex-start; gap:5px; margin:8px 0">
+          <div class="flow-step" style="background:var(--c-amber-dim); border-color:var(--c-amber-border)">1 · NEGOTIATE (Client → Server): capabilities, domain, workstation, NTLM flags</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step" style="background:var(--c-amber-dim); border-color:var(--c-amber-border)">2 · CHALLENGE (Server → Client): 8-byte server nonce, negotiated flags, target info</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step" style="background:var(--c-amber-dim); border-color:var(--c-amber-border)">3 · AUTHENTICATE (Client → Server): NTLMv2 Response, username, domain, workstation, session key</div>
+        </div>
+        <div class="divider"></div>
+        <h4 class="sub">NTLMv1 vs NTLMv2</h4>
+        <ul class="field-list">
+          <li><span class="field-key amber">NTLMv1</span><span class="field-val">Response = DES(NT hash, ServerChallenge). No client nonce. Deprecated.</span></li>
+          <li><span class="field-key amber">NTLMv2</span><span class="field-val">Response = HMAC-MD5(NT hash, HMAC-MD5(NT hash, ServerChallenge + ClientChallenge + Timestamp + TargetInfo)).</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Channel &amp; Signing Protections</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">SMB Signing</span><span class="field-val">Each SMB packet is HMAC-signed with the session key.</span></li>
+          <li><span class="field-key blue">Channel Binding</span><span class="field-val">Binds NTLM auth to a specific TLS channel via channel binding token (CBT).</span></li>
+          <li><span class="field-key blue">EPA</span><span class="field-val">Extended Protection for Authentication — combines SPN binding and channel binding for HTTPS services.</span></li>
+          <li><span class="field-key blue">LDAP Signing</span><span class="field-val">Requires signed LDAP bind. Mandatory for sensitive AD writes.</span></li>
+          <li><span class="field-key blue">LmCompatibilityLevel</span><span class="field-val">GPO setting. Level 5 = NTLMv2 only, refuse LM and NTLMv1 (recommended).</span></li>
+        </ul>
+        <div class="callout callout-blue" style="margin-top:10px">
+          <div class="callout-label">Session Keys</div>
+          NTLM derives a session key from the NT hash and challenge material. The session key signs and seals subsequent traffic — without it, an intermediary cannot forge or read protected SMB/RPC messages.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 10 KERBEROS ───────────────────────────────────────── -->
+  <section class="section" id="kerberos">
+    <div class="section-header">
+      <div class="section-dot dot-teal"></div>
+      <h3>10 — Kerberos Authentication</h3>
+      <span class="section-id">KRB5</span>
+    </div>
+
+    <p class="note">Kerberos v5 is the default protocol for domain authentication. It is ticket-based and mutual — both client and server authenticate each other. The KDC (Key Distribution Center) runs on every Domain Controller. No passwords travel the network; all encryption uses keys derived from account passwords.</p>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-teal">Components</div>
+        <ul class="field-list">
+          <li><span class="field-key">KDC</span><span class="field-val">Key Distribution Center. Runs on DC. Contains AS + TGS + database of all account keys.</span></li>
+          <li><span class="field-key">AS</span><span class="field-val">Authentication Service. Issues TGTs in response to valid pre-auth.</span></li>
+          <li><span class="field-key">TGS</span><span class="field-val">Ticket Granting Service. Issues service tickets in exchange for valid TGTs.</span></li>
+          <li><span class="field-key">Principal</span><span class="field-val">Any identity: user, computer, or service account.</span></li>
+          <li><span class="field-key">SPN</span><span class="field-val">Service Principal Name. Format: <code>service/host@REALM</code>.</span></li>
+          <li><span class="field-key">Realm</span><span class="field-val">Domain (uppercase). Cross-realm trusts enable inter-domain auth.</span></li>
+          <li><span class="field-key">krbtgt</span><span class="field-val">Special account whose hash encrypts ALL TGTs.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Ticket Types &amp; Lifetime</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">TGT</span><span class="field-val">Ticket Granting Ticket. Issued by AS. Encrypted with krbtgt hash. Default 10 hours, renewable up to 7 days.</span></li>
+          <li><span class="field-key blue">Service Ticket</span><span class="field-val">Issued by TGS. Encrypted with target service account's hash.</span></li>
+          <li><span class="field-key blue">PAC</span><span class="field-val">Privileged Attribute Certificate embedded in tickets. Contains user SID, group SIDs, logon info. Signed by KDC.</span></li>
+          <li><span class="field-key blue">Authenticator</span><span class="field-val">Client-generated timestamp encrypted with session key. Sent with each ticket use to prevent replay.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-purple">Encryption Types</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">RC4-HMAC</span><span class="field-val">Uses NT hash directly as key. Legacy.</span></li>
+          <li><span class="field-key purple">AES-128/256</span><span class="field-val">Uses PBKDF2-derived key from password + salt (username@domain). Modern standard.</span></li>
+          <li><span class="field-key purple">DES-CBC-CRC</span><span class="field-val">Legacy, disabled by default since Win7/2008R2.</span></li>
+        </ul>
+        <div class="divider"></div>
+        <h4 class="sub">Pre-authentication</h4>
+        <p class="note">By default, the AS-REQ includes a timestamp encrypted with the user's long-term key. This proves the client knows the password before the KDC issues a TGT. Without it, the AS-REP becomes offline-crackable.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-teal">Full Authentication Flow</div>
+      <div style="overflow-x:auto; margin-top:8px">
+        <table class="ref-table">
+          <thead><tr><th>#</th><th>Message</th><th>Direction</th><th>Contents</th><th>Encrypted With</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell">1</td><td><strong class="hl">AS-REQ</strong></td><td>Client → KDC/AS</td><td>Username, service name (krbtgt), pre-auth timestamp</td><td>User's long-term key</td></tr>
+            <tr><td class="mono-cell">2</td><td><strong class="hl">AS-REP</strong></td><td>KDC/AS → Client</td><td>TGT + session key</td><td>TGT → krbtgt key; session key → user's key</td></tr>
+            <tr><td class="mono-cell">3</td><td><strong class="hl">TGS-REQ</strong></td><td>Client → KDC/TGS</td><td>TGT + Authenticator + target SPN</td><td>Authenticator → TGS session key</td></tr>
+            <tr><td class="mono-cell">4</td><td><strong class="hl">TGS-REP</strong></td><td>KDC/TGS → Client</td><td>Service Ticket + new service session key</td><td>ST → service account's key</td></tr>
+            <tr><td class="mono-cell">5</td><td><strong class="hl">AP-REQ</strong></td><td>Client → Service</td><td>Service Ticket + Authenticator</td><td>Authenticator → service session key</td></tr>
+            <tr><td class="mono-cell">6</td><td><strong class="hl">AP-REP</strong></td><td>Service → Client</td><td>Confirmation timestamp (mutual auth)</td><td>Service session key</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-purple">Kerberos Delegation Models</div>
+      <p class="note">Delegation allows a service to act on behalf of a user against another service — necessary for multi-tier applications.</p>
+      <ul class="field-list" style="margin-top:8px">
+        <li>
+          <span class="field-key purple">Unconstrained</span>
+          <span class="field-val">User's TGT is forwarded to the front-end service and cached there. The service can request tickets to <em>any</em> downstream service. Configured by <code>TrustedForDelegation</code> on the account object.</span>
+        </li>
+        <li>
+          <span class="field-key purple">Constrained (KCD)</span>
+          <span class="field-val">Front-end service can only delegate to a specific list of SPNs in <code>msDS-AllowedToDelegateTo</code>. Uses <strong class="hl">S4U2Self</strong> (obtain a self-ticket for any user — protocol transition) and <strong class="hl">S4U2Proxy</strong> (use that ticket to get one for the back-end service).</span>
+        </li>
+        <li>
+          <span class="field-key purple">Resource-Based (RBCD)</span>
+          <span class="field-val">Configured on the back-end resource via <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code>. The resource lists which front-end principals may delegate to it.</span>
+        </li>
+        <li>
+          <span class="field-key purple">PKINIT</span>
+          <span class="field-val">Certificate-based Kerberos pre-authentication. Smart cards and ADCS-issued certificates. The KDC trusts certificates issued by an Enterprise CA mapped to a user account.</span>
+        </li>
+      </ul>
+      <div class="callout callout-blue" style="margin-top:10px">
+        <div class="callout-label">Sensitive Account Protection</div>
+        Adding accounts to the <strong class="hl">Protected Users</strong> group disables NTLM auth, unconstrained delegation, DES/RC4 Kerberos, and CredSSP caching. TGT lifetime is forced to 4 hours, non-renewable. The <code>Account is sensitive and cannot be delegated</code> flag prevents an account's tickets from being forwarded.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 11 ACTIVE DIRECTORY ───────────────────────────────────────── -->
+  <section class="section" id="active-directory">
+    <div class="section-header">
+      <div class="section-dot dot-purple"></div>
+      <h3>11 — Active Directory Security Model</h3>
+      <span class="section-id">AD</span>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title c-purple">Forest &amp; Domain Structure</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Forest</span><span class="field-val">The true security boundary. Shared schema, GC, and Enterprise Admins group.</span></li>
+          <li><span class="field-key purple">Domain</span><span class="field-val">Admin and replication boundary within a forest. Has its own DC, krbtgt, and domain admins.</span></li>
+          <li><span class="field-key purple">OU</span><span class="field-val">Organizational Unit. Container for GPO application and delegated admin. Not a security boundary.</span></li>
+          <li><span class="field-key purple">GC</span><span class="field-val">Global Catalog. Partial replica of all objects in the forest.</span></li>
+          <li><span class="field-key purple">FSMO Roles</span><span class="field-val">5 single-master roles: Schema Master, Domain Naming Master (forest); PDC Emulator, RID Master, Infrastructure Master (per domain).</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Trust Types</div>
+        <table class="ref-table">
+          <thead><tr><th>Type</th><th>Transitivity</th><th>Direction</th></tr></thead>
+          <tbody>
+            <tr><td>Parent-Child</td><td>Transitive</td><td>Bi-directional (auto)</td></tr>
+            <tr><td>Tree-Root</td><td>Transitive</td><td>Bi-directional (auto)</td></tr>
+            <tr><td>Shortcut</td><td>Transitive</td><td>Configurable</td></tr>
+            <tr><td>External</td><td>Non-transitive</td><td>Configurable</td></tr>
+            <tr><td>Forest</td><td>Transitive within forests</td><td>Configurable</td></tr>
+            <tr><td>Realm</td><td>Configurable</td><td>Configurable</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-blue" style="margin-top:8px">
+          <div class="callout-label">SID Filtering</div>
+          Cross-forest trusts apply <strong class="hl">SID Filtering</strong> by default — strips SIDs from foreign domains out of the PAC at the trust boundary. Within a single forest, SID history is trusted.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">Group Scopes</div>
+        <ul class="field-list">
+          <li><span class="field-key">Domain Local</span><span class="field-val">Members from any domain. Used for resource permissions in same domain.</span></li>
+          <li><span class="field-key">Global</span><span class="field-val">Members from same domain only. Usable in any domain. Replicated to own DC only.</span></li>
+          <li><span class="field-key">Universal</span><span class="field-val">Members from any domain in forest. Replicated to Global Catalog.</span></li>
+        </ul>
+        <div class="divider"></div>
+        <h4 class="sub">Privileged Groups</h4>
+        <div class="badge-grid">
+          <span class="badge badge-purple">Domain Admins</span>
+          <span class="badge badge-purple">Enterprise Admins</span>
+          <span class="badge badge-purple">Schema Admins</span>
+          <span class="badge badge-purple">Domain Controllers</span>
+          <span class="badge badge-amber">Account Operators</span>
+          <span class="badge badge-amber">Backup Operators</span>
+          <span class="badge badge-amber">Server Operators</span>
+          <span class="badge badge-amber">DnsAdmins</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-coral">AD Object Security Descriptors</div>
+        <p class="note">Every AD object has a full security descriptor stored in the directory. ACEs can apply to the object itself or be scoped to specific <strong class="hl">object types</strong> (classes) or <strong class="hl">properties</strong> (attributes).</p>
+        <ul class="field-list" style="margin-top:8px">
+          <li><span class="field-key coral">Standard Access Rights</span><span class="field-val">GenericAll, GenericRead, GenericWrite, GenericExecute — mapped to AD-specific rights.</span></li>
+          <li><span class="field-key coral">Object-Specific Rights</span><span class="field-val"><code>DS-Read-Property</code>, <code>DS-Write-Property</code> scoped to specific attribute GUIDs.</span></li>
+          <li><span class="field-key coral">Control Access Rights</span><span class="field-val">Extended rights identified by GUID. Examples: <code>Reset-Password</code>, <code>DS-Replication-Get-Changes-All</code>.</span></li>
+          <li><span class="field-key coral">Property Sets</span><span class="field-val">Groups of attributes under one right GUID.</span></li>
+          <li><span class="field-key coral">Write-Validated Rights</span><span class="field-val">Constrain writes to validated values only (e.g., Self-Membership).</span></li>
+          <li><span class="field-key coral">AdminSDHolder</span><span class="field-val">Template object whose ACL is propagated to all protected group members by SDProp every 60 minutes.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Group Policy Enforcement</div>
+        <h4 class="sub">Application Order (LSDOU)</h4>
+        <div class="flow" style="flex-direction:column; align-items:flex-start; gap:4px">
+          <div class="flow-step">1 · Local GPO</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">2 · Site GPO</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">3 · Domain GPO</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">4 · OU GPO (outermost first)</div>
+        </div>
+        <p class="note" style="margin-top:6px">Later GPO wins unless Enforced or Block Inheritance is set.</p>
+        <div class="divider"></div>
+        <h4 class="sub">Security-Relevant GPO Settings</h4>
+        <ul class="field-list">
+          <li><span class="field-key blue">Password Policy</span><span class="field-val">Min length, complexity, history, max age. One per domain unless PSO used.</span></li>
+          <li><span class="field-key blue">Audit Policy</span><span class="field-val">Categories logged. Set at domain or OU level.</span></li>
+          <li><span class="field-key blue">User Rights</span><span class="field-val">URA / privilege assignments per machine.</span></li>
+          <li><span class="field-key blue">Restricted Groups</span><span class="field-val">Enforce local group membership on machines.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 12 AUDITING ───────────────────────────────────────── -->
+  <section class="section" id="auditing">
+    <div class="section-header">
+      <div class="section-dot dot-green"></div>
+      <h3>12 — Security Auditing</h3>
+      <span class="section-id">AUDIT</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title c-green">Audit Policy Architecture</div>
+        <ul class="field-list">
+          <li><span class="field-key green">System Audit Policy</span><span class="field-val">Machine-wide settings configured via Group Policy or <code>auditpol</code>. Two types: legacy (category) and advanced (subcategory). Advanced takes precedence.</span></li>
+          <li><span class="field-key green">Per-User Audit Policy</span><span class="field-val">Override system policy for specific users.</span></li>
+          <li><span class="field-key green">Resource SACL</span><span class="field-val">Per-object audit ACEs. Audit events generated only when a request matches both the system policy AND a SACL ACE on the target.</span></li>
+          <li><span class="field-key green">Global SACL</span><span class="field-val">Apply audit rules to all objects of a type without per-object configuration.</span></li>
+          <li><span class="field-key green">Policy Security</span><span class="field-val">CrashOnAuditFail prevents system operation if auditing fails. Modifying audit policy requires SeSecurityPrivilege.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">Critical Event ID Reference</div>
+        <table class="ref-table">
+          <thead><tr><th>Event ID</th><th>Category</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell teal">4624</td><td>Logon</td><td>Successful logon (with logon type)</td></tr>
+            <tr><td class="mono-cell teal">4625</td><td>Logon</td><td>Failed logon</td></tr>
+            <tr><td class="mono-cell teal">4634/4647</td><td>Logon</td><td>Logoff</td></tr>
+            <tr><td class="mono-cell teal">4648</td><td>Logon</td><td>Explicit credential logon (runas)</td></tr>
+            <tr><td class="mono-cell">4672</td><td>Special Logon</td><td>Sensitive privileges in token</td></tr>
+            <tr><td class="mono-cell">4688</td><td>Process</td><td>Process creation</td></tr>
+            <tr><td class="mono-cell">4663</td><td>Object Access</td><td>Access on audited object</td></tr>
+            <tr><td class="mono-cell">4698/4702</td><td>Task Sched</td><td>Scheduled task created/modified</td></tr>
+            <tr><td class="mono-cell">4720/4722</td><td>Account Mgmt</td><td>Account created / enabled</td></tr>
+            <tr><td class="mono-cell">4728/4732</td><td>Account Mgmt</td><td>Member added to global / local group</td></tr>
+            <tr><td class="mono-cell">4768</td><td>Kerberos</td><td>TGT request (AS-REQ)</td></tr>
+            <tr><td class="mono-cell">4769</td><td>Kerberos</td><td>Service ticket request (TGS-REQ)</td></tr>
+            <tr><td class="mono-cell">4771</td><td>Kerberos</td><td>Pre-auth failure</td></tr>
+            <tr><td class="mono-cell">4776</td><td>NTLM</td><td>Credential validation on DC</td></tr>
+            <tr><td class="mono-cell">4662</td><td>DS Access</td><td>Directory service object access</td></tr>
+            <tr><td class="mono-cell">7045</td><td>System</td><td>New service installed</td></tr>
+            <tr><td class="mono-cell">4719</td><td>Policy</td><td>Audit policy changed</td></tr>
+            <tr><td class="mono-cell">1102</td><td>Log</td><td>Audit log cleared</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-blue">SACL ACE Mechanics</div>
+      <p class="note">A SACL ACE triggers an event log entry when a matching access occurs on the object. Both conditions must hold for an event to be generated: the SACL ACE must match (SID + access mask), AND the system audit policy must have the relevant category enabled.</p>
+      <ul class="field-list" style="margin-top:8px">
+        <li><span class="field-key blue">SUCCESSFUL_ACCESS</span><span class="field-val">Log on successful access.</span></li>
+        <li><span class="field-key blue">FAILED_ACCESS</span><span class="field-val">Log on access denial.</span></li>
+        <li><span class="field-key blue">Access Mask</span><span class="field-val">Targeted — can audit only specific access rights (e.g., DELETE attempts only).</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       PART III — OFFENSIVE
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="part-banner off">
+    <div class="part-eyebrow">Part III</div>
+    <h2>Offensive — Attacks Against the Windows Security Model</h2>
+    <p>Each subsection maps to a component covered in Parts I–II and enumerates the techniques that exploit it. Mitigations are paired with each attack so the defensive response is co-located. Subsections are ordered roughly by attack chain stage: privilege escalation, credential access, lateral movement, then domain-wide compromise.</p>
+  </div>
+
+  <!-- ── 13 PRIVILEGE ESCALATION ───────────────────────────────────────── -->
+  <section class="section" id="privesc">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>13 — Privilege Escalation (Token &amp; Privilege Abuse)</h3>
+      <span class="section-id">TA0004</span>
+    </div>
+
+    <p class="note">Privilege escalation [<strong class="hl">TA0004</strong>] is the tactic of going from limited access — typically a standard user shell after initial access — to higher authority on the host (Administrator, SYSTEM) or in the domain. Most local techniques exploit the token model, the privilege list, or UAC. Service-related path/DLL hijacking is covered separately in Section 14.</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeImpersonatePrivilege Abuse — Potato Family</span>
+        <span class="attack-mitre">T1134.001 / T1134.002</span>
+      </div>
+      <div class="attack-body">
+        <p>Any service account holding <code>SeImpersonatePrivilege</code> (LocalService, NetworkService, IIS application pool identities, MSSQL service, etc.) can impersonate any security context that authenticates to it. The attacker coerces SYSTEM to authenticate to a local listener under attacker control — historically via DCOM/RPC (RottenPotato, JuicyPotato), the Print Spooler and Print Notification (PrintSpoofer), or COM type-coercion (RoguePotato, GenericPotato) — captures the resulting authentication, and uses the impersonation token to spawn a SYSTEM process.</p>
+        <p>Co-occurs with <code>SeAssignPrimaryTokenPrivilege</code>, which permits assigning the impersonation token as a primary token of a new process directly.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Remove <code>SeImpersonatePrivilege</code> from accounts that don't need it; review URA on web/SQL servers</li>
+          <li>Apply latest patches — Microsoft has progressively closed coercion vectors (Spooler, EFS-RPC, DCOM type confusion)</li>
+          <li>Disable Print Spooler service on hosts that don't need it (servers, DCs)</li>
+          <li>Use AppContainers / virtual service accounts where possible to limit blast radius</li>
+          <li>Monitor 4672 and 4673 events for unusual privilege use, and 4688 for SYSTEM children of non-system parents</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeBackupPrivilege / SeRestorePrivilege Abuse</span>
+        <span class="attack-mitre">T1003.002</span>
+      </div>
+      <div class="attack-body">
+        <p>These privileges bypass DACL checks for read/write respectively. <code>SeBackupPrivilege</code> permits opening any file or registry hive — including locked SAM and SECURITY hives — and exporting them for offline analysis. <code>SeRestorePrivilege</code> permits writing arbitrary files, including system binaries that run as SYSTEM at next boot. Backup Operators is the canonical privileged group, but third-party backup software often grants these rights to service accounts.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Treat Backup Operators as Tier-0 equivalent; restrict membership and audit rigorously</li>
+          <li>Ensure backup service accounts use gMSAs and are isolated from interactive use</li>
+          <li>Enable Credential Guard so SAM/SECURITY extraction yields encrypted blobs only</li>
+          <li>Monitor 4673 (privileged service called) when these privileges are exercised</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeDebugPrivilege — LSASS Access</span>
+        <span class="attack-mitre">T1003.001</span>
+      </div>
+      <div class="attack-body">
+        <p>Permits opening any process for full read/write access regardless of its DACL. The canonical use is opening LSASS to extract credentials from memory. Held by Administrators by default but disabled — must be explicitly enabled in the token. Many anti-malware drivers also rely on this privilege, complicating policy tightening.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Enable LSASS as a Protected Process Light (PPL) — blocks userland injection even with SeDebugPrivilege</li>
+          <li>Enable Credential Guard — isolates secrets in VSM (LSAIso) so memory dumps don't contain usable material</li>
+          <li>Restrict <code>SeDebugPrivilege</code> via URA to only the accounts that genuinely need it</li>
+          <li>Deploy EDR with kernel callbacks (PsSetCreateProcessNotifyRoutineEx, ObRegisterCallbacks) to detect LSASS handle requests</li>
+          <li>Remove debug privilege from local Administrators on workstations where developers don't operate</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeLoadDriverPrivilege — Bring Your Own Vulnerable Driver (BYOVD)</span>
+        <span class="attack-mitre">T1068</span>
+      </div>
+      <div class="attack-body">
+        <p>Loading a kernel driver yields immediate Ring 0 code execution — the maximum privilege available on the host. Microsoft requires drivers to be signed, but many <em>legitimately signed</em> drivers contain vulnerabilities (arbitrary read/write primitives) that the attacker can chain to execute kernel shellcode. Public lists of known-vulnerable signed drivers exist (<em>loldrivers.io</em>).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Enable Microsoft Vulnerable Driver Blocklist (built-in since Win11; configurable in WDAC)</li>
+          <li>Require Hypervisor-Protected Code Integrity (HVCI) — blocks unsigned and disallowed-signature drivers</li>
+          <li>Restrict <code>SeLoadDriverPrivilege</code> via URA</li>
+          <li>Enable Smart App Control / WDAC policies in audit then enforce mode</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeTakeOwnershipPrivilege — DACL Rewrite</span>
+        <span class="attack-mitre">T1222.001</span>
+      </div>
+      <div class="attack-body">
+        <p>Permits taking ownership of any object. Once owned, the actor automatically has WriteDac (per Token Access Check Phase 02) and can rewrite the DACL to grant themselves any access — including writing to system binaries or rewriting service registry keys.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit and minimize URA assignment of this privilege</li>
+          <li>Monitor 4670 (Permissions on object changed) and 4674 (privileged operation attempted)</li>
+          <li>WDAC code integrity policy prevents executing tampered binaries even after takeover</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">UAC Bypass</span>
+        <span class="attack-mitre">T1548.002</span>
+      </div>
+      <div class="attack-body">
+        <p>UAC produces a Medium IL filtered token from an admin's split token. Bypass techniques exploit the auto-elevation behavior of trusted Microsoft binaries that elevate without prompting, plus a writable input that the trusted binary consumes. Common vectors: registry/COM hijacks targeting <code>fodhelper.exe</code>, <code>computerdefaults.exe</code>, <code>eventvwr.exe</code> and similar; environment variable hijacks against <code>sdclt.exe</code>; DLL hijacks against signed elevated binaries with insecure search paths; and ICMLuaUtil / IFileOperation COM elevation moniker abuse. The attacker writes to a per-user registry/key/file consumed by the auto-elevating binary, then triggers it; the resulting child process runs at High IL.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Set UAC to <strong class="hl">Always Notify</strong> (highest) — disables silent auto-elevation</li>
+          <li>Remove standard users from the local Administrators group; use LAPS for emergency local admin</li>
+          <li>Apply Secure Desktop for elevation prompts (default; do not disable)</li>
+          <li>Disable <code>EnableLUA=0</code> alarms in monitoring — disabling UAC is itself an indicator</li>
+          <li>WDAC / AppLocker to constrain which binaries can execute as elevated</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Token Impersonation / Theft (Generic)</span>
+        <span class="attack-mitre">T1134</span>
+      </div>
+      <div class="attack-body">
+        <p>An attacker with sufficient access to a process holding a privileged token can duplicate its primary or impersonation token and either impersonate the security context (thread-level) or spawn a new process with the duplicated primary token. Common with SYSTEM tokens already present in service processes when the attacker first achieves admin-level local access.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Restrict <code>SeImpersonatePrivilege</code> and <code>SeAssignPrimaryTokenPrivilege</code></li>
+          <li>Run sensitive services as Protected Processes where supported</li>
+          <li>EDR detection on token duplication / DuplicateTokenEx + CreateProcessAsUser sequences</li>
+          <li>Network segmentation so a SYSTEM-on-host token has limited lateral reach</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Generic Software Vulnerabilities — Local EoP</span>
+        <span class="attack-mitre">T1068</span>
+      </div>
+      <div class="attack-body">
+        <p>Memory corruption or logic bugs in kernel components, IPC endpoints (ALPC, RPC), drivers, or privileged user-mode services that allow a low-privileged process to coerce execution at higher integrity. Frequently chained from sandbox escapes or used directly when a vulnerable third-party driver/service is present. Reverse engineering with Ghidra or IDA against native binaries (and dnSpy/dotPeek for .NET services) is the standard discovery workflow.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Aggressive patching cadence — local EoP CVEs are routinely weaponized within days</li>
+          <li>Exploit Protection (DEP, ASLR, CFG, CET, ACG, Code Integrity Guard) for user-mode services</li>
+          <li>Reduce attack surface: disable unused services, restrict third-party kernel components</li>
+          <li>WDAC / HVCI to constrain post-exploitation</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 14 VULNERABLE SERVICES ───────────────────────────────────────── -->
+  <section class="section" id="vuln-services">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>14 — Vulnerable Services &amp; Binary Hijacking</h3>
+      <span class="section-id">SVC</span>
+    </div>
+
+    <p class="note">Services are one of the largest local attack surfaces because most run as SYSTEM and many are configured with weak file system, registry, or path-resolution properties. Discovery is straightforward via <code>sc query</code>, <code>wmic service</code>, or PowerShell <code>Get-Service</code> / <code>Get-CimInstance Win32_Service</code>; automated tooling such as PowerSploit's <em>PowerUp</em> module and SharpUp enumerate misconfigurations. The categories below all yield SYSTEM-level code execution when the service is privileged.</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">DLL Search Order Hijacking</span>
+        <span class="attack-mitre">T1574.001</span>
+      </div>
+      <div class="attack-body">
+        <p>When a process loads a DLL by name without an absolute path, Windows searches a defined sequence of directories. If the attacker can plant a malicious DLL in a directory that is searched <em>before</em> the legitimate location, the malicious DLL is loaded into the privileged process. Common when a service binary's own application directory or any directory in the PATH is writable by lower-privileged users. The default search order roughly is: KnownDLLs → application directory → System32 → System → Windows → current directory → PATH directories — but this is altered by SafeDllSearchMode, manifests, and side-by-side configuration.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Ensure <code>SafeDllSearchMode</code> is enabled (default) so the current directory is searched last</li>
+          <li>Use the <code>KnownDLLs</code> registry list — these are loaded from System32 only and cannot be hijacked</li>
+          <li>Audit service install directories — they should not be writable by non-admins</li>
+          <li>Use absolute paths or <code>LOAD_LIBRARY_SEARCH_*</code> flags in service code</li>
+          <li>WDAC publisher rules block unsigned/untrusted DLLs from loading into protected processes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">PATH Environment Variable Hijacking</span>
+        <span class="attack-mitre">T1574.007</span>
+      </div>
+      <div class="attack-body">
+        <p>If the system or service PATH contains a directory writable by low-privileged users, the attacker plants an executable matching a name the service or its child processes invoke without an absolute path. The injected binary is found first in PATH lookup and executes at the service's privilege level. Often arises from sloppy installer behavior that prepends application directories with weak ACLs to system PATH.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit system PATH for entries with weak ACLs (<code>icacls</code> on each directory)</li>
+          <li>Remove writable directories from system PATH; place application binaries in protected directories</li>
+          <li>Always invoke binaries with full paths in scripts and service configurations</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Search Order Hijacking (Executable)</span>
+        <span class="attack-mitre">T1574.008</span>
+      </div>
+      <div class="attack-body">
+        <p>The executable equivalent of DLL search order hijacking — when a process spawns a child by name without an absolute path, the same directory search rules apply, and a malicious binary higher in the search order will be executed instead.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Always specify absolute paths in <code>CreateProcess</code> / <code>ShellExecute</code> service code</li>
+          <li>Sanitize PATH; remove user-writable entries</li>
+          <li>AppLocker / WDAC publisher rules block unauthorized binaries from running</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Unquoted Service Path</span>
+        <span class="attack-mitre">T1574.009</span>
+      </div>
+      <div class="attack-body">
+        <p>When a service's <code>BINARY_PATH_NAME</code> contains spaces and is not enclosed in quotes (e.g. <code>C:\Program Files\Bad Service\bin\svc.exe</code>), the SCM tries each tokenized prefix as a candidate executable: <code>C:\Program.exe</code>, <code>C:\Program Files\Bad.exe</code>, <code>C:\Program Files\Bad Service\bin\svc.exe</code>. If the attacker can write a binary at one of the earlier candidate paths, the SCM launches it as the service identity (often SYSTEM).</p>
+        <p>The frequency of this misconfiguration in third-party software, combined with the default writable status of <code>C:\</code> root for some legacy installers, makes this a perennial finding.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Quote service binary paths properly: <code>sc config &lt;svc&gt; binpath= "\"C:\Program Files\...\"</code></li>
+          <li>Audit ACLs on <code>C:\</code> and intermediate directories — should not be writable by non-admins</li>
+          <li>Periodic scan via <code>wmic service get name,pathname,startmode</code> piped through unquoted-path detection</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Weak Service File Permissions</span>
+        <span class="attack-mitre">T1574.010</span>
+      </div>
+      <div class="attack-body">
+        <p>The service's executable, or any DLL it loads, has a DACL granting write access to a low-privileged identity (Users, Authenticated Users, or a specific user). The attacker overwrites or replaces the binary with a malicious payload; on next service start (or after forcing a restart), the SCM executes the attacker-controlled binary as the service principal.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit DACLs on all service binaries and dependencies — only Administrators / SYSTEM should have Modify</li>
+          <li>WDAC code integrity policy — even if the file is replaced, an unsigned/untrusted replacement won't execute</li>
+          <li>Monitor 4663 events with WriteData / AppendData on service executables</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Weak Service Registry Permissions</span>
+        <span class="attack-mitre">T1574.011</span>
+      </div>
+      <div class="attack-body">
+        <p>The service's configuration key under <code>HKLM\SYSTEM\CurrentControlSet\Services\&lt;ServiceName&gt;</code> is writable by a low-privileged identity. The attacker rewrites <code>ImagePath</code> to point to their own binary, or modifies <code>ObjectName</code> to change the run-as identity. Next service start uses the new configuration. Even without write access to the binary, controlling the registry key fully owns the service.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit registry DACLs on all service keys — only SYSTEM/Admins should have SetValue</li>
+          <li>Monitor 4657 (Registry value changed) on service ImagePath / ObjectName attributes</li>
+          <li>Group Policy: Restricted Groups / Security Templates to enforce baseline service ACLs</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Weak SCM ACL on Service Object</span>
+        <span class="attack-mitre">T1574.011</span>
+      </div>
+      <div class="attack-body">
+        <p>Even when binaries and registry keys are protected, the service object itself — managed by the SCM — has its own DACL. If a low-privileged user holds <code>SERVICE_CHANGE_CONFIG</code> on the service, they can call <code>ChangeServiceConfig</code> to alter the binPath or the run-as account directly through SCM APIs. <code>SERVICE_ALL_ACCESS</code> on a SYSTEM service is equivalent to local SYSTEM compromise.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit per-service SDDL with <code>sc sdshow &lt;service&gt;</code> — verify only SYSTEM/Admins have CC/CR (CHANGE_CONFIG)</li>
+          <li>Group Policy security templates can enforce service security descriptors</li>
+          <li>Monitor 4670 (object permissions changed) on Service objects</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 15 CREDENTIAL ACCESS ───────────────────────────────────────── -->
+  <section class="section" id="cred-access">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>15 — Credential Access</h3>
+      <span class="section-id">TA0006</span>
+    </div>
+
+    <p class="note">Once local admin or SYSTEM is achieved, the next objective is harvesting credentials for lateral movement and persistence. Targets are LSASS memory, the SAM/SECURITY hives, the DPAPI master key chain, and (on a DC) the directory database itself.</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">LSASS Memory Dumping</span>
+        <span class="attack-mitre">T1003.001</span>
+      </div>
+      <div class="attack-body">
+        <p>LSASS holds, for every interactive logon session on the host, the user's NT hash, Kerberos AES/RC4 keys and tickets, and (if WDigest enabled) cleartext password. Dumping the process — via Mimikatz, comsvcs.dll <code>MiniDump</code>, taskmgr, ProcDump, or direct <code>MiniDumpWriteDump</code> — yields all of those secrets for offline parsing. Requires <code>SeDebugPrivilege</code> to open the process.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Run LSASS as Protected Process Light — registry <code>RunAsPPL=1</code> (or <code>=2</code> on Win11 22H2+ for boot-time enforcement)</li>
+          <li>Enable Credential Guard (VSM) — secrets isolated in LSAIso, dumps yield encrypted material</li>
+          <li>EDR with kernel callbacks to alert on LSASS handle requests with PROCESS_VM_READ</li>
+          <li>Enable Attack Surface Reduction rule "Block credential stealing from LSASS"</li>
+          <li>Restrict <code>SeDebugPrivilege</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SAM &amp; SECURITY Hive Extraction</span>
+        <span class="attack-mitre">T1003.002 / T1003.004</span>
+      </div>
+      <div class="attack-body">
+        <p>The SAM hive contains local NT hashes; the SECURITY hive contains LSA Secrets (service account passwords stored in cleartext, cached domain credentials as DCC2 verifiers, DPAPI keys). The hives are locked at runtime, so direct file copy fails — but Volume Shadow Copy, <code>reg save</code> with <code>SeBackupPrivilege</code>, or raw NTFS access (<code>ntfsclone</code>, <code>esentutl /y</code>) all bypass the lock. Decryption uses the SYSTEM hive's BootKey (legacy) or DPAPI machine key (modern).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Disable cleartext WDigest, restrict use of cached domain credentials (<code>CachedLogonsCount</code>)</li>
+          <li>Use LAPS so even if local Administrator hash is recovered, it cannot be reused</li>
+          <li>Disable VSS where not required; monitor VSS shadow creation events (8222)</li>
+          <li>Monitor 4663/4670 events on \Windows\System32\config\SAM and SECURITY</li>
+          <li>EDR detection on <code>reg save HKLM\SAM</code> and similar patterns</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">DCSync — Replication of Domain Secrets</span>
+        <span class="attack-mitre">T1003.006</span>
+      </div>
+      <div class="attack-body">
+        <p>The MS-DRSR replication protocol allows a DC (or any principal granted the <code>DS-Replication-Get-Changes</code> + <code>DS-Replication-Get-Changes-All</code> extended rights on the domain root) to request replication of secret attributes — including the NT hash and Kerberos keys — for any account in the domain, krbtgt included. The attack runs against any DC over the network, requiring no code execution on the DC. Domain Admins, Enterprise Admins, and Domain Controllers hold these rights by default; misconfigured AD ACLs frequently grant them to other accounts.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit and minimize accounts holding <code>DS-Replication-Get-Changes-All</code> on the domain root (use the Active Directory module's DSACLs / ACL queries)</li>
+          <li>Enable advanced auditing for Directory Service Access (4662) on the domain object — alert on replication right exercise from non-DC sources</li>
+          <li>Network segment DCs; DC-to-DC replication should not be reachable from user subnets</li>
+          <li>Tier-0 enforcement: identity admins never log into Tier-1/2 systems</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">DPAPI Master Key Abuse</span>
+        <span class="attack-mitre">T1555.003 / T1003.004</span>
+      </div>
+      <div class="attack-body">
+        <p>The Data Protection API encrypts user secrets — saved browser passwords, RDP credentials, certificate private keys — with a per-user master key derived from the user's password (or, for domain users, backed by a domain-wide DPAPI backup key on a DC). With local SYSTEM, an attacker can extract user master keys; with the domain DPAPI backup key (extractable via LSADUMP::backupkeys against a DC), they can decrypt <em>any</em> user's protected blob in the domain offline, even without that user's hash.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Treat the DPAPI domain backup key as a Tier-0 secret; restrict access on DCs</li>
+          <li>Credential Guard isolates DPAPI keys within VSM</li>
+          <li>EDR detection on LSARPC <code>LsarRetrievePrivateData</code> calls referencing <code>G$BCKUPKEY*</code></li>
+          <li>Discourage browser-stored credentials; use centralized password managers with hardware-backed keys</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Cached Domain Credentials (DCC2)</span>
+        <span class="attack-mitre">T1003.005</span>
+      </div>
+      <div class="attack-body">
+        <p>For offline-logon support, Windows stores up to 10 (default) domain users' password verifiers in HKLM\SECURITY\Cache. The format (DCC2/MSCASHv2) is PBKDF2-HMAC-SHA1 over the username and NT hash and is not directly usable for authentication — but is offline-crackable. A successful crack gives the cleartext password, which can be replayed against any service.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Reduce <code>CachedLogonsCount</code> to 0 or 1 on hosts that don't go offline</li>
+          <li>Strong password policies (length &gt;14) — DCC2 cracking depends on password strength</li>
+          <li>Add privileged users to Protected Users group — disables credential caching for those accounts</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">WDigest Re-enable</span>
+        <span class="attack-mitre">T1112 + T1003</span>
+      </div>
+      <div class="attack-body">
+        <p>WDigest stored cleartext passwords reversibly in LSASS. Disabled by default since Win8.1, but the registry value <code>HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest\UseLogonCredential = 1</code> re-enables it. After flipping the value, the attacker waits for users to authenticate (or forces RDP reconnections) — subsequent LSASS dumps yield cleartext credentials.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Group Policy enforcement of <code>UseLogonCredential = 0</code> with refresh interval</li>
+          <li>Monitor 4657 events on the WDigest registry path</li>
+          <li>Credential Guard prevents extraction even if WDigest re-enabled</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 16 NTLM ATTACKS ───────────────────────────────────────── -->
+  <section class="section" id="ntlm-attacks">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>16 — NTLM Attacks</h3>
+      <span class="section-id">NTLM-OFF</span>
+    </div>
+
+    <p class="note">NTLM's challenge-response design is vulnerable to relay (because the client cannot verify the server's identity in many configurations), to offline cracking (because the response is computed deterministically from the NT hash), and to credential reuse (because the NT hash itself is a sufficient authenticator).</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">NTLM Relay</span>
+        <span class="attack-mitre">T1557.001</span>
+      </div>
+      <div class="attack-body">
+        <p>The attacker positions themselves between client and server (LLMNR/NBT-NS/mDNS poisoning, ARP spoofing, malicious WPAD, IPv6 DHCPv6 takeover, or coercion via PrinterBug, PetitPotam, DFSCoerce, Coerced Authentication). They forward the captured NEGOTIATE/CHALLENGE/AUTHENTICATE messages to a target server, authenticating <em>as the victim</em>. Common targets: SMB (file share access, admin operations), LDAP/LDAPS (write to AD attributes — RBCD, addUserToGroup), HTTP (OWA, ADFS), AD CS web enrollment endpoints (ESC8 — request a certificate as the victim, then use it for Kerberos PKINIT). Privileged victims (Domain Admin, computer accounts) yield direct domain compromise.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Enforce SMB Signing on all hosts (<code>RequireSecuritySignature=1</code>) — relay across SMB fails</li>
+          <li>Enforce LDAP Signing and LDAP Channel Binding on DCs — closes the LDAP/LDAPS relay path</li>
+          <li>Enable EPA on AD CS web endpoints, OWA, ECP, and any HTTPS that uses NTLM — closes ESC8</li>
+          <li>Disable LLMNR (GPO) and NetBIOS-over-TCP/IP — eliminates name-resolution poisoning</li>
+          <li>Disable IPv6 if not in use, or enforce DHCPv6 guard / RA guard at the switch</li>
+          <li>Patch coercion vectors (Spooler, EFS-RPC PetitPotam, DFS) and consider disabling Print Spooler on servers</li>
+          <li>Restrict NTLM via GPO (<em>Network security: Restrict NTLM</em>) — audit then enforce</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Pass-the-Hash (PtH)</span>
+        <span class="attack-mitre">T1550.002</span>
+      </div>
+      <div class="attack-body">
+        <p>NTLM authentication does not require the cleartext password — only the NT hash. An attacker holding a stolen hash can inject it into LSASS (or use a tool that performs NTLM auth directly with the hash) and authenticate to any service that accepts NTLM. Used extensively for lateral movement: PSExec, WMI, WinRM, SMB admin shares (C$, ADMIN$), scheduled tasks. Effective until the password is rotated.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>LAPS for local Administrator passwords — each host has a unique, rotated password, breaking lateral PtH</li>
+          <li>Credential Guard prevents hash extraction in the first place</li>
+          <li>Restrict local account network logon (<em>Deny access to this computer from the network</em> for local accounts) — UAC remote restrictions also block this</li>
+          <li>Network segmentation; jump boxes (PAWs) for admin operations</li>
+          <li>Disable NTLM where possible; enforce Kerberos-only</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Hash Capture (Responder-style)</span>
+        <span class="attack-mitre">T1187 / T1557.001</span>
+      </div>
+      <div class="attack-body">
+        <p>The attacker stands up a malicious SMB / HTTP / LDAP server and induces clients to authenticate to it (typically by poisoning name resolution). The captured NTLMv2 challenge-response is offline-crackable — for weak passwords, recovery in seconds to hours. Yields the cleartext password, which is then usable everywhere.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Disable LLMNR, NBT-NS, mDNS at the host</li>
+          <li>Strong password policy — long passphrases resist offline cracking</li>
+          <li>Block outbound SMB to the internet (egress filtering on TCP/445, /139)</li>
+          <li>Detection: alert on UDP 5355 (LLMNR) traffic; honeypot SMB shares with names like AAA</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">NTLM Downgrade</span>
+        <span class="attack-mitre">T1562 / T1556</span>
+      </div>
+      <div class="attack-body">
+        <p>The attacker manipulates the NTLM negotiate flags or relies on lax server compatibility settings to force NTLMv1, which uses DES on the challenge with the NT hash. NTLMv1 challenge-response is far easier to crack offline (constant <code>1122334455667788</code> challenge with crack.sh yields the hash directly).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Set <code>LmCompatibilityLevel = 5</code> via GPO — refuse LM &amp; NTLMv1, send NTLMv2 only</li>
+          <li>Audit 4624 events for NTLMv1 authentications</li>
+          <li>Disable NTLM entirely on servers that don't require it (Restrict NTLM in GPO)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 17 KERBEROS ATTACKS ───────────────────────────────────────── -->
+  <section class="section" id="kerberos-attacks">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>17 — Kerberos Attacks</h3>
+      <span class="section-id">KRB-OFF</span>
+    </div>
+
+    <p class="note">Kerberos is structurally stronger than NTLM but exposes its own attack surface: ticket forgery (when a long-term key is compromised), offline cracking of tickets encrypted with a service principal's key, abuse of misconfigured delegation, and certificate-based authentication bypasses via AD CS.</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Kerberoasting</span>
+        <span class="attack-mitre">T1558.003</span>
+      </div>
+      <div class="attack-body">
+        <p>Any authenticated domain user can request a service ticket for any SPN. The TGS-REP contains a portion encrypted with the target service account's long-term key. By preferring RC4-HMAC etype (which uses the NT hash directly as key), the attacker obtains material that can be cracked offline to recover the service account password. Targets accounts with SPNs registered — typically service accounts, often privileged.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Use Group Managed Service Accounts (gMSA) — auto-rotated 240-byte random passwords resist offline cracking</li>
+          <li>Disable RC4 on the KDC (<em>Network Security: Configure encryption types allowed for Kerberos</em>) — forces AES, slower to crack</li>
+          <li>Audit accounts with SPNs and ensure long, random passwords</li>
+          <li>Detect: 4769 with Ticket Encryption Type <code>0x17</code> (RC4) at high volume from a single source</li>
+          <li>Add sensitive service accounts to Protected Users where compatible</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">AS-REP Roasting</span>
+        <span class="attack-mitre">T1558.004</span>
+      </div>
+      <div class="attack-body">
+        <p>If an account has the <code>DONT_REQ_PREAUTH</code> flag set, the KDC issues an AS-REP without first verifying the client knows the password. The AS-REP contains material encrypted with the user's long-term key — directly offline-crackable. No prior authentication to the domain is required (an unauthenticated attacker with network access to the DC can enumerate and roast).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit AD for accounts with <code>DONT_REQ_PREAUTH</code> set; remove the flag unless strictly required</li>
+          <li>Detect: 4768 with pre-auth type 0 (no pre-auth) — anomalous when not from known legacy clients</li>
+          <li>Strong password policy — offline crack resistance</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Pass-the-Ticket</span>
+        <span class="attack-mitre">T1550.003</span>
+      </div>
+      <div class="attack-body">
+        <p>An attacker with admin/SYSTEM on a host extracts Kerberos tickets (TGT or service ticket) from LSASS memory or from credential cache files. The stolen ticket is injected into the attacker's logon session and used as if it were their own. Distinct from PtH because it does not require the user's hash — only the (time-limited) ticket — and the resulting authentication is indistinguishable from legitimate Kerberos to the receiving service.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Credential Guard — tickets are isolated in VSM, not extractable from userland</li>
+          <li>Reduce TGT lifetime for sensitive accounts (Protected Users default: 4 hours, non-renewable)</li>
+          <li>Privileged account isolation — admins use PAWs and never log into Tier-1/2 hosts</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Golden Ticket</span>
+        <span class="attack-mitre">T1558.001</span>
+      </div>
+      <div class="attack-body">
+        <p>Once the krbtgt account's NT hash (RC4) or AES key is compromised, the attacker can forge arbitrary TGTs offline. The forged TGT can claim any user identity, any group memberships (Domain Admins, Enterprise Admins), and any validity period. Persists across user password resets and domain admin removal — only rotating the krbtgt password (twice, due to password history) invalidates them.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>If krbtgt compromise suspected: rotate the krbtgt password twice (not once — replication and password history matter)</li>
+          <li>Detect: 4769 events for service tickets where the source TGT was never observed at the AS layer (PAC validation logs)</li>
+          <li>Detect: anomalous TGT lifetimes (10+ year tickets are common forgery indicators)</li>
+          <li>Limit Domain Admin / Enterprise Admin membership to absolute minimum; segregate Tier-0</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Silver Ticket</span>
+        <span class="attack-mitre">T1558.002</span>
+      </div>
+      <div class="attack-body">
+        <p>The attacker compromises a single service account's hash and forges service tickets for that one service. Because the service ticket is only validated by the target service (not the KDC, in standard configurations without PAC validation), no DC interaction is required at use-time — the attack is silent against centralized monitoring. Limited to that specific service.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Enable PAC validation (<code>ValidateKdcPacSignature</code>) on services where supported — service contacts DC to verify PAC signature</li>
+          <li>Use gMSA for service accounts</li>
+          <li>Detect tickets without PAC, or with malformed PAC structure (Sysmon and EDR Kerberos parsing)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Overpass-the-Hash</span>
+        <span class="attack-mitre">T1550.002 + T1558</span>
+      </div>
+      <div class="attack-body">
+        <p>An attacker holding a user's NT hash (or AES key) sends an AS-REQ with RC4 (or AES) pre-authentication using that key. The KDC issues a legitimate TGT — converting the hash into a Kerberos credential, which is more useful than the raw hash because it works against Kerberos-only services and produces normal-looking authentication telemetry.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Same as PtH: Credential Guard, LAPS, Protected Users, network segmentation</li>
+          <li>Disable RC4 — forces AES-only, narrower attack window</li>
+          <li>Detect: 4768 with RC4 etype for accounts that should authenticate AES-only</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Unconstrained Delegation Abuse</span>
+        <span class="attack-mitre">T1558 / T1134</span>
+      </div>
+      <div class="attack-body">
+        <p>A server with unconstrained delegation receives users' TGTs cached in LSASS. An attacker who compromises that server can extract any TGT that arrives. Combined with a coercion technique (PrinterBug, PetitPotam) to force a Domain Controller's computer account to authenticate to the unconstrained-delegation server, the attacker captures a DC's TGT — sufficient for DCSync and full domain compromise.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit AD for <code>TRUSTED_FOR_DELEGATION</code> on accounts; minimize use; prefer constrained or RBCD</li>
+          <li>Mark sensitive accounts (DA/EA, DCs) as "Account is sensitive and cannot be delegated" or add to Protected Users</li>
+          <li>Patch coercion vectors and disable Print Spooler on DCs</li>
+          <li>Detect: 4769 for DC computer accounts targeting non-DC SPNs (unusual)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Constrained Delegation / RBCD Abuse</span>
+        <span class="attack-mitre">T1134.003</span>
+      </div>
+      <div class="attack-body">
+        <p>Constrained Delegation (KCD): if the attacker compromises a service account configured for KCD, they can use S4U2Self + S4U2Proxy to obtain a service ticket as <em>any user</em> to any SPN listed in <code>msDS-AllowedToDelegateTo</code>. With "use any auth protocol" (protocol transition) flag, no pre-existing user TGT is needed. Resource-Based Constrained Delegation (RBCD): if the attacker can write <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code> on a target computer object (commonly via ACL abuse — see Section 18), they configure the target to trust an attacker-controlled computer account, then S4U2Proxy as Domain Admin to that target and execute as DA. RBCD is the most common ACL-abuse-to-RCE primitive in modern AD.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit AD for <code>msDS-AllowedToDelegateTo</code> populations and review necessity</li>
+          <li>Audit <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code> across all computers — should normally be empty</li>
+          <li>Restrict who can write to computer objects (ACL hygiene; remove "Authenticated Users" creation rights — MS-DS-Machine-Account-Quota)</li>
+          <li>Add sensitive accounts to Protected Users (cannot be delegated)</li>
+          <li>Detect: 4624 with logon process Kerberos and authentication package S4U; cross-reference with TGS-REQ S4U flags</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">AD CS Abuse (ESC1–ESC15)</span>
+        <span class="attack-mitre">T1649</span>
+      </div>
+      <div class="attack-body">
+        <p>Active Directory Certificate Services trust relationship to Kerberos (PKINIT) and weak default templates / endpoint configurations create a wide range of escalation paths catalogued as ESC1 through ESC15+. Common patterns: ESC1 — request a certificate with arbitrary SAN as a low-privileged user from a misconfigured template (Enrollee Supplies Subject), then PKINIT as Domain Admin; ESC8 — NTLM-relay HTTP enrollment endpoint to issue a certificate as a privileged victim; ESC4 — write access to a certificate template lets you reconfigure it to be vulnerable; Shadow Credentials — write <code>msDS-KeyCredentialLink</code> on a target to add an attacker-controlled key, then PKINIT as the target.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit certificate templates for ESC1 conditions (Enrollee Supplies Subject + Client Auth EKU + low-privileged enrollment)</li>
+          <li>Disable HTTP enrollment endpoints; if HTTPS, enforce EPA + LDAP signing</li>
+          <li>Restrict template ACLs to admins; review enrollment permissions</li>
+          <li>Audit <code>msDS-KeyCredentialLink</code> writes (Shadow Credentials primitive)</li>
+          <li>Use Microsoft's <em>Certify</em> / <em>Locksmith</em> / <em>PSPKIAudit</em> tools to detect misconfigurations</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 18 AD ACL ABUSE ───────────────────────────────────────── -->
+  <section class="section" id="ad-abuse">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>18 — Active Directory ACL &amp; Configuration Abuse</h3>
+      <span class="section-id">AD-OFF</span>
+    </div>
+
+    <p class="note">Modern AD attacks rarely rely on credential theft alone — they trace ACL paths in the directory until reaching a high-privilege identity. Each ACE that grants write-class permissions to a low-tier identity is a potential edge in an attack graph (BloodHound). The patterns below are the canonical primitives.</p>
+
+    <div class="card">
+      <div class="card-title c-red">High-Value ACL Primitives</div>
+      <table class="ref-table">
+        <thead><tr><th>ACE / Right</th><th>On Target</th><th>Path to Compromise</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell red">GenericAll</td><td>Any object</td><td>Full control — reset password, add to group, write attributes, take ownership</td></tr>
+          <tr><td class="mono-cell red">WriteDACL</td><td>Any object</td><td>Modify DACL → grant self GenericAll → escalate</td></tr>
+          <tr><td class="mono-cell red">WriteOwner</td><td>Any object</td><td>Become owner → automatic WriteDac</td></tr>
+          <tr><td class="mono-cell red">GenericWrite</td><td>User</td><td>Write SPN → Kerberoast; write <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code> → RBCD</td></tr>
+          <tr><td class="mono-cell red">GenericWrite</td><td>Computer</td><td>RBCD setup; write <code>msDS-KeyCredentialLink</code> → Shadow Credentials</td></tr>
+          <tr><td class="mono-cell red">GenericWrite</td><td>Group</td><td>Add member → group membership escalation</td></tr>
+          <tr><td class="mono-cell red">DS-Replication-Get-Changes-All</td><td>Domain root</td><td>DCSync — dump all hashes including krbtgt</td></tr>
+          <tr><td class="mono-cell red">ForceChangePassword</td><td>User</td><td>Reset password without knowing current → takeover</td></tr>
+          <tr><td class="mono-cell red">AllowedToAct</td><td>Computer</td><td>RBCD → S4U2Proxy as any user (incl. DA) to that computer</td></tr>
+          <tr><td class="mono-cell red">AddMember</td><td>Group</td><td>Add controlled account to privileged group</td></tr>
+          <tr><td class="mono-cell red">ReadGMSAPassword</td><td>gMSA object</td><td>Retrieve managed password → authenticate as service account</td></tr>
+          <tr><td class="mono-cell red">WriteSPN</td><td>User</td><td>Set arbitrary SPN → Targeted Kerberoasting</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="attack-block" style="margin-top:14px">
+      <div class="attack-head">
+        <span class="attack-name">AdminSDHolder Backdoor</span>
+        <span class="attack-mitre">T1098</span>
+      </div>
+      <div class="attack-body">
+        <p>The AdminSDHolder object's DACL is propagated by SDProp every 60 minutes to all members of protected groups (Domain Admins, Enterprise Admins, etc.). An attacker who plants a backdoor ACE (e.g., GenericAll for a controlled account) on AdminSDHolder achieves persistent access — even if defenders manually fix individual user ACLs, SDProp re-applies the malicious template at the next cycle.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit AdminSDHolder ACL routinely and on every 4670/4662 event affecting it</li>
+          <li>Detect SDProp execution (events 4780) and verify expected ACEs only</li>
+          <li>Monitor any ACE addition to AdminSDHolder as a high-severity alert</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SYSVOL / cPassword Exposure</span>
+        <span class="attack-mitre">T1552.006</span>
+      </div>
+      <div class="attack-body">
+        <p>Group Policy Preferences (GPP) historically allowed setting passwords for local accounts, scheduled tasks, and services via XML files in SYSVOL. The passwords were AES-encrypted with a key Microsoft published — trivially decryptable (<strong class="hl">CVE-2014-1812</strong>). Patched by removing the password-setting capability, but legacy GPPs still in SYSVOL retain the encrypted blobs and remain readable by all domain users.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit SYSVOL for <code>cpassword=</code> in *.xml files; remove and rotate any exposed credentials</li>
+          <li>Use LAPS instead of GPP for local account password management</li>
+          <li>Restrict SYSVOL write access to domain admins and Group Policy creators</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">GPO Abuse — Logon Script / Scheduled Task Injection</span>
+        <span class="attack-mitre">T1484.001</span>
+      </div>
+      <div class="attack-body">
+        <p>An attacker with write access to a GPO (or to the SYSVOL files backing it) can inject malicious logon scripts, immediate scheduled tasks, or registry modifications that are applied to every machine and user in scope at next gpupdate. Common edges: GenericWrite on a GPO; write access to a linked OU's gPLink attribute; or membership in Group Policy Creator Owners with edit access to a GPO linked to high-value OUs (like Domain Controllers).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit GPO ACLs and linkage; least-privilege on Group Policy editing</li>
+          <li>Monitor 4739 (Domain Policy changed), 5136 (Directory object modified) on GPO containers</li>
+          <li>SYSVOL write access tightly controlled; FS auditing on \\domain\sysvol\Policies</li>
+          <li>WDAC / AppLocker on endpoints to block unauthorized scripts</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SID History Injection (Cross-Domain)</span>
+        <span class="attack-mitre">T1134.005</span>
+      </div>
+      <div class="attack-body">
+        <p>The <code>sIDHistory</code> attribute lets a migrated account retain SIDs from its previous domain. Within a forest, SID history is honored — meaning an attacker who controls a child domain (compromise of any child Domain Admin) can inject SIDs of forest-root Enterprise Admins into a sIDHistory-permitted ticket and escalate forest-wide. The <em>SID Filter Quarantining</em> setting on a trust normally strips foreign SIDs but is disabled within a single forest by design.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Treat the forest as the security boundary — child-domain compromise = forest compromise</li>
+          <li>Enable SID Filtering on cross-forest trusts; quarantine external trusts</li>
+          <li>Monitor 4662 events for sIDHistory writes; should be rare outside migrations</li>
+          <li>Detect Kerberos tickets with extra SIDs in PAC that don't match the issuing domain</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">DnsAdmins → SYSTEM on DC</span>
+        <span class="attack-mitre">T1574 (legacy)</span>
+      </div>
+      <div class="attack-body">
+        <p>Members of the DnsAdmins group could historically register a malicious DLL as a DNS plugin via <code>dnscmd /config /serverlevelplugindll</code>; the DNS service (running as SYSTEM on a DC) loads the DLL on next restart, yielding SYSTEM on the DC and effectively domain compromise. Microsoft mitigated by limiting the registry path and patching dnscmd (see CVE-2021-40469 / KB5006744 era), but legacy systems remain vulnerable.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit and minimize DnsAdmins membership — treat as Tier-0</li>
+          <li>Apply current patches; verify <code>HKLM\SYSTEM\...\DNS\Parameters\ServerLevelPluginDll</code> is restricted</li>
+          <li>Run DNS on dedicated, non-DC servers where feasible</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 19 DETECTION ───────────────────────────────────────── -->
+  <section class="section" id="detection">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>19 — Detection &amp; Telemetry Mapping</h3>
+      <span class="section-id">DET</span>
+    </div>
+
+    <p class="note">A telemetry-first view of the attacks above. Each row maps an attack pattern to the specific Windows event IDs and additional sources (Sysmon, EDR, network) that produce signal. Use as a baseline for hunt queries.</p>
+
+    <div class="card">
+      <table class="ref-table">
+        <thead>
+          <tr><th>Attack Pattern</th><th>Primary Telemetry</th><th>Hunt Hint</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong class="hl">LSASS dumping</strong></td>
+            <td>4688 (process create), Sysmon 10 (ProcessAccess), EDR kernel callbacks</td>
+            <td>Any non-system parent opening lsass.exe with PROCESS_VM_READ; comsvcs.dll MiniDump invocations</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Token impersonation / Potato</strong></td>
+            <td>4672 (special privileges), 4673 (privilege use), 4624 type 9 (NewCredentials)</td>
+            <td>SYSTEM child of IIS/SQL/service process; SeImpersonatePrivilege use spike</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">UAC bypass</strong></td>
+            <td>4688, 4657 (registry), Sysmon 13 (Reg value set), Sysmon 11 (FileCreate)</td>
+            <td>Auto-elevating binary spawned with non-default registry/file inputs in user-controlled paths</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Service hijack (T1574.x)</strong></td>
+            <td>7045 (service install), 4697, 4670 (object permissions), Sysmon 7 (ImageLoad)</td>
+            <td>Service binPath/ImagePath rewrites; DLL load from non-System32 path by privileged service</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">SAM/SECURITY hive theft</strong></td>
+            <td>4663 on \config\SAM &amp; SECURITY, 8222 (VSS shadow), 4688 (reg.exe save)</td>
+            <td><code>reg save</code>, <code>esentutl /y</code>, <code>vssadmin create shadow</code> patterns</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">DCSync</strong></td>
+            <td>4662 with DS-Replication-Get-Changes GUIDs</td>
+            <td>Replication right exercised by non-DC source IP</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">NTLM relay</strong></td>
+            <td>4624 type 3 + LogonProcessName=NtLmSsp + AuthenticationPackage=NTLM, 4776, network IDS</td>
+            <td>Workstation account logging into another workstation; LLMNR/NBNS query floods</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Pass-the-Hash</strong></td>
+            <td>4624 type 3 with NTLM auth from local account; 4672 on lateral host</td>
+            <td>Local Administrator network logons across hosts (LAPS makes each unique)</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Hash capture (Responder)</strong></td>
+            <td>Network: outbound SMB to unusual destinations; UDP 5355 LLMNR queries</td>
+            <td>Unexpected SMB connection attempts from clients to non-domain hosts</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Kerberoasting</strong></td>
+            <td>4769 with Ticket Encryption Type 0x17 (RC4)</td>
+            <td>Single source requesting many distinct SPNs in short window</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">AS-REP Roasting</strong></td>
+            <td>4768 with PreAuthType 0</td>
+            <td>Bulk AS-REQ for multiple users without pre-auth</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Golden Ticket</strong></td>
+            <td>4769 without preceding 4768 (no AS-REQ); ticket lifetime anomalies</td>
+            <td>Service ticket requests for users whose TGT was never issued by the KDC observably</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Silver Ticket</strong></td>
+            <td>4624 / 4769 without DC interaction</td>
+            <td>Service authentications without corresponding TGS-REQ on DC</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">RBCD / S4U abuse</strong></td>
+            <td>4769 with S4U flags; 5136 on msDS-AllowedToActOnBehalfOfOtherIdentity</td>
+            <td>Computer object attribute writes by non-admin; S4U2Self+S4U2Proxy chains</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">AD CS abuse (ESC1/8)</strong></td>
+            <td>4886/4887 (CA enrollment), 4768 with PKINIT, IIS logs on /certsrv</td>
+            <td>Certificate issued with SAN ≠ requester; PKINIT logons for admins from unusual hosts</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">ACL / GPO abuse</strong></td>
+            <td>5136 (DS object modified), 4670 (perms changed), 4719 (audit policy changed)</td>
+            <td>Modifications to AdminSDHolder, GPO containers, computer/user objects by unexpected principals</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Defense evasion</strong></td>
+            <td>1102 (log cleared), 4719 (audit policy changed), 4904/4905 (security source registered/removed)</td>
+            <td>Any of these events from non-admin process tree is high-severity</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-blue" style="margin-top:14px">
+      <div class="callout-label">Layered Hardening Stack</div>
+      The most resilient posture combines: <strong class="hl">Credential Guard</strong> + <strong class="hl">LSASS PPL</strong> for credential isolation; <strong class="hl">LAPS</strong> for local account uniqueness; <strong class="hl">tiered admin model</strong> with Deny logon rights enforcing separation; <strong class="hl">SMB/LDAP signing + EPA</strong> for relay resistance; <strong class="hl">Disable NTLM</strong> where compatible; <strong class="hl">gMSA</strong> for service accounts; <strong class="hl">AD CS hardening + EPA on enrollment endpoints</strong>; <strong class="hl">BloodHound ACL audits</strong> on a regular cadence; <strong class="hl">Protected Users</strong> for all Tier-0 identities.
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-green">Log Source Priority</div>
+        <table class="ref-table">
+          <thead><tr><th>Source</th><th>What it covers</th><th>Minimum config</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell green">DC Security Log</td><td>All Kerberos (4768/4769/4771), NTLM validation (4776), DS access (4662/5136)</td><td>Advanced Audit Policy — all Kerberos sub-categories Success+Failure</td></tr>
+            <tr><td class="mono-cell green">Workstation Security Log</td><td>Local logon (4624/4625), process creation (4688), token/privilege use (4672/4673)</td><td>Enable 4688 command-line logging; forward via WEF</td></tr>
+            <tr><td class="mono-cell green">Sysmon</td><td>ProcessAccess (10) for LSASS handles, NetworkConnect (3), ImageLoad (7), RegValue (13)</td><td>SwiftOnSecurity config at minimum; tune LSASS rule</td></tr>
+            <tr><td class="mono-cell green">EDR Kernel Telemetry</td><td>ObRegisterCallbacks — process handle requests with VM_READ; ETW Microsoft-Windows-Threat-Intelligence provider</td><td>Any modern EDR (Defender for Endpoint, CrowdStrike, etc.)</td></tr>
+            <tr><td class="mono-cell green">Network / NDR</td><td>NTLM relay traffic patterns; SMB to anomalous destinations; Kerberos RC4 concentration</td><td>Zeek + Suricata; alert on outbound SMB port 445 from clients</td></tr>
+            <tr><td class="mono-cell green">AD Change Auditing</td><td>5136 on all schema classes (user, computer, group, GPO, adminSDHolder)</td><td>Advanced Audit — DS Changes; SIEM correlation on object writes</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-amber">High-Fidelity Hunt Queries (Skeleton)</div>
+        <ul class="field-list">
+          <li>
+            <span class="field-key amber">LSASS Handle</span>
+            <span class="field-val">Sysmon 10 where TargetImage contains lsass.exe AND GrantedAccess in (0x1010, 0x1038, 0x143a) AND SourceImage NOT IN (AV/EDR known paths)</span>
+          </li>
+          <li>
+            <span class="field-key amber">DCSync</span>
+            <span class="field-val">Event 4662, Properties includes DS-Replication-Get-Changes-All GUID (1131f6ad-…), SubjectUserName is NOT a DC computer account</span>
+          </li>
+          <li>
+            <span class="field-key amber">Kerberoasting Burst</span>
+            <span class="field-val">Event 4769, TicketEncryptionType=0x17, count(distinct ServiceName) &gt; 5 per SourceIP per minute</span>
+          </li>
+          <li>
+            <span class="field-key amber">Golden Ticket</span>
+            <span class="field-val">Event 4769 where no corresponding 4768 for same account in last 10 hours on any DC; OR ticket lifetime &gt; 10 hours</span>
+          </li>
+          <li>
+            <span class="field-key amber">RBCD Write</span>
+            <span class="field-val">Event 5136, AttributeLDAPDisplayName = msDS-AllowedToActOnBehalfOfOtherIdentity, ModifierSID NOT admin group</span>
+          </li>
+          <li>
+            <span class="field-key amber">Lateral PtH</span>
+            <span class="field-val">Event 4624, LogonType=3, AuthenticationPackageName=NTLM, SubjectUserName matches local admin naming convention, across &gt;2 hosts</span>
+          </li>
+          <li>
+            <span class="field-key amber">Service Install (Persistence)</span>
+            <span class="field-val">Event 7045 or 4697, ServiceType=0x10 (WIN32_OWN_PROCESS), ServiceStartType=2 (AUTO_START), within hours of 4625/4624 anomaly</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-red">Indicators of Compromise — Quick Reference</div>
+      <table class="ref-table">
+        <thead><tr><th>Indicator</th><th>Implication</th><th>Response Priority</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell red">Event 1102 (log cleared)</td><td>Attacker covering tracks; often precedes exfiltration or persistence</td><td>P1 — immediate investigation</td></tr>
+          <tr><td class="mono-cell red">krbtgt password not rotated &gt;180 days</td><td>Golden ticket window is open if hash ever exposed</td><td>Rotate immediately (twice); check for anomalous TGTs</td></tr>
+          <tr><td class="mono-cell red">AdminSDHolder modified (4670 / 5136)</td><td>Backdoor persistence on all protected group members</td><td>P1 — revert and investigate path to Domain Admin</td></tr>
+          <tr><td class="mono-cell red">New SPN on privileged account</td><td>Targeted Kerberoasting setup</td><td>Remove SPN; audit who set it (5136)</td></tr>
+          <tr><td class="mono-cell red">LSASS child process (4688)</td><td>Code injection / credential dump in progress</td><td>P1 — isolate host</td></tr>
+          <tr><td class="mono-cell red">WDigest UseLogonCredential = 1 (4657)</td><td>Attacker staging for cleartext credential harvest</td><td>Revert; check what credentials were exposed</td></tr>
+          <tr><td class="mono-cell red">Certificate issued with arbitrary SAN</td><td>ESC1/ESC8 ADCS abuse; attacker may have a DA certificate</td><td>Revoke; restrict template; audit CA logs</td></tr>
+          <tr><td class="mono-cell red">msDS-AllowedToActOnBehalfOfOtherIdentity written</td><td>RBCD setup — S4U2Proxy attack likely pending</td><td>Clear attribute; investigate writer identity</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+</div>
+</body>
+</html>
