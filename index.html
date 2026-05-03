@@ -240,6 +240,38 @@
     letter-spacing: 0.08em;
   }
 
+  .ref-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: -8px 0 16px 20px;
+  }
+  .ref-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 7px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--bg2);
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 9.5px;
+    line-height: 1.4;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+  .ref-link::before {
+    content: 'MS';
+    color: var(--c-blue);
+    font-weight: 600;
+  }
+  .ref-link:hover {
+    color: var(--white);
+    border-color: var(--c-blue-border);
+    background: var(--c-blue-dim);
+  }
+
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
   .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
@@ -397,6 +429,55 @@
   .ref-table .mono-cell.red { color: var(--c-red); }
   .ref-table .mono-cell.purple { color: var(--c-purple); }
   .ref-table .mono-cell.green { color: var(--c-green); }
+  .ref-table .mono-cell.coral { color: var(--c-coral); }
+
+  .inline-diagram {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px 0 12px;
+  }
+  .inline-diagram .box {
+    fill: var(--bg3);
+    stroke: var(--line2);
+    stroke-width: 1.2;
+    rx: 6;
+  }
+  .inline-diagram .box-soft {
+    fill: rgba(255,255,255,0.025);
+    stroke: var(--line);
+    stroke-width: 1.2;
+    rx: 6;
+  }
+  .inline-diagram .blue { stroke: var(--c-blue); fill: var(--c-blue-dim); }
+  .inline-diagram .teal { stroke: var(--c-teal); fill: var(--c-teal-dim); }
+  .inline-diagram .amber { stroke: var(--c-amber); fill: var(--c-amber-dim); }
+  .inline-diagram .purple { stroke: var(--c-purple); fill: var(--c-purple-dim); }
+  .inline-diagram .red { stroke: var(--c-red); fill: var(--c-red-dim); }
+  .inline-diagram .green { stroke: var(--c-green); fill: var(--c-green-dim); }
+  .inline-diagram .coral { stroke: var(--c-coral); fill: var(--c-coral-dim); }
+  .inline-diagram .flowline {
+    stroke: var(--text3);
+    stroke-width: 1.8;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .inline-diagram .node-text {
+    fill: var(--white);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .inline-diagram .tiny-text {
+    fill: var(--text2);
+    font-family: var(--mono);
+    font-size: 8.5px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
 
   .phase-row { display: flex; gap: 12px; margin: 12px 0; }
   .phase-box {
@@ -835,6 +916,16 @@
   <a href="#architecture" class="accent-blue">01 Architecture</a>
   <a href="#sids" class="accent-teal">02 SIDs</a>
   <a href="#tokens" class="accent-amber">03 Access Tokens</a>
+  <a href="#tokens-lifecycle" class="accent-amber">· Lifecycle</a>
+  <a href="#tokens-relationships" class="accent-amber">· How Tokens Link</a>
+  <a href="#tokens-primary" class="accent-amber">· Primary</a>
+  <a href="#tokens-impersonation" class="accent-amber">· Impersonation</a>
+  <a href="#tokens-uac" class="accent-amber">· UAC Linked</a>
+  <a href="#tokens-virtualization" class="accent-amber">· Virtualization / UIAccess</a>
+  <a href="#tokens-restricted" class="accent-amber">· Restricted</a>
+  <a href="#tokens-appcontainer" class="accent-amber">· AppContainer</a>
+  <a href="#tokens-integrity" class="accent-amber">· Integrity</a>
+  <a href="#tokens-network" class="accent-amber">· Network / Delegation</a>
   <a href="#descriptors" class="accent-purple">04 Security Descriptors</a>
   <a href="#access-check" class="accent-teal">05 Access Check</a>
   <a href="#privileges" class="accent-coral">06 Privileges</a>
@@ -887,6 +978,10 @@
       <div class="section-dot dot-blue"></div>
       <h3>01 — Windows Security Architecture</h3>
       <span class="section-id">ARCH</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/windows-security-model" target="_blank" rel="noopener noreferrer">Windows security model</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-components" target="_blank" rel="noopener noreferrer">Access control components</a>
     </div>
 
     <div class="grid-2">
@@ -952,6 +1047,9 @@
       <h3>02 — Security Identifiers (SIDs)</h3>
       <span class="section-id">SID</span>
     </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-identifiers" target="_blank" rel="noopener noreferrer">Security identifiers</a>
+    </div>
 
     <div class="grid-2">
       <div class="card">
@@ -1002,89 +1100,361 @@
       <h3>03 — Security Access Tokens</h3>
       <span class="section-id">TOKEN</span>
     </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens" target="_blank" rel="noopener noreferrer">Access tokens</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-rights-for-access-token-objects" target="_blank" rel="noopener noreferrer">Token object rights</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/client-impersonation" target="_blank" rel="noopener noreferrer">Client impersonation</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/restricted-tokens" target="_blank" rel="noopener noreferrer">Restricted tokens</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/mandatory-integrity-control" target="_blank" rel="noopener noreferrer">Mandatory Integrity Control</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/" target="_blank" rel="noopener noreferrer">UAC</a>
+    </div>
 
-    <p class="note">The access token is the kernel's representation of a security context. The SRM reads the token when deciding whether to grant access. Every process has a <strong class="hl">primary token</strong>; threads can carry an <strong class="hl">impersonation token</strong> that temporarily overrides the process context.</p>
+    <p class="note">An access token is the runtime security context that the Security Reference Monitor (SRM) evaluates. It is not just "the user": it is a compact kernel object containing identity, group memberships, privileges, integrity, default security settings, sandbox state, and a link back to the LSASS logon session. The clean mental model is: <strong class="hl">account data becomes a logon session; the logon session produces one or more tokens; the effective token is consumed by SRM during each access check.</strong></p>
+
+    <h4 class="sub" id="tokens-lifecycle">Token Lifecycle</h4>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-amber">Lifecycle Diagram: From Credentials to a Handle</div>
+      <p class="note">The lifecycle matters because token "types" are not isolated objects. UAC linked tokens, restricted tokens, AppContainer tokens, and delegation tokens are all variations created at different points in the same pipeline.</p>
+      <svg class="inline-diagram" viewBox="0 0 720 252" role="img" aria-label="Access token lifecycle from logon request through LSASS policy, token creation, process or thread attachment, access check, and auditing">
+        <rect class="box blue" x="18" y="28" width="104" height="44"></rect>
+        <text class="node-text" x="70" y="44">1 Logon</text>
+        <text class="tiny-text" x="70" y="58">interactive / service / net</text>
+        <path class="flowline" d="M122 50 H150"></path>
+        <path class="flowline" d="M144 44 L154 50 L144 56"></path>
+
+        <rect class="box teal" x="154" y="28" width="112" height="44"></rect>
+        <text class="node-text" x="210" y="44">2 Validate</text>
+        <text class="tiny-text" x="210" y="58">SAM / AD / Kerberos</text>
+        <path class="flowline" d="M266 50 H294"></path>
+        <path class="flowline" d="M288 44 L298 50 L288 56"></path>
+
+        <rect class="box amber" x="298" y="28" width="116" height="44"></rect>
+        <text class="node-text" x="356" y="44">3 LSA Policy</text>
+        <text class="tiny-text" x="356" y="58">rights / groups / privs</text>
+        <path class="flowline" d="M414 50 H442"></path>
+        <path class="flowline" d="M436 44 L446 50 L436 56"></path>
+
+        <rect class="box purple" x="446" y="28" width="116" height="44"></rect>
+        <text class="node-text" x="504" y="44">4 Logon Session</text>
+        <text class="tiny-text" x="504" y="58">LUID + credentials</text>
+        <path class="flowline" d="M562 50 H590"></path>
+        <path class="flowline" d="M584 44 L594 50 L584 56"></path>
+
+        <rect class="box red" x="594" y="28" width="108" height="44"></rect>
+        <text class="node-text" x="648" y="44">5 Token</text>
+        <text class="tiny-text" x="648" y="58">primary / linked / sandbox</text>
+
+        <path class="flowline" d="M648 72 V104"></path>
+        <path class="flowline" d="M642 98 L648 108 L654 98"></path>
+
+        <rect class="box-soft" x="484" y="108" width="148" height="42"></rect>
+        <text class="node-text" x="558" y="124">Process Primary</text>
+        <text class="tiny-text" x="558" y="138">default effective token</text>
+        <rect class="box-soft" x="484" y="166" width="148" height="42"></rect>
+        <text class="node-text" x="558" y="182">Thread Impersonation</text>
+        <text class="tiny-text" x="558" y="196">optional override</text>
+        <path class="flowline" d="M632 129 H664 V176 H632"></path>
+        <path class="flowline" d="M638 170 L628 176 L638 182"></path>
+
+        <rect class="box green" x="274" y="126" width="128" height="50"></rect>
+        <text class="node-text" x="338" y="143">6 Effective Token</text>
+        <text class="tiny-text" x="338" y="158">thread token wins;</text>
+        <text class="tiny-text" x="338" y="170">else process token</text>
+        <path class="flowline" d="M484 129 H402"></path>
+        <path class="flowline" d="M408 123 L398 129 L408 135"></path>
+        <path class="flowline" d="M484 187 H446 V151 H402"></path>
+        <path class="flowline" d="M408 145 L398 151 L408 157"></path>
+
+        <rect class="box coral" x="116" y="126" width="116" height="50"></rect>
+        <text class="node-text" x="174" y="143">7 SRM Check</text>
+        <text class="tiny-text" x="174" y="158">MIC + privileges +</text>
+        <text class="tiny-text" x="174" y="170">DACL + sandbox</text>
+        <path class="flowline" d="M274 151 H232"></path>
+        <path class="flowline" d="M238 145 L228 151 L238 157"></path>
+
+        <rect class="box blue" x="18" y="126" width="74" height="50"></rect>
+        <text class="node-text" x="55" y="143">8 Handle</text>
+        <text class="tiny-text" x="55" y="158">granted access</text>
+        <path class="flowline" d="M116 151 H92"></path>
+        <path class="flowline" d="M98 145 L88 151 L98 157"></path>
+
+        <rect class="box-soft" x="220" y="214" width="280" height="24"></rect>
+        <text class="tiny-text" x="360" y="226">audit events and token lifetime follow object references, handles, and logoff</text>
+      </svg>
+      <table class="ref-table">
+        <thead><tr><th>Stage</th><th>Subsystem</th><th>What actually happens</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell amber">1 · Entry path</td><td>Winlogon, SCM, Task Scheduler, RDP, SMB, API caller</td><td>A component requests a logon type: interactive, service, batch, network, unlock, cached interactive, NewCredentials, and so on.</td><td>The logon type controls which User Rights Assignment entries apply and whether a reusable local token, a network-only token, or a service token is expected.</td></tr>
+          <tr><td class="mono-cell amber">2 · Authentication</td><td>LSASS + SAM / AD / Kerberos / NTLM</td><td>LSASS asks an authentication package to prove the account. The result is user SID, group expansion, account flags, claims/device data where applicable, and authentication metadata.</td><td>This is where identity is proven, but not yet where file or registry access is decided.</td></tr>
+          <tr><td class="mono-cell amber">3 · Authorization policy</td><td>LSASS + LSA policy</td><td>Deny logon rights, allow logon rights, privileges, group attributes, default owner, default DACL, mandatory policy, and UAC filtering rules are composed.</td><td>User Rights Assignment gates whether a token can exist for that logon path; privileges and SID attributes shape what the token can later do.</td></tr>
+          <tr><td class="mono-cell amber">4 · Logon session</td><td>LSASS</td><td>LSASS creates or reuses a logon session identified by a LUID. Credential material, Kerberos tickets, NewCredentials state, and audit identity attach here.</td><td>Multiple tokens can point to the same logon session, so closing one process does not necessarily destroy the session immediately.</td></tr>
+          <tr><td class="mono-cell amber">5 · Token materialization</td><td>Kernel / SRM</td><td>The kernel creates an access token object and fills its identity, groups, privileges, integrity SID, default DACL, token type, impersonation level, linked-token pointer, and sandbox fields.</td><td>This is the moment token categories appear: primary, impersonation, linked, restricted, AppContainer, low-integrity, network-only, or delegation-capable.</td></tr>
+          <tr><td class="mono-cell amber">6 · Attachment</td><td>Process manager / thread manager</td><td>A primary token attaches to a process. An impersonation token can attach to one thread. Child processes normally inherit the parent effective identity unless created with another token.</td><td>The effective token for an access check is the thread token if present; otherwise the process primary token.</td></tr>
+          <tr><td class="mono-cell amber">7 · Consumption</td><td>Object Manager + SRM</td><td>When code opens a handle, SRM evaluates the effective token against the target object's integrity label, privileges, DACL, object type mapping, sandbox rules, and audit policy.</td><td>The token does not grant access by itself. It is input to an access check that returns a handle with a specific granted-access mask.</td></tr>
+          <tr><td class="mono-cell amber">8 · Lifetime</td><td>Kernel + LSASS</td><td>The token object stays alive while processes, threads, duplicated token handles, or kernel references hold it. Logoff tears down the interactive session, but service and network sessions follow their own lifetimes.</td><td>Tokens are runtime objects. Password changes or group changes do not fully affect already-issued tokens until new logon/token creation occurs.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-amber" style="margin-top:10px">
+        <div class="callout-label">Keep These Separate</div>
+        <strong class="hl">Account</strong> is persistent directory or SAM data. <strong class="hl">Logon session</strong> is LSASS runtime state. <strong class="hl">Token</strong> is the kernel authorization object. <strong class="hl">Handle</strong> is the result of one successful access check.
+      </div>
+    </div>
 
     <div class="grid-2" style="margin-top:14px">
       <div class="card">
-        <div class="card-title c-amber">Token Fields</div>
+        <div class="card-title c-amber">Shared Token Anatomy</div>
         <ul class="field-list">
-          <li><span class="field-key amber">User SID</span><span class="field-val">The authenticated user's SID. Basis for identity.</span></li>
-          <li><span class="field-key amber">Group SIDs</span><span class="field-val">List of group memberships. Each with attribute flags (see below).</span></li>
-          <li><span class="field-key amber">Privileges</span><span class="field-val">Special rights (e.g. SeDebugPrivilege). Each is Enabled or Disabled.</span></li>
-          <li><span class="field-key amber">Default Owner</span><span class="field-val">SID assigned as owner when this token creates a new object.</span></li>
-          <li><span class="field-key amber">Default DACL</span><span class="field-val">Applied to new objects if no DACL is specified at creation.</span></li>
-          <li><span class="field-key amber">Logon Session ID</span><span class="field-val">Links token to a logon session; determines credential cache and drive mappings.</span></li>
-          <li><span class="field-key amber">Token Type</span><span class="field-val">Primary (process) or Impersonation (thread).</span></li>
-          <li><span class="field-key amber">Impersonation Level</span><span class="field-val">Anonymous / Identification / Impersonation / Delegation.</span></li>
-          <li><span class="field-key amber">Integrity Level</span><span class="field-val">Mandatory Integrity Control label (Medium, High, System…).</span></li>
-          <li><span class="field-key amber">UAC Flags</span><span class="field-val">Elevation type, UI Access, virtualization enabled.</span></li>
-          <li><span class="field-key amber">AppContainer SID</span><span class="field-val">Present only in sandboxed tokens; defines the container identity.</span></li>
-          <li><span class="field-key amber">Capabilities</span><span class="field-val">AppContainer only. Capability SIDs grant specific permissions.</span></li>
+          <li><span class="field-key amber">User SID</span><span class="field-val">The account identity. This SID usually becomes the default owner for new objects and can match allow or deny ACEs.</span></li>
+          <li><span class="field-key amber">Group SIDs</span><span class="field-val">Normal, domain, local, logon, resource, capability, and integrity SIDs. Attributes decide whether each SID can allow access, only deny access, or participate in mandatory policy.</span></li>
+          <li><span class="field-key amber">Privileges</span><span class="field-val">System powers such as SeDebugPrivilege, SeBackupPrivilege, SeImpersonatePrivilege, and SeChangeNotifyPrivilege. A privilege can be present but disabled until a process enables it.</span></li>
+          <li><span class="field-key amber">Integrity SID</span><span class="field-val">The token's mandatory integrity level. It is checked before ordinary DACL walking and can block write/read/execute-up operations.</span></li>
+          <li><span class="field-key amber">Default owner / DACL</span><span class="field-val">Applied when the token creates a securable object without an explicit security descriptor.</span></li>
+          <li><span class="field-key amber">Token source + LUIDs</span><span class="field-val">Token source, authentication ID, modified ID, and logon LUID let Windows connect audit events, logon sessions, and duplicated tokens.</span></li>
+          <li><span class="field-key amber">Optional sandbox fields</span><span class="field-val">Restricted SIDs, AppContainer SID, capability SIDs, UIAccess, virtualization state, lowbox state, and trust/protection flags.</span></li>
         </ul>
       </div>
 
       <div class="card">
-        <div class="card-title c-blue">Group SID Attribute Flags</div>
+        <div class="card-title c-blue">How SRM Chooses the Effective Token</div>
         <ul class="field-list">
-          <li><span class="field-key blue">Enabled</span><span class="field-val">SID is active in this token — contributes to access checks.</span></li>
-          <li><span class="field-key blue">EnabledByDefault</span><span class="field-val">SID is enabled at logon unless explicitly removed.</span></li>
-          <li><span class="field-key blue">Mandatory</span><span class="field-val">Cannot be disabled. Always participates in access checks.</span></li>
-          <li><span class="field-key blue">UseForDenyOnly</span><span class="field-val">SID only matches Deny ACEs, never Allow ACEs.</span></li>
-          <li><span class="field-key blue">Integrity</span><span class="field-val">Marks the SID as the integrity level for MIC.</span></li>
-          <li><span class="field-key blue">IntegrityEnabled</span><span class="field-val">The integrity SID is active for enforcement.</span></li>
-          <li><span class="field-key blue">Resource</span><span class="field-val">SID from a resource domain, used in cross-domain scenarios.</span></li>
-          <li><span class="field-key blue">LogonId</span><span class="field-val">Refers to the logon session identifier SID.</span></li>
-        </ul>
-        <div class="divider"></div>
-        <div class="card-title c-teal" style="margin-top:8px">Impersonation Levels</div>
-        <ul class="field-list">
-          <li><span class="field-key">Anonymous</span><span class="field-val">Server cannot learn caller's identity.</span></li>
-          <li><span class="field-key">Identification</span><span class="field-val">Server can query identity but cannot act as the caller on remote resources.</span></li>
-          <li><span class="field-key">Impersonation</span><span class="field-val">Server can act as caller on <em>local</em> resources only.</span></li>
-          <li><span class="field-key">Delegation</span><span class="field-val">Server can act as caller on <em>remote</em> resources too. Requires Kerberos delegation.</span></li>
+          <li><span class="field-key blue">Thread token present</span><span class="field-val">SRM uses the thread impersonation token. The process primary token is temporarily bypassed for that access check.</span></li>
+          <li><span class="field-key blue">No thread token</span><span class="field-val">SRM uses the process primary token. This is the normal case for desktop apps, services, and child processes.</span></li>
+          <li><span class="field-key blue">SID attributes</span><span class="field-val">Enabled SIDs can allow or deny. Deny-only SIDs can deny but cannot grant. Disabled SIDs are ignored for normal DACL decisions.</span></li>
+          <li><span class="field-key blue">Privilege shortcut</span><span class="field-val">Some operations are authorized through privileges instead of ordinary ACEs, or require a privilege in addition to object access.</span></li>
+          <li><span class="field-key blue">Mandatory policy</span><span class="field-val">Integrity and sandbox policy can remove access that the DACL would otherwise grant. They are restrictive layers, not grants.</span></li>
+          <li><span class="field-key blue">Granted handle</span><span class="field-val">After the check, code receives a handle with a fixed granted-access mask. Later token changes do not magically increase that existing handle.</span></li>
         </ul>
       </div>
     </div>
 
-    <div class="grid-3" style="margin-top:14px">
-      <div class="card">
-        <div class="card-title c-red">UAC &amp; Linked Tokens</div>
-        <p class="note">When an administrator logs in interactively, UAC splits the session into <strong class="hl">two linked tokens</strong>:</p>
-        <ul class="field-list" style="margin-top:8px">
-          <li><span class="field-key red">Filtered token</span><span class="field-val">Medium IL. Admin groups marked UseForDenyOnly. Dangerous privileges removed. Assigned by default to all user processes.</span></li>
-          <li><span class="field-key red">Full token</span><span class="field-val">High IL. All privileges and admin groups present. Only assigned on explicit elevation consent.</span></li>
-          <li><span class="field-key red">Elevation Type</span><span class="field-val">Default (manifest), Full (auto-elevate), Limited (UAC filtered).</span></li>
-          <li><span class="field-key red">UI Access</span><span class="field-val">Allows a process to interact with higher IL UI elements. Requires signed binary in secure location.</span></li>
-          <li><span class="field-key red">Virtualization</span><span class="field-val">Legacy compatibility — file/registry writes by non-UAC-aware apps silently redirected to per-user VirtualStore.</span></li>
-        </ul>
-      </div>
+    <h4 class="sub" id="tokens-relationships">How Token Types Link Together</h4>
 
-      <div class="card">
-        <div class="card-title c-purple">Restricted &amp; Sandbox Tokens</div>
-        <ul class="field-list">
-          <li><span class="field-key purple">Restricted Token</span><span class="field-val">A copy of an existing token with groups marked UseForDenyOnly, privileges removed, and/or a list of <em>Restricting SIDs</em> added. Access check must pass <em>both</em> the normal ACE walk <em>and</em> the Restricting SIDs walk (intersection).</span></li>
-          <li><span class="field-key purple">Write-Restricted</span><span class="field-val">Only Restricting SIDs check applies for write access, not reads.</span></li>
-          <li><span class="field-key purple">AppContainer (Lowbox)</span><span class="field-val">Strongest sandbox: IL=Low + AppContainer SID + Capability SIDs. Used by UWP apps and browsers.</span></li>
-          <li><span class="field-key purple">Capability SIDs</span><span class="field-val">e.g., internetClient, microphone, camera. Capabilities gate access to protected resources.</span></li>
-        </ul>
-      </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-amber">Relationship Map: One Base Model, Several Modifiers</div>
+      <p class="note">The most important idea is that Windows does not have eight unrelated token systems. It has one token object model, then several ways to attach it, derive it, filter it, label it, or connect it to network credentials.</p>
+      <svg class="inline-diagram" viewBox="0 0 720 286" role="img" aria-label="Relationship map showing primary token, impersonation token, UAC linked tokens, restricted tokens, AppContainer tokens, integrity, virtualization, and network delegation">
+        <rect class="box amber" x="268" y="18" width="184" height="48"></rect>
+        <text class="node-text" x="360" y="36">Base Access Token</text>
+        <text class="tiny-text" x="360" y="52">user SID + groups + privileges + LUID</text>
 
-      <div class="card">
-        <div class="card-title c-green">Mandatory Integrity Levels (MIC)</div>
-        <div class="il-table">
-          <div class="il-row"><div class="il-bar" style="width:8px;background:#ff6b6b"></div><span class="il-label">Protected</span><span class="il-sid">S-1-16-20480</span><span class="il-note">Protected Process Light</span></div>
-          <div class="il-row"><div class="il-bar" style="width:8px;background:#f5b642"></div><span class="il-label">System</span><span class="il-sid">S-1-16-16384</span><span class="il-note">SYSTEM/kernel processes</span></div>
-          <div class="il-row"><div class="il-bar" style="width:8px;background:#4e9eff"></div><span class="il-label">High</span><span class="il-sid">S-1-16-12288</span><span class="il-note">Elevated (UAC) processes</span></div>
-          <div class="il-row"><div class="il-bar" style="width:8px;background:#6ee79a"></div><span class="il-label">Med-High</span><span class="il-sid">S-1-16-8448</span><span class="il-note">Admin w/ integrity flag</span></div>
-          <div class="il-row"><div class="il-bar" style="width:8px;background:#2dd4a4"></div><span class="il-label">Medium</span><span class="il-sid">S-1-16-8192</span><span class="il-note">Default for users</span></div>
-          <div class="il-row"><div class="il-bar" style="width:8px;background:#a78bfa"></div><span class="il-label">Low</span><span class="il-sid">S-1-16-4096</span><span class="il-note">AppContainer / sandboxed</span></div>
-          <div class="il-row"><div class="il-bar" style="width:8px;background:#555e78"></div><span class="il-label">Untrusted</span><span class="il-sid">S-1-16-0</span><span class="il-note">Anonymous / minimum</span></div>
-        </div>
-        <div class="callout callout-blue" style="margin-top:10px">
-          <div class="callout-label">MIC Policy</div>
-          <strong class="hl">No-Write-Up</strong> is default: a token at IL=Low cannot write to objects labeled Medium or higher. Read-up and execute-up are allowed by default but can be blocked with NoReadUp / NoExecuteUp flags on the object label.
-        </div>
+        <rect class="box teal" x="70" y="104" width="150" height="44"></rect>
+        <text class="node-text" x="145" y="121">Primary Token</text>
+        <text class="tiny-text" x="145" y="136">process default identity</text>
+        <path class="flowline" d="M303 66 C250 80, 206 91, 168 104"></path>
+        <path class="flowline" d="M176 96 L164 105 L179 108"></path>
+
+        <rect class="box blue" x="278" y="104" width="164" height="44"></rect>
+        <text class="node-text" x="360" y="121">Impersonation Token</text>
+        <text class="tiny-text" x="360" y="136">thread override identity</text>
+        <path class="flowline" d="M360 66 V104"></path>
+        <path class="flowline" d="M354 96 L360 108 L366 96"></path>
+
+        <rect class="box red" x="500" y="104" width="150" height="44"></rect>
+        <text class="node-text" x="575" y="121">UAC Linked Pair</text>
+        <text class="tiny-text" x="575" y="136">filtered + elevated primary</text>
+        <path class="flowline" d="M417 66 C466 82, 508 94, 553 104"></path>
+        <path class="flowline" d="M543 96 L557 105 L541 108"></path>
+
+        <rect class="box purple" x="70" y="204" width="150" height="44"></rect>
+        <text class="node-text" x="145" y="221">Restricted Token</text>
+        <text class="tiny-text" x="145" y="236">source token minus authority</text>
+        <path class="flowline" d="M145 148 V204"></path>
+        <path class="flowline" d="M139 196 L145 208 L151 196"></path>
+
+        <rect class="box purple" x="278" y="204" width="164" height="44"></rect>
+        <text class="node-text" x="360" y="221">AppContainer</text>
+        <text class="tiny-text" x="360" y="236">user + package + capabilities</text>
+        <path class="flowline" d="M220 126 H278"></path>
+        <path class="flowline" d="M270 120 L282 126 L270 132"></path>
+        <path class="flowline" d="M220 226 H278"></path>
+        <path class="flowline" d="M270 220 L282 226 L270 232"></path>
+
+        <rect class="box green" x="500" y="204" width="150" height="44"></rect>
+        <text class="node-text" x="575" y="221">Integrity Label</text>
+        <text class="tiny-text" x="575" y="236">mandatory layer on all tokens</text>
+        <path class="flowline" d="M575 148 V204"></path>
+        <path class="flowline" d="M569 196 L575 208 L581 196"></path>
+        <path class="flowline" d="M442 226 H500"></path>
+        <path class="flowline" d="M492 220 L504 226 L492 232"></path>
+
+        <rect class="box-soft" x="250" y="162" width="220" height="28"></rect>
+        <text class="tiny-text" x="360" y="176">virtualization / UIAccess are token flags, not separate identities</text>
+
+        <rect class="box-soft" x="238" y="258" width="244" height="24"></rect>
+        <text class="tiny-text" x="360" y="270">network-only credentials and delegation hang from the logon session / impersonation path</text>
+      </svg>
+      <table class="ref-table">
+        <thead><tr><th>Relationship</th><th>How to think about it</th><th>Access-check consequence</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell amber">Base → Primary</td><td>A logon creates a token that can be attached to a process. That process token is the normal security identity for code execution.</td><td>Used whenever the current thread is not impersonating.</td></tr>
+          <tr><td class="mono-cell blue">Primary → Impersonation</td><td>A server keeps its own process token, then one thread temporarily borrows a client token.</td><td>The thread token overrides the process token for local access checks; delegation level decides whether it can flow remotely.</td></tr>
+          <tr><td class="mono-cell red">Primary → UAC linked pair</td><td>An admin interactive logon can produce two related primary tokens: filtered medium token and full high token.</td><td>Same account, different SID attributes, privileges, and integrity. Elevation selects the full token for a new process.</td></tr>
+          <tr><td class="mono-cell purple">Source → Restricted</td><td>A token is duplicated and weakened by removing privileges, disabling groups, adding deny-only SIDs, or adding restricting SIDs.</td><td>Access must fit the reduced authority. Restricted tokens can still be primary or impersonation tokens.</td></tr>
+          <tr><td class="mono-cell purple">Restricted → AppContainer</td><td>AppContainer is a stronger sandbox style: constrained user token plus package SID, capability SIDs, and usually low integrity.</td><td>The user SID alone is not enough. Package/capability grants and brokers become central.</td></tr>
+          <tr><td class="mono-cell green">Any token → Integrity</td><td>Integrity is a label inside the token, not a separate token type.</td><td>MIC can deny write/read/execute-up before DACL allow ACEs matter.</td></tr>
+          <tr><td class="mono-cell coral">Any token → Virtualization/UIAccess</td><td>These are flags/state on eligible desktop tokens.</td><td>They change compatibility redirection or UI interaction rules but do not create a new user identity.</td></tr>
+          <tr><td class="mono-cell red">Logon session → Network behavior</td><td>The token points to a logon session. That session can hold normal credentials, NewCredentials, Kerberos tickets, or delegation-capable state.</td><td>Local access uses the local effective token; remote access may use outbound credentials or delegated client identity.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="sub">Token Categories</h4>
+
+    <p class="note">Read the following categories as roles a token can play. A token can be a <strong class="hl">primary token</strong> and also be <strong class="hl">filtered by UAC</strong>, <strong class="hl">restricted</strong>, <strong class="hl">low integrity</strong>, or <strong class="hl">AppContainer</strong>. Likewise, an <strong class="hl">impersonation token</strong> can carry an integrity level and can be delegation-capable. The labels overlap because they describe different dimensions: attachment, derivation, restriction, trust level, and network behavior.</p>
+
+    <div class="card" id="tokens-primary" style="margin-top:14px">
+      <div class="card-title c-teal">Primary Tokens</div>
+      <p class="note">A primary token is the security context attached to a process. It answers the question "who is this process when none of its threads are impersonating?" Explorer, services, scheduled tasks, command shells, and child processes all run with a primary token.</p>
+      <table class="ref-table">
+        <thead><tr><th>Aspect</th><th>Detailed explanation</th><th>Connection to other token types</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell">Creation</td><td>Usually created by LSASS after a successful logon and handed to Winlogon, SCM, Task Scheduler, RDP, or another trusted caller. APIs such as <code>CreateProcessAsUser</code>, <code>CreateProcessWithTokenW</code>, and service startup paths can place a chosen primary token on a new process.</td><td>UAC, restricted, AppContainer, and network-only tokens can all be primary tokens when they are assigned to a process.</td></tr>
+          <tr><td class="mono-cell">Default use</td><td>Every thread in the process uses the primary token unless a thread token is installed. The token supplies SIDs, privileges, integrity, default DACL, audit identity, and network credential linkage.</td><td>An impersonation token temporarily overrides this default at the thread level.</td></tr>
+          <tr><td class="mono-cell">Process creation</td><td>Creating a process with a primary token requires the token to be assignable as primary and the caller to have the right token object access. The new process receives a fresh handle table, but its security context starts from that token.</td><td>A duplicated impersonation token often must be converted or duplicated into a primary token before it can launch a process.</td></tr>
+          <tr><td class="mono-cell">Lifetime</td><td>The primary token remains alive while the process or duplicated token handles reference it. The logon session can outlive individual processes when other tokens or credentials still reference it.</td><td>Group membership and privilege changes normally require a new logon to appear in a new primary token.</td></tr>
+          <tr><td class="mono-cell">Security trap</td><td>A process may hold powerful privileges even when they are disabled. Code can enable them for a sensitive operation if the privilege is present in the token.</td><td>Restricted and UAC-filtered primary tokens reduce this ambient authority by removing or disabling SIDs and privileges.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-teal" style="margin-top:10px">
+        <div class="callout-label">Connection Model</div>
+        Treat the primary token as the root runtime identity of a process. Other token concepts either override it for a thread, derive a reduced version from it, attach extra sandbox identity to it, or change its trust/network behavior.
+      </div>
+    </div>
+
+    <div class="card" id="tokens-impersonation" style="margin-top:14px">
+      <div class="card-title c-blue">Impersonation Tokens</div>
+      <p class="note">An impersonation token is a thread-level identity override. It lets a server process keep its own primary token while one thread temporarily performs an access check as a client. This is essential for RPC, COM, named pipes, SMB server code, IIS-style worker flows, and many brokered service designs.</p>
+      <table class="ref-table">
+        <thead><tr><th>Impersonation level</th><th>Meaning</th><th>Practical consequence</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell blue">Anonymous</td><td>The server cannot obtain a usable client identity.</td><td>Authorization sees an anonymous-style context, so most protected local resources fail.</td></tr>
+          <tr><td class="mono-cell blue">Identification</td><td>The server can inspect the caller identity and groups but cannot access resources as that caller.</td><td>Good for "should I serve this caller?" decisions, not for opening files or registry keys on the caller's behalf.</td></tr>
+          <tr><td class="mono-cell blue">Impersonation</td><td>The server can use the client identity for local access checks on the same machine.</td><td>Common local service model: accept a client request, impersonate, open the local object, then revert.</td></tr>
+          <tr><td class="mono-cell blue">Delegation</td><td>The server can carry the client identity to a remote machine.</td><td>Requires delegation-capable authentication and policy; this is where Kerberos delegation becomes relevant.</td></tr>
+        </tbody>
+      </table>
+      <ul class="field-list" style="margin-top:10px">
+        <li><span class="field-key blue">Where it attaches</span><span class="field-val">Only to a thread. Other threads in the same process keep using the process primary token unless they impersonate too.</span></li>
+        <li><span class="field-key blue">How it starts</span><span class="field-val">Created by authentication packages, RPC/COM/pipe impersonation calls, SSPI flows, or token duplication. Servers must carefully call revert routines such as <code>RevertToSelf</code> after the protected operation.</span></li>
+        <li><span class="field-key blue">Privilege sensitivity</span><span class="field-val">SeImpersonatePrivilege is powerful because a service that can impersonate a privileged client may be able to use that client's local authority.</span></li>
+        <li><span class="field-key blue">Primary-token link</span><span class="field-val">SRM chooses the impersonation token first. If no thread token exists, SRM falls back to the process primary token.</span></li>
+      </ul>
+      <div class="callout callout-blue" style="margin-top:10px">
+        <div class="callout-label">Connection Model</div>
+        Impersonation is not "logging the whole process in as someone else." It is a temporary thread override. A service can be SYSTEM as a process, impersonate Alice on one thread to open Alice's file, then revert and continue running as SYSTEM.
+      </div>
+    </div>
+
+    <div class="card" id="tokens-uac" style="margin-top:14px">
+      <div class="card-title c-red">UAC Linked Tokens</div>
+      <p class="note">A UAC linked-token pair is created for many interactive administrator logons. Windows creates a normal working token that behaves like a standard user most of the time, plus a related elevated token that can be used after consent or credential approval.</p>
+      <ul class="field-list" style="margin-top:8px">
+        <li><span class="field-key red">Filtered token</span><span class="field-val">The default desktop token for an administrator under Admin Approval Mode. It is normally Medium integrity. Administrator SIDs remain present but are marked deny-only, and many administrative privileges are removed or disabled. Explorer and normal child processes inherit this token.</span></li>
+        <li><span class="field-key red">Full token</span><span class="field-val">The elevated partner token. It is normally High integrity, has admin SIDs enabled, and has the administrative privilege set available. Elevated processes are separate processes that use this full token as their primary token.</span></li>
+        <li><span class="field-key red">Linked-token pointer</span><span class="field-val">The relationship is stored as token state. Windows can locate the elevated partner when an elevation broker, manifest, shell verb, installer detection, or explicit request triggers UAC.</span></li>
+        <li><span class="field-key red">DACL effect</span><span class="field-val">Because admin SIDs are deny-only in the filtered token, they can still match deny ACEs but cannot satisfy admin allow ACEs. This is why a local admin can be denied access until running elevated.</span></li>
+        <li><span class="field-key red">Integrity effect</span><span class="field-val">The filtered token usually cannot write to High-integrity objects because MIC blocks write-up before the DACL can grant access. Elevation changes both SID usability and integrity.</span></li>
+        <li><span class="field-key red">Standard user distinction</span><span class="field-val">A standard user normally has no linked admin token. An over-the-shoulder elevation prompt creates a process with another account's token, not a linked full token for the standard user's own account.</span></li>
+      </ul>
+      <div class="callout callout-red" style="margin-top:10px">
+        <div class="callout-label">Connection Model</div>
+        UAC linked tokens are two primary tokens for the same admin logon session. The filtered token is what normal processes inherit; the full token is selected only for elevated processes. This is why elevation creates a new process context instead of "turning on admin" inside every existing process.
+      </div>
+    </div>
+
+    <div class="card" id="tokens-virtualization" style="margin-top:14px">
+      <div class="card-title c-coral">Virtualization and UIAccess Token State</div>
+      <p class="note">Virtualization and UIAccess are not separate users and usually not separate token objects. They are token state that changes how a process interacts with protected file, registry, and desktop UI resources.</p>
+      <table class="ref-table">
+        <thead><tr><th>State</th><th>Detailed explanation</th><th>Links to the lifecycle</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell coral">Virtualization allowed</td><td>Windows marks some medium-integrity legacy desktop processes as eligible for UAC file/registry virtualization. Eligibility depends on factors such as bitness, manifest, elevation, service status, and AppContainer state.</td><td>Set during token/process creation after UAC policy and application compatibility decisions are known.</td></tr>
+          <tr><td class="mono-cell coral">Virtualization enabled</td><td>Writes that would fail against protected locations such as parts of Program Files or HKLM\Software can be redirected to per-user locations such as VirtualStore. The app thinks the write succeeded in the old location.</td><td>It is a compatibility shim for non-elevated legacy apps, not an authorization grant. The real protected object is still protected.</td></tr>
+          <tr><td class="mono-cell coral">Virtualization disabled</td><td>No redirection occurs. The normal SRM decision stands. Elevated, manifested, 64-bit, service, protected, and AppContainer-style contexts commonly run without virtualization.</td><td>Most modern software should fail clearly or request proper elevation rather than depend on virtualization.</td></tr>
+          <tr><td class="mono-cell coral">UIAccess</td><td>A token flag for trusted accessibility-style applications that need to interact with higher-integrity windows. It requires strict signing and trusted install-location conditions.</td><td>It modifies User Interface Privilege Isolation behavior, but it does not bypass file DACLs, token privileges, or general SRM checks.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-amber" style="margin-top:10px">
+        <div class="callout-label">Connection Model</div>
+        Virtualization/UIAccess sit beside UAC and integrity, not above them. They modify selected desktop behaviors after Windows already knows the token's user, elevation state, integrity, and application compatibility profile.
+      </div>
+    </div>
+
+    <div class="card" id="tokens-restricted" style="margin-top:14px">
+      <div class="card-title c-purple">Restricted and Write-Restricted Tokens</div>
+      <p class="note">A restricted token is a deliberately reduced version of another token. It is useful when code should keep the same broad user identity for auditing and profile access, but should lose dangerous authority for the operation it is about to perform.</p>
+      <ul class="field-list" style="margin-top:8px">
+        <li><span class="field-key purple">Construction</span><span class="field-val">Windows duplicates an existing token, then removes privileges, disables groups, marks SIDs deny-only, adds restricting SIDs, or combines those changes. The result can be used as a primary token for a sandboxed process or as an impersonation token.</span></li>
+        <li><span class="field-key purple">Deny-only groups</span><span class="field-val">A deny-only SID can still trigger deny ACEs, but it cannot satisfy allow ACEs. This preserves negative security boundaries while removing positive authority.</span></li>
+        <li><span class="field-key purple">Restricting SID list</span><span class="field-val">For normal restricted tokens, access must pass the ordinary DACL evaluation and also be allowed by the restricting SID list. Think of it as an intersection: normal identity AND sandbox allow-list.</span></li>
+        <li><span class="field-key purple">Write-restricted mode</span><span class="field-val">A write-restricted token applies the extra restricting-SID intersection primarily to write-style access. This lets reads stay closer to the original user while writes require explicit sandbox permission.</span></li>
+        <li><span class="field-key purple">Relationship to UAC</span><span class="field-val">UAC filtering also removes authority, but it is a specialized admin split-token design. Restricted tokens are a general-purpose API model for lowering authority.</span></li>
+        <li><span class="field-key purple">Relationship to AppContainer</span><span class="field-val">AppContainer builds a stronger package/capability sandbox on top of constrained-token ideas. A plain restricted token has no package identity or capability SID model by itself.</span></li>
+      </ul>
+      <div class="callout callout-blue" style="margin-top:10px">
+        <div class="callout-label">Connection Model</div>
+        A restricted token starts from another token and subtracts authority. It can still be attached as a primary token to a sandboxed process or as an impersonation token to a thread, so "restricted" describes derivation, not attachment.
+      </div>
+    </div>
+
+    <div class="card" id="tokens-appcontainer" style="margin-top:14px">
+      <div class="card-title c-purple">AppContainer / Lowbox Tokens</div>
+      <p class="note">An AppContainer token, historically called a lowbox token, is the token model behind modern Windows app sandboxing. It is not simply "a low-integrity user"; it adds an application/container identity and explicit capability SIDs to a constrained token.</p>
+      <table class="ref-table">
+        <thead><tr><th>Component</th><th>What it means</th><th>How it links to access checks</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell purple">AppContainer SID</td><td>The package or container identity. It distinguishes one sandboxed app/container from another even when they run under the same user account.</td><td>Resources can grant directly to this SID when only that package/container should access them.</td></tr>
+          <tr><td class="mono-cell purple">Capability SIDs</td><td>Permission-like SIDs for declared abilities such as network, camera, microphone, enterprise resources, or library access.</td><td>A DACL can grant access to a capability SID, allowing any package that holds that capability unless additional package-specific ACLs narrow it.</td></tr>
+          <tr><td class="mono-cell purple">Low integrity</td><td>Most AppContainer work runs at Low integrity, which blocks writes to ordinary Medium-or-higher objects unless labels, brokered APIs, or explicit grants permit them.</td><td>MIC blocks first, then DACL/capability logic still has to permit the access.</td></tr>
+          <tr><td class="mono-cell purple">Brokered access</td><td>Many sensitive resources are reached through brokers rather than direct object access. The broker runs with more authority and validates app identity/capabilities.</td><td>The app token proves package identity and capabilities to the broker; the broker performs the privileged operation.</td></tr>
+          <tr><td class="mono-cell purple">LPAC</td><td>Less Privileged AppContainer reduces ambient compatibility access further, often requiring resources to allow restricted application package identities explicitly.</td><td>Useful for tighter sandboxes where "all app packages" style grants are too broad.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-blue" style="margin-top:10px">
+        <div class="callout-label">Connection Model</div>
+        AppContainer combines several dimensions at once: it is usually a primary token for a sandboxed process, usually Low integrity, derived from the user, restricted in ambient access, and extended with package/capability SIDs. That combination is why it behaves stricter than a plain restricted token.
+      </div>
+    </div>
+
+    <div class="card" id="tokens-integrity" style="margin-top:14px">
+      <div class="card-title c-green">Mandatory Integrity Token State</div>
+      <p class="note">Integrity is stored in the token as a mandatory label SID. It is not a group that grants permission. It is a restrictive trust level used by Mandatory Integrity Control before normal DACL evaluation.</p>
+      <div class="il-table">
+        <div class="il-row"><div class="il-bar" style="width:8px;background:#ff6b6b"></div><span class="il-label">Protected</span><span class="il-sid">S-1-16-20480</span><span class="il-note">Protected Process Light style contexts</span></div>
+        <div class="il-row"><div class="il-bar" style="width:8px;background:#f5b642"></div><span class="il-label">System</span><span class="il-sid">S-1-16-16384</span><span class="il-note">SYSTEM and core service contexts</span></div>
+        <div class="il-row"><div class="il-bar" style="width:8px;background:#4e9eff"></div><span class="il-label">High</span><span class="il-sid">S-1-16-12288</span><span class="il-note">Elevated admin token</span></div>
+        <div class="il-row"><div class="il-bar" style="width:8px;background:#2dd4a4"></div><span class="il-label">Medium</span><span class="il-sid">S-1-16-8192</span><span class="il-note">Default interactive user token</span></div>
+        <div class="il-row"><div class="il-bar" style="width:8px;background:#a78bfa"></div><span class="il-label">Low</span><span class="il-sid">S-1-16-4096</span><span class="il-note">Sandboxed/browser/AppContainer style contexts</span></div>
+        <div class="il-row"><div class="il-bar" style="width:8px;background:#555e78"></div><span class="il-label">Untrusted</span><span class="il-sid">S-1-16-0</span><span class="il-note">Minimum trust</span></div>
+      </div>
+      <ul class="field-list" style="margin-top:10px">
+        <li><span class="field-key green">No write up</span><span class="field-val">The default MIC rule blocks a lower-integrity token from writing to a higher-integrity object, even if the DACL would allow the user SID.</span></li>
+        <li><span class="field-key green">Object label</span><span class="field-val">The object's mandatory label lives in the SACL. Policy bits can express no-write-up, no-read-up, and no-execute-up behavior.</span></li>
+        <li><span class="field-key green">UAC link</span><span class="field-val">Filtered admin tokens usually run at Medium; elevated admin tokens usually run at High. The integrity change is one reason elevation changes behavior.</span></li>
+        <li><span class="field-key green">Sandbox link</span><span class="field-val">Low integrity is common for AppContainer, browser renderer, and document sandbox designs. It limits writes even when the user account is otherwise allowed.</span></li>
+        <li><span class="field-key green">Important limit</span><span class="field-val">Integrity only restricts. It never grants access that the DACL, privilege, capability, or broker policy denies.</span></li>
+      </ul>
+      <div class="callout callout-green" style="margin-top:10px">
+        <div class="callout-label">Connection Model</div>
+        Integrity is a layer on every practical token category. Primary, impersonation, UAC filtered, elevated, restricted, and AppContainer tokens all carry an integrity level; SRM checks that level before ordinary allow ACEs can help.
+      </div>
+    </div>
+
+    <div class="card" id="tokens-network" style="margin-top:14px">
+      <div class="card-title c-red">Network-Only and Delegation Tokens</div>
+      <p class="note">Network-related token behavior is where local and remote identity can diverge. A process can look like one user locally while using another credential set for outbound authentication, or a server can be allowed to carry a client's identity to another machine.</p>
+      <ul class="field-list" style="margin-top:8px">
+        <li><span class="field-key red">Network-only / NewCredentials</span><span class="field-val">Used by flows such as <code>runas /netonly</code> and <code>LOGON32_LOGON_NEW_CREDENTIALS</code>. Locally, the token mostly behaves like the caller's existing identity. For outbound SSPI authentication, supplied network credentials can be used.</span></li>
+        <li><span class="field-key red">Validation timing</span><span class="field-val">The local machine can create a NewCredentials logon session without proving the supplied remote password to a domain controller immediately. The remote service validates the credentials when they are actually used.</span></li>
+        <li><span class="field-key red">Local vs remote access</span><span class="field-val">Opening a local file, registry key, or process uses the local token identity. Accessing SMB, LDAP, HTTP, SQL, or another remote service can present the outbound credentials associated with the logon session.</span></li>
+        <li><span class="field-key red">Delegation token</span><span class="field-val">An impersonation token at Delegation level lets a server access a remote resource as the client. In domain environments this normally depends on Kerberos delegation settings and account restrictions.</span></li>
+        <li><span class="field-key red">Credential protection link</span><span class="field-val">Restricted Admin, Remote Credential Guard, Protected Users, and "account is sensitive and cannot be delegated" style controls change whether reusable credentials or delegation-capable tickets are available.</span></li>
+        <li><span class="field-key red">Impersonation link</span><span class="field-val">Identification and ordinary impersonation are local concepts. Delegation is the level that crosses machine boundaries, so it is the bridge between token mechanics and Kerberos delegation policy.</span></li>
+      </ul>
+      <div class="callout callout-red" style="margin-top:10px">
+        <div class="callout-label">Connection Model</div>
+        Network behavior hangs from the logon session and the impersonation level. NewCredentials changes outbound authentication while local access still uses the local token. Delegation changes whether a client's impersonation token can be used beyond the current machine.
       </div>
     </div>
   </section>
@@ -1095,6 +1465,12 @@
       <div class="section-dot dot-purple"></div>
       <h3>04 — Security Descriptors</h3>
       <span class="section-id">SD</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptors" target="_blank" rel="noopener noreferrer">Security descriptors</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-lists" target="_blank" rel="noopener noreferrer">ACLs and ACEs</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format" target="_blank" rel="noopener noreferrer">SDDL format</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/ace-strings" target="_blank" rel="noopener noreferrer">ACE strings</a>
     </div>
 
     <p class="note">Every securable kernel object carries a security descriptor. The SRM reads it during every access check. A descriptor can be in <strong class="hl">absolute</strong> form (pointers to separate ACL buffers) or <strong class="hl">relative</strong> form (self-contained flat buffer — used for persistence in registry/file).</p>
@@ -1175,6 +1551,98 @@
         </ul>
       </div>
     </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">Absolute vs Self-Relative Form</div>
+        <p class="note">The same descriptor can be represented in two memory layouts. Confusing these is a common source of broken parsers and incorrect assumptions.</p>
+        <table class="ref-table">
+          <thead><tr><th>Form</th><th>Where used</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell purple">Absolute</td><td>Runtime APIs</td><td>The descriptor contains pointers to separate owner, group, DACL, and SACL buffers.</td></tr>
+            <tr><td class="mono-cell purple">Self-relative</td><td>Storage / transmission</td><td>The descriptor is one contiguous blob; fields are offsets from the start of the blob.</td></tr>
+            <tr><td class="mono-cell purple">SDDL</td><td>Text / policy</td><td>A string form that can serialize common descriptor parts and many ACE types.</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-blue" style="margin-top:10px">
+          <div class="callout-label">Practical Rule</div>
+          Registry, file system, AD, and security policy often persist descriptors as self-relative binary or SDDL. API code often converts to absolute form before modifying individual parts.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">ACL and ACE Binary Shape</div>
+        <ul class="field-list">
+          <li><span class="field-key">ACL header</span><span class="field-val">Contains ACL revision, total ACL size, and ACE count. ACEs follow immediately after the header.</span></li>
+          <li><span class="field-key">ACE header</span><span class="field-val">Every ACE begins with type, flags, and size. Unknown ACE types can be skipped using the size field.</span></li>
+          <li><span class="field-key">Access mask</span><span class="field-val">The rights bitmask granted, denied, audited, or filtered by that ACE.</span></li>
+          <li><span class="field-key">SID</span><span class="field-val">The principal to which the ACE applies. For object ACEs, GUID fields can appear before the SID.</span></li>
+          <li><span class="field-key">Extra data</span><span class="field-val">Callback, resource attribute, scoped policy, and conditional ACEs may carry additional data after the normal fields.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-blue">Creation and Inheritance</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">Creator descriptor</span><span class="field-val">The caller can pass a descriptor when creating an object. If omitted, the token default DACL is used.</span></li>
+          <li><span class="field-key blue">Parent inheritance</span><span class="field-val">Container objects can contribute inheritable ACEs to children. Files inherit from folders; AD objects inherit from containers/OUs.</span></li>
+          <li><span class="field-key blue">Merge behavior</span><span class="field-val">Windows merges explicit creator ACEs with parent inheritable ACEs unless inheritance protection flags suppress it.</span></li>
+          <li><span class="field-key blue">Auto-inherited</span><span class="field-val">Inherited ACEs are marked so tools can distinguish explicit permissions from inherited permissions.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-amber">Special SIDs in ACEs</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">OWNER RIGHTS</span><span class="field-val">Lets a descriptor explicitly restrict or define what the owner receives instead of relying only on implicit owner rights.</span></li>
+          <li><span class="field-key amber">CREATOR OWNER</span><span class="field-val">Placeholder in inheritable ACEs. Replaced by the actual creator/owner when inherited by child objects.</span></li>
+          <li><span class="field-key amber">CREATOR GROUP</span><span class="field-val">Similar placeholder for the primary group.</span></li>
+          <li><span class="field-key amber">SELF</span><span class="field-val">Common in AD. Replaced by the object's own principal SID during object-specific access checks.</span></li>
+          <li><span class="field-key amber">Everyone / Authenticated Users</span><span class="field-val">Broad trustees. Safe only when the access mask is deliberately narrow.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-red">Descriptor Footguns</div>
+        <ul class="field-list">
+          <li><span class="field-key red">NULL DACL</span><span class="field-val">Grants all access to everyone. Rarely intended.</span></li>
+          <li><span class="field-key red">Wrong ACE order</span><span class="field-val">Allow ACEs before deny ACEs can grant access before the deny is reached.</span></li>
+          <li><span class="field-key red">InheritOnly misunderstood</span><span class="field-val">Does not apply to the current object; it exists only to flow to children.</span></li>
+          <li><span class="field-key red">Generic rights not mapped</span><span class="field-val">GenericAll/Read/Write/Execute mean different specific bits depending on object type.</span></li>
+          <li><span class="field-key red">SACL ignored</span><span class="field-val">No audit event appears unless audit policy enables the relevant category and a matching audit ACE exists.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">Object, Callback, and Conditional ACEs</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Object ACE</span><span class="field-val">Adds object type and/or inherited object type GUIDs. AD uses this to scope rights to a class, attribute, property set, or extended right.</span></li>
+          <li><span class="field-key purple">Callback ACE</span><span class="field-val">Carries a condition that must evaluate true before the ACE participates. Used by AuthZ and Central Access Policy scenarios.</span></li>
+          <li><span class="field-key purple">ResourceAttribute ACE</span><span class="field-val">Stores resource claims such as classification labels. CAP rules can evaluate these claims.</span></li>
+          <li><span class="field-key purple">ScopedPolicyId ACE</span><span class="field-val">Points a resource at a Central Access Policy so enterprise claim rules become part of access evaluation.</span></li>
+          <li><span class="field-key purple">Critical / TrustProtected flags</span><span class="field-val">Can mark certain ACEs as difficult or unsafe to remove. Useful around protected process trust and filter semantics.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-green">SACL: More Than Auditing</div>
+        <p class="note">The SACL is not just for event generation. Windows also stores mandatory integrity and some policy/filter ACEs there.</p>
+        <table class="ref-table">
+          <thead><tr><th>SACL ACE</th><th>Purpose</th><th>Access needed</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell green">SystemAudit</td><td>Generate success/failure audit events when the access mask matches.</td><td>SeSecurityPrivilege to read/write SACL</td></tr>
+            <tr><td class="mono-cell green">MandatoryLabel</td><td>Object integrity level and NoWriteUp/NoReadUp/NoExecuteUp policy.</td><td>WriteDac or label-specific privilege depending on change</td></tr>
+            <tr><td class="mono-cell green">ProcessTrustLabel</td><td>Protected process trust rules.</td><td>Constrained by trust-protection semantics</td></tr>
+            <tr><td class="mono-cell green">AccessFilter</td><td>Can remove access based on conditions; it cannot add access.</td><td>Security descriptor write rights</td></tr>
+            <tr><td class="mono-cell green">ScopedPolicyId</td><td>Enables Central Access Policy evaluation for a resource.</td><td>AccessSystemSecurity</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 
   <!-- ── 05 ACCESS CHECK ───────────────────────────────────────── -->
@@ -1183,6 +1651,15 @@
       <div class="section-dot dot-teal"></div>
       <h3>05 — The Access Check Process</h3>
       <span class="section-id">AC</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/access-control/access-control" target="_blank" rel="noopener noreferrer">Access control overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-lists" target="_blank" rel="noopener noreferrer">DACL evaluation</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/how-dacls-control-access-to-an-object" target="_blank" rel="noopener noreferrer">How AccessCheck works</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-accesscheck" target="_blank" rel="noopener noreferrer">AccessCheck</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-accesscheckbytype" target="_blank" rel="noopener noreferrer">AccessCheckByType</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/generic-access-rights" target="_blank" rel="noopener noreferrer">Generic rights</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-generic_mapping" target="_blank" rel="noopener noreferrer">GENERIC_MAPPING</a>
     </div>
 
     <p class="note">When a thread opens a handle to a kernel object, the SRM runs a deterministic three-phase check. All three phases must pass. The SRM is the <em>only</em> component that performs this — no kernel subsystem bypasses it.</p>
@@ -1243,6 +1720,107 @@
         </ul>
       </div>
     </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-teal">Before the DACL Walk</div>
+        <ul class="field-list">
+          <li><span class="field-key">Requested access</span><span class="field-val">The caller asks for a bitmask such as Read, Write, Delete, WriteDac, GenericAll, or MAXIMUM_ALLOWED.</span></li>
+          <li><span class="field-key">Generic mapping</span><span class="field-val">GenericRead/Write/Execute/All are translated into object-specific bits. A file, process, token, registry key, and AD object all map generics differently.</span></li>
+          <li><span class="field-key">Valid access mask</span><span class="field-val">Bits that are meaningless for that object type are stripped or rejected. Object types define what rights exist.</span></li>
+          <li><span class="field-key">Effective token</span><span class="field-val">If a thread token exists, SRM uses it. Otherwise SRM uses the process token.</span></li>
+          <li><span class="field-key">Previously granted</span><span class="field-val">Some rights may already be granted by ownership or privileges before the DACL loop begins.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-amber">Remaining Access Algorithm</div>
+        <p class="note">The DACL walk is easiest to understand as a shrinking set of bits called <strong class="hl">RemainingAccess</strong>.</p>
+        <div class="mono-block amber" style="white-space:normal; word-break:normal">
+          Remaining = Desired - AlreadyGranted<br>
+          for each ACE in canonical order:<br>
+          &nbsp;&nbsp;if ACE does not apply: continue<br>
+          &nbsp;&nbsp;if Deny intersects Remaining: deny<br>
+          &nbsp;&nbsp;if Allow intersects Remaining: grant those bits<br>
+          &nbsp;&nbsp;if Remaining is empty: grant
+        </div>
+        <p class="note">Canonical ordering matters because the loop can stop early. If allows appear before denies, a bad DACL may grant everything before the deny ACE is reached.</p>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">SID Matching Rules</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Allow ACE</span><span class="field-val">Matches token user SID, enabled group SIDs, enabled capability SIDs, or relevant package SIDs.</span></li>
+          <li><span class="field-key purple">Deny ACE</span><span class="field-val">Matches enabled SIDs and deny-only SIDs. This is why UAC filtered admin SIDs can still be denied.</span></li>
+          <li><span class="field-key purple">Disabled SID</span><span class="field-val">Ignored for normal allow/deny checks.</span></li>
+          <li><span class="field-key purple">OWNER RIGHTS</span><span class="field-val">If present, can replace the broad implicit owner behavior with explicit owner rights.</span></li>
+          <li><span class="field-key purple">SELF</span><span class="field-val">During object-specific checks, SELF is replaced with the principal SID of the object being checked.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">MAXIMUM_ALLOWED</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">Purpose</span><span class="field-val">Ask Windows to compute the largest access mask the token can receive instead of requesting exact bits.</span></li>
+          <li><span class="field-key blue">Deny still applies</span><span class="field-val">A deny ACE removes matching bits from the possible result.</span></li>
+          <li><span class="field-key blue">Privileges count</span><span class="field-val">Owner rights and enabled privileges can add rights to the computed result.</span></li>
+          <li><span class="field-key blue">Use carefully</span><span class="field-val">Opening handles with broader rights than needed increases damage if the handle is leaked or duplicated.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-red">Privilege Short-Circuits</div>
+        <ul class="field-list">
+          <li><span class="field-key red">SeBackupPrivilege</span><span class="field-val">May grant backup/read-style access even when the DACL denies ordinary reads.</span></li>
+          <li><span class="field-key red">SeRestorePrivilege</span><span class="field-val">May grant restore/write-style access and override ownership-related restrictions.</span></li>
+          <li><span class="field-key red">SeTakeOwnershipPrivilege</span><span class="field-val">May grant WriteOwner even when DACL says no.</span></li>
+          <li><span class="field-key red">SeSecurityPrivilege</span><span class="field-val">Required to read or write SACLs through ACCESS_SYSTEM_SECURITY.</span></li>
+          <li><span class="field-key red">SeChangeNotifyPrivilege</span><span class="field-val">Bypasses directory traversal checks, not ordinary file read/write checks.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-green">Object-Type Access Checks</div>
+        <p class="note">Some resources, especially AD objects, are not just "one object with one mask." They have properties, property sets, child object classes, validated writes, and extended rights.</p>
+        <ul class="field-list" style="margin-top:8px">
+          <li><span class="field-key green">AllowedObject ACE</span><span class="field-val">Grants access only when the requested object type GUID matches the ACE's object type GUID.</span></li>
+          <li><span class="field-key green">DeniedObject ACE</span><span class="field-val">Denies only the matching property, property set, class, or extended right.</span></li>
+          <li><span class="field-key green">InheritedObjectType</span><span class="field-val">Controls which child object classes inherit an ACE.</span></li>
+          <li><span class="field-key green">Result list</span><span class="field-val">Object-type APIs can return a result per requested object type, not only one yes/no decision.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-coral">Central Access Policy Layer</div>
+        <ul class="field-list">
+          <li><span class="field-key coral">Resource attributes</span><span class="field-val">Claims stored on the resource, such as classification or department.</span></li>
+          <li><span class="field-key coral">User/device claims</span><span class="field-val">Claims in the token that describe the authenticated user or device.</span></li>
+          <li><span class="field-key coral">Scoped policy</span><span class="field-val">A SACL ACE points the object to the Central Access Policy that should apply.</span></li>
+          <li><span class="field-key coral">Callback ACEs</span><span class="field-val">Conditions are evaluated in addition to normal DACL checks. CAP can remove access that the DACL alone would allow.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-amber">End-to-End Access Check Mental Model</div>
+      <table class="ref-table">
+        <thead><tr><th>Step</th><th>Question</th><th>If it fails</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell amber">1</td><td>Can generic rights be mapped to valid object-specific rights?</td><td>The request is invalid or meaningless for this object type.</td></tr>
+          <tr><td class="mono-cell amber">2</td><td>Does MIC permit the operation at this integrity level?</td><td>Access denied before DACL evaluation.</td></tr>
+          <tr><td class="mono-cell amber">3</td><td>Does ownership or an enabled privilege grant special rights?</td><td>The request proceeds with fewer pre-granted bits.</td></tr>
+          <tr><td class="mono-cell amber">4</td><td>Does any applicable deny ACE intersect the remaining requested bits?</td><td>Access denied immediately.</td></tr>
+          <tr><td class="mono-cell amber">5</td><td>Do applicable allow ACEs grant every remaining requested bit?</td><td>Access denied unless MAXIMUM_ALLOWED is being computed.</td></tr>
+          <tr><td class="mono-cell amber">6</td><td>For restricted/lowbox tokens, do sandbox-specific checks also allow it?</td><td>Access denied even if the normal token was allowed.</td></tr>
+          <tr><td class="mono-cell amber">7</td><td>Do object-type or Central Access Policy checks remove any requested access?</td><td>Access denied or reduced for the affected object/property/right.</td></tr>
+          <tr><td class="mono-cell amber">8</td><td>Does a matching SACL require auditing?</td><td>Access may still succeed, but no relevant audit is emitted if policy/SACL do not align.</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- ── 06 PRIVILEGES ───────────────────────────────────────── -->
@@ -1251,6 +1829,9 @@
       <div class="section-dot dot-coral"></div>
       <h3>06 — Privileges</h3>
       <span class="section-id">PRIV</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/privileges" target="_blank" rel="noopener noreferrer">Privileges</a>
     </div>
     <p class="note">Privileges are special rights in a token that override normal access checks. They must be <strong class="hl">enabled</strong> in the token (some are disabled by default and must be explicitly activated) and are distinct from access rights (which are checked against object DACLs). Privileges are assigned via <em>User Rights Assignment</em> security policy — see Section 07.</p>
 
@@ -1286,8 +1867,40 @@
       <h3>07 — Service Accounts &amp; User Rights Assignment</h3>
       <span class="section-id">URA</span>
     </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/user-rights-assignment" target="_blank" rel="noopener noreferrer">User Rights Assignment</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-userrights" target="_blank" rel="noopener noreferrer">UserRights CSP</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secmgmt/local-security-policy" target="_blank" rel="noopener noreferrer">Local security policy</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/ntsecapi/nf-ntsecapi-lsaenumerateaccountswithuserright" target="_blank" rel="noopener noreferrer">LSA user-right API</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/access-control/local-accounts" target="_blank" rel="noopener noreferrer">Local accounts</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/group-managed-service-accounts/getting-started-with-group-managed-service-accounts" target="_blank" rel="noopener noreferrer">gMSA</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview" target="_blank" rel="noopener noreferrer">Windows LAPS</a>
+    </div>
 
     <p class="note">Windows defines three categories of accounts relevant to authorization. Service accounts are particularly important because they back nearly every system process and are not visible in normal account enumeration tools (<code>net user</code>, etc.) — their authority comes from <strong class="hl">User Rights Assignment</strong> security policy rather than group membership.</p>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-blue">How URA Enters the System</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">Configuration</span><span class="field-val">Defined locally in <code>secpol.msc</code>, through Group Policy, or through MDM Policy CSP. The setting is machine-scoped: it applies to the computer where the policy is effective.</span></li>
+          <li><span class="field-key blue">Storage</span><span class="field-val">The effective assignment is stored in the Local Security Authority policy database. Domain GPO can overwrite local assignment when policy refresh applies.</span></li>
+          <li><span class="field-key blue">Names to SIDs</span><span class="field-val">LSA resolves users and groups to SIDs. Microsoft recommends SID-form values for policy tooling because account names can be localized or renamed.</span></li>
+          <li><span class="field-key blue">Evaluation Time</span><span class="field-val">LSASS evaluates logon rights at logon, service start, scheduled task launch, RDP sign-in, and network authentication. Privilege assignments become part of the resulting token.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">How Other Subsystems Use It</div>
+        <ul class="field-list">
+          <li><span class="field-key">LSASS</span><span class="field-val">Checks allow/deny logon rights before creating a logon session. Deny rights override allow rights when both apply through direct or group membership.</span></li>
+          <li><span class="field-key">SCM</span><span class="field-val">When a service runs under a named account, the Service Control Manager needs that account to have <code>SeServiceLogonRight</code>. Built-in service identities have service-logon behavior by design.</span></li>
+          <li><span class="field-key">Task Scheduler</span><span class="field-val">Tasks running as a stored account depend on batch-style logon semantics, commonly tied to <code>SeBatchLogonRight</code> and its deny counterpart.</span></li>
+          <li><span class="field-key">RDP / SMB / RPC</span><span class="field-val">Remote Desktop depends on remote interactive logon rights; network access paths depend on network logon rights before object ACLs are even considered.</span></li>
+          <li><span class="field-key">SRM</span><span class="field-val">After logon succeeds, the Security Reference Monitor consumes token privileges such as <code>SeBackupPrivilege</code>, <code>SeDebugPrivilege</code>, and <code>SeTakeOwnershipPrivilege</code> during access checks.</span></li>
+        </ul>
+      </div>
+    </div>
 
     <div class="grid-3" style="margin-top:14px">
       <div class="card">
@@ -1340,7 +1953,7 @@
         </ul>
         <div class="callout callout-blue" style="margin-top:10px">
           <div class="callout-label">Configuration Surface</div>
-          URA is configured via Group Policy (<em>Computer Configuration → Windows Settings → Security Settings → Local Policies → User Rights Assignment</em>) or directly via the Local Security Authority policy database. Modifications require <code>SeSecurityPrivilege</code>.
+          URA is configured via Group Policy (<em>Computer Configuration → Windows Settings → Security Settings → Local Policies → User Rights Assignment</em>), local security policy, or MDM UserRights CSP. Treat these settings as full-replacement lists: policy deployment should include every principal that must retain the right, not only the new account being added.
         </div>
       </div>
     </div>
@@ -1362,6 +1975,23 @@
         Microsoft's recommended hardening model uses Deny logon rights to enforce tiering: Tier 0 (DCs, identity systems) accounts denied logon to Tier 1 (servers) and Tier 2 (workstations); Tier 1 denied logon to Tier 2; etc. Prevents credential exposure on lower-tier hosts.
       </div>
     </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-green">Subsystem Decision Points</div>
+      <table class="ref-table">
+        <thead><tr><th>Subsystem</th><th>URA Input</th><th>Security Result</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell green">Group Policy / CSP</td><td>Principal list for each right</td><td>Writes effective machine policy that LSASS will enforce</td></tr>
+          <tr><td class="mono-cell green">LSASS</td><td>Allow and deny logon rights</td><td>Permits or rejects logon session creation</td></tr>
+          <tr><td class="mono-cell green">SCM</td><td><code>SeServiceLogonRight</code></td><td>Allows a named service account to start as a service</td></tr>
+          <tr><td class="mono-cell green">Task Scheduler</td><td><code>SeBatchLogonRight</code></td><td>Allows scheduled tasks to run under stored credentials</td></tr>
+          <tr><td class="mono-cell green">Terminal Services</td><td><code>SeRemoteInteractiveLogonRight</code></td><td>Allows or denies RDP-style logon</td></tr>
+          <tr><td class="mono-cell green">SMB / RPC / WinRM</td><td><code>SeNetworkLogonRight</code></td><td>Allows or denies network logon before resource ACL checks</td></tr>
+          <tr><td class="mono-cell green">SRM</td><td>Privileges embedded in the token</td><td>May bypass or augment normal DACL evaluation</td></tr>
+          <tr><td class="mono-cell green">Auditing</td><td><code>SeAuditPrivilege</code> and audit policy</td><td>Controls which trusted processes can generate security audit records</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- ════════════════════════════════════════════════════════════════════════
@@ -1379,6 +2009,10 @@
       <div class="section-dot dot-blue"></div>
       <h3>08 — Local Authentication</h3>
       <span class="section-id">LAUTH</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/windows-authentication/windows-authentication-overview" target="_blank" rel="noopener noreferrer">Windows authentication</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/" target="_blank" rel="noopener noreferrer">UAC overview</a>
     </div>
 
     <div class="grid-2">
@@ -1448,6 +2082,10 @@
       <h3>09 — NTLM Network Authentication</h3>
       <span class="section-id">NTLM</span>
     </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthn/microsoft-ntlm" target="_blank" rel="noopener noreferrer">Microsoft NTLM</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/kerberos/ntlm-overview" target="_blank" rel="noopener noreferrer">NTLM overview</a>
+    </div>
 
     <p class="note">NTLM is a challenge-response protocol used when Kerberos is unavailable (workgroup, non-SPN targets, IP-based connections). The NT hash is derived from the user's password and never leaves the client — instead, a hash-based response to a server challenge is sent.</p>
 
@@ -1492,6 +2130,9 @@
       <div class="section-dot dot-teal"></div>
       <h3>10 — Kerberos Authentication</h3>
       <span class="section-id">KRB5</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview" target="_blank" rel="noopener noreferrer">Kerberos overview</a>
     </div>
 
     <p class="note">Kerberos v5 is the default protocol for domain authentication. It is ticket-based and mutual — both client and server authenticate each other. The KDC (Key Distribution Center) runs on every Domain Controller. No passwords travel the network; all encryption uses keys derived from account passwords.</p>
@@ -1584,6 +2225,11 @@
       <div class="section-dot dot-purple"></div>
       <h3>11 — Active Directory Security Model</h3>
       <span class="section-id">AD</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview" target="_blank" rel="noopener noreferrer">AD DS overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/ad/active-directory-domain-services" target="_blank" rel="noopener noreferrer">AD DS API overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-lists" target="_blank" rel="noopener noreferrer">AD ACLs</a>
     </div>
 
     <div class="grid-3">
@@ -1685,6 +2331,10 @@
       <h3>12 — Security Auditing</h3>
       <span class="section-id">AUDIT</span>
     </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/advanced-audit-policy-configuration" target="_blank" rel="noopener noreferrer">Advanced audit policy</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/audit-generation" target="_blank" rel="noopener noreferrer">Audit generation</a>
+    </div>
 
     <div class="grid-2">
       <div class="card">
@@ -1752,6 +2402,11 @@
       <div class="section-dot dot-red"></div>
       <h3>13 — Privilege Escalation (Token &amp; Privilege Abuse)</h3>
       <span class="section-id">TA0004</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens" target="_blank" rel="noopener noreferrer">Access tokens</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/privileges" target="_blank" rel="noopener noreferrer">Privileges</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/" target="_blank" rel="noopener noreferrer">UAC</a>
     </div>
 
     <p class="note">Privilege escalation [<strong class="hl">TA0004</strong>] is the tactic of going from limited access — typically a standard user shell after initial access — to higher authority on the host (Administrator, SYSTEM) or in the domain. Most local techniques exploit the token model, the privilege list, or UAC. Service-related path/DLL hijacking is covered separately in Section 14.</p>
@@ -1919,6 +2574,10 @@
       <h3>14 — Vulnerable Services &amp; Binary Hijacking</h3>
       <span class="section-id">SVC</span>
     </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/group-managed-service-accounts/getting-started-with-group-managed-service-accounts" target="_blank" rel="noopener noreferrer">Service accounts</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670" target="_blank" rel="noopener noreferrer">Event 4670</a>
+    </div>
 
     <p class="note">Services are one of the largest local attack surfaces because most run as SYSTEM and many are configured with weak file system, registry, or path-resolution properties. Discovery is straightforward via <code>sc query</code>, <code>wmic service</code>, or PowerShell <code>Get-Service</code> / <code>Get-CimInstance Win32_Service</code>; automated tooling such as PowerSploit's <em>PowerUp</em> module and SharpUp enumerate misconfigurations. The categories below all yield SYSTEM-level code execution when the service is privileged.</p>
 
@@ -2059,6 +2718,11 @@
       <h3>15 — Credential Access</h3>
       <span class="section-id">TA0006</span>
     </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/credential-guard/how-it-works" target="_blank" rel="noopener noreferrer">Credential Guard</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata" target="_blank" rel="noopener noreferrer">DPAPI CryptProtectData</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptunprotectdata" target="_blank" rel="noopener noreferrer">DPAPI CryptUnprotectData</a>
+    </div>
 
     <p class="note">Once local admin or SYSTEM is achieved, the next objective is harvesting credentials for lateral movement and persistence. Targets are LSASS memory, the SAM/SECURITY hives, the DPAPI master key chain, and (on a DC) the directory database itself.</p>
 
@@ -2184,6 +2848,10 @@
       <h3>16 — NTLM Attacks</h3>
       <span class="section-id">NTLM-OFF</span>
     </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthn/microsoft-ntlm" target="_blank" rel="noopener noreferrer">Microsoft NTLM</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/kerberos/ntlm-overview" target="_blank" rel="noopener noreferrer">NTLM overview</a>
+    </div>
 
     <p class="note">NTLM's challenge-response design is vulnerable to relay (because the client cannot verify the server's identity in many configurations), to offline cracking (because the response is computed deterministically from the NT hash), and to credential reuse (because the NT hash itself is a sufficient authenticator).</p>
 
@@ -2273,6 +2941,10 @@
       <div class="section-dot dot-red"></div>
       <h3>17 — Kerberos Attacks</h3>
       <span class="section-id">KRB-OFF</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview" target="_blank" rel="noopener noreferrer">Kerberos overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4769" target="_blank" rel="noopener noreferrer">Event 4769</a>
     </div>
 
     <p class="note">Kerberos is structurally stronger than NTLM but exposes its own attack surface: ticket forgery (when a long-term key is compromised), offline cracking of tickets encrypted with a service principal's key, abuse of misconfigured delegation, and certificate-based authentication bypasses via AD CS.</p>
@@ -2455,6 +3127,11 @@
       <h3>18 — Active Directory ACL &amp; Configuration Abuse</h3>
       <span class="section-id">AD-OFF</span>
     </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview" target="_blank" rel="noopener noreferrer">AD DS overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-lists" target="_blank" rel="noopener noreferrer">ACLs</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670" target="_blank" rel="noopener noreferrer">Permissions changed event</a>
+    </div>
 
     <p class="note">Modern AD attacks rarely rely on credential theft alone — they trace ACL paths in the directory until reaching a high-privilege identity. Each ACE that grants write-class permissions to a low-tier identity is a potential edge in an attack graph (BloodHound). The patterns below are the canonical primitives.</p>
 
@@ -2578,6 +3255,12 @@
       <div class="section-dot dot-red"></div>
       <h3>19 — Detection &amp; Telemetry Mapping</h3>
       <span class="section-id">DET</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/audit-policy-recommendations" target="_blank" rel="noopener noreferrer">Audit recommendations</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4624" target="_blank" rel="noopener noreferrer">Event 4624</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4769" target="_blank" rel="noopener noreferrer">Event 4769</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670" target="_blank" rel="noopener noreferrer">Event 4670</a>
     </div>
 
     <p class="note">A telemetry-first view of the attacks above. Each row maps an attack pattern to the specific Windows event IDs and additional sources (Sysmon, EDR, network) that produce signal. Use as a baseline for hunt queries.</p>
@@ -2808,6 +3491,71 @@
     <div class="diagram-note">Authorization is mostly token math: identity, memberships, privileges, and integrity level.</div>
   </a>
 
+  <a class="diagram-card amber" href="#tokens-lifecycle">
+    <div class="diagram-title">Token Lifecycle</div>
+    <svg class="diagram-svg" viewBox="0 0 260 154" role="img" aria-label="Access token lifecycle from logon request to access check">
+      <rect class="box blue" x="12" y="12" width="62" height="28"></rect>
+      <text class="tiny-text" x="43" y="26">Logon</text>
+      <path class="flowline" d="M74 26 H94"></path>
+      <path class="flowline" d="M89 21 L96 26 L89 31"></path>
+      <rect class="box teal" x="96" y="12" width="68" height="28"></rect>
+      <text class="tiny-text" x="130" y="26">LSASS</text>
+      <path class="flowline" d="M164 26 H184"></path>
+      <path class="flowline" d="M179 21 L186 26 L179 31"></path>
+      <rect class="box amber" x="186" y="12" width="62" height="28"></rect>
+      <text class="tiny-text" x="217" y="26">Policy</text>
+
+      <path class="flowline" d="M217 40 V58"></path>
+      <path class="flowline" d="M212 53 L217 60 L222 53"></path>
+      <rect class="box purple" x="162" y="60" width="86" height="30"></rect>
+      <text class="tiny-text" x="205" y="75">Logon Session</text>
+      <path class="flowline" d="M162 75 H138"></path>
+      <path class="flowline" d="M143 70 L136 75 L143 80"></path>
+      <rect class="box red" x="64" y="60" width="72" height="30"></rect>
+      <text class="tiny-text" x="100" y="75">Token</text>
+
+      <path class="flowline" d="M100 90 V110"></path>
+      <path class="flowline" d="M95 105 L100 112 L105 105"></path>
+      <rect class="box green" x="34" y="112" width="80" height="30"></rect>
+      <text class="tiny-text" x="74" y="127">Effective</text>
+      <path class="flowline" d="M114 127 H146"></path>
+      <path class="flowline" d="M141 122 L148 127 L141 132"></path>
+      <rect class="box" x="148" y="112" width="78" height="30"></rect>
+      <text class="tiny-text" x="187" y="127">SRM Check</text>
+    </svg>
+    <div class="diagram-note">The token is born from logon policy, attaches to a process or thread, then becomes input to SRM.</div>
+  </a>
+
+  <a class="diagram-card amber" href="#tokens-relationships">
+    <div class="diagram-title">Token Relationships</div>
+    <svg class="diagram-svg" viewBox="0 0 260 154" role="img" aria-label="How access token types relate to each other">
+      <rect class="box amber" x="84" y="10" width="92" height="30"></rect>
+      <text class="tiny-text" x="130" y="25">Base Token</text>
+      <path class="flowline" d="M101 40 L64 64"></path>
+      <path class="flowline" d="M70 55 L61 66 L75 64"></path>
+      <rect class="box teal" x="14" y="66" width="82" height="26"></rect>
+      <text class="tiny-text" x="55" y="79">Primary</text>
+      <path class="flowline" d="M130 40 V66"></path>
+      <path class="flowline" d="M125 59 L130 68 L135 59"></path>
+      <rect class="box blue" x="98" y="66" width="64" height="26"></rect>
+      <text class="tiny-text" x="130" y="79">Imperson.</text>
+      <path class="flowline" d="M159 40 L196 64"></path>
+      <path class="flowline" d="M185 64 L199 66 L190 55"></path>
+      <rect class="box red" x="164" y="66" width="82" height="26"></rect>
+      <text class="tiny-text" x="205" y="79">UAC Pair</text>
+      <path class="flowline" d="M55 92 V114"></path>
+      <path class="flowline" d="M50 107 L55 116 L60 107"></path>
+      <rect class="box purple" x="14" y="116" width="82" height="26"></rect>
+      <text class="tiny-text" x="55" y="129">Restricted</text>
+      <path class="flowline" d="M96 129 H164"></path>
+      <path class="flowline" d="M157 124 L166 129 L157 134"></path>
+      <rect class="box purple" x="166" y="116" width="80" height="26"></rect>
+      <text class="tiny-text" x="206" y="129">AppContainer</text>
+      <text class="tiny-text" x="130" y="105">integrity + network session apply across them</text>
+    </svg>
+    <div class="diagram-note">Primary, impersonation, UAC, restricted, AppContainer, integrity, and network state are dimensions of one token model.</div>
+  </a>
+
   <a class="diagram-card purple" href="#access-check">
     <div class="diagram-title">Access Check Order</div>
     <svg class="diagram-svg" viewBox="0 0 260 116" role="img" aria-label="Access check evaluates deny ACEs, allow ACEs, then auditing">
@@ -2828,6 +3576,48 @@
       <text class="tiny-text" x="87" y="89">DACL grants or blocks</text>
     </svg>
     <div class="diagram-note">A matching deny ACE can end the decision before allow entries finish accumulating rights.</div>
+  </a>
+
+  <a class="diagram-card teal" href="#access-check">
+    <div class="diagram-title">Full Access Pipeline</div>
+    <svg class="diagram-svg" viewBox="0 0 260 154" role="img" aria-label="Full Windows access check pipeline from desired access to final decision">
+      <rect class="box amber" x="14" y="12" width="66" height="24"></rect>
+      <text class="tiny-text" x="47" y="24">Desired</text>
+      <path class="flowline" d="M80 24 H104"></path>
+      <path class="flowline" d="M99 19 L106 24 L99 29"></path>
+      <rect class="box blue" x="106" y="12" width="66" height="24"></rect>
+      <text class="tiny-text" x="139" y="24">Map Generic</text>
+      <path class="flowline" d="M172 24 H196"></path>
+      <path class="flowline" d="M191 19 L198 24 L191 29"></path>
+      <rect class="box purple" x="198" y="12" width="48" height="24"></rect>
+      <text class="tiny-text" x="222" y="24">MIC</text>
+      <path class="flowline" d="M222 36 V56"></path>
+      <path class="flowline" d="M217 51 L222 58 L227 51"></path>
+      <rect class="box-soft" x="176" y="58" width="70" height="24"></rect>
+      <text class="tiny-text" x="211" y="70">Owner/Privs</text>
+      <path class="flowline" d="M176 70 H150"></path>
+      <path class="flowline" d="M155 65 L148 70 L155 75"></path>
+      <rect class="box red" x="88" y="58" width="60" height="24"></rect>
+      <text class="tiny-text" x="118" y="70">Deny ACE</text>
+      <path class="flowline" d="M88 70 H62"></path>
+      <path class="flowline" d="M67 65 L60 70 L67 75"></path>
+      <rect class="box green" x="12" y="58" width="48" height="24"></rect>
+      <text class="tiny-text" x="36" y="70">Allow</text>
+      <path class="flowline" d="M36 82 V102"></path>
+      <path class="flowline" d="M31 97 L36 104 L41 97"></path>
+      <rect class="box-soft" x="12" y="104" width="70" height="24"></rect>
+      <text class="tiny-text" x="47" y="116">Sandbox/CAP</text>
+      <path class="flowline" d="M82 116 H122"></path>
+      <path class="flowline" d="M117 111 L124 116 L117 121"></path>
+      <rect class="box teal" x="124" y="104" width="54" height="24"></rect>
+      <text class="tiny-text" x="151" y="116">Audit</text>
+      <path class="flowline" d="M178 116 H208"></path>
+      <path class="flowline" d="M203 111 L210 116 L203 121"></path>
+      <rect class="box green" x="210" y="104" width="38" height="24"></rect>
+      <text class="tiny-text" x="229" y="116">Grant</text>
+      <text class="tiny-text" x="130" y="145">each phase can deny or reduce remaining access</text>
+    </svg>
+    <div class="diagram-note">The DACL is only one phase: generic mapping, MIC, privilege, sandbox, CAP, and audit layers also matter.</div>
   </a>
 
   <a class="diagram-card teal" href="#ntlm">
@@ -2947,6 +3737,41 @@
       <text class="tiny-text" x="180" y="92">SAM / AD / policy</text>
     </svg>
     <div class="diagram-note">Interactive logon asks LSASS to authenticate, build a logon session, and return a token.</div>
+  </a>
+
+  <a class="diagram-card blue" href="#service-accounts">
+    <div class="diagram-title">URA Enforcement Flow</div>
+    <svg class="diagram-svg" viewBox="0 0 260 142" role="img" aria-label="User Rights Assignment policy flows through LSA, LSASS, token creation, and SRM access checks">
+      <rect class="box blue" x="12" y="14" width="74" height="26"></rect>
+      <text class="tiny-text" x="49" y="27">GPO / CSP</text>
+      <path class="flowline" d="M86 27 H110"></path>
+      <path class="flowline" d="M105 22 L112 27 L105 32"></path>
+      <rect class="box purple" x="112" y="14" width="62" height="26"></rect>
+      <text class="tiny-text" x="143" y="27">LSA Policy</text>
+      <path class="flowline" d="M174 27 H198"></path>
+      <path class="flowline" d="M193 22 L200 27 L193 32"></path>
+      <rect class="box teal" x="200" y="14" width="48" height="26"></rect>
+      <text class="tiny-text" x="224" y="27">LSASS</text>
+      <rect class="box-soft" x="12" y="62" width="62" height="24"></rect>
+      <text class="tiny-text" x="43" y="74">SCM</text>
+      <rect class="box-soft" x="82" y="62" width="62" height="24"></rect>
+      <text class="tiny-text" x="113" y="74">RDP</text>
+      <rect class="box-soft" x="152" y="62" width="62" height="24"></rect>
+      <text class="tiny-text" x="183" y="74">SMB/RPC</text>
+      <path class="flowline" d="M43 62 C75 48, 161 48, 224 40"></path>
+      <path class="flowline" d="M113 62 C137 50, 179 45, 224 40"></path>
+      <path class="flowline" d="M183 62 C197 53, 213 47, 224 40"></path>
+      <path class="flowline" d="M224 40 V100"></path>
+      <path class="flowline" d="M219 95 L224 102 L229 95"></path>
+      <rect class="box amber" x="194" y="102" width="60" height="26"></rect>
+      <text class="tiny-text" x="224" y="115">Token</text>
+      <path class="flowline" d="M194 115 H156"></path>
+      <path class="flowline" d="M161 110 L154 115 L161 120"></path>
+      <rect class="box green" x="92" y="102" width="62" height="26"></rect>
+      <text class="tiny-text" x="123" y="115">SRM</text>
+      <text class="tiny-text" x="74" y="136">deny rights gate logon; privileges affect later access checks</text>
+    </svg>
+    <div class="diagram-note">URA gates logon before a token exists, then token privileges influence later object access decisions.</div>
   </a>
 
   <a class="diagram-card red" href="#cred-access">
