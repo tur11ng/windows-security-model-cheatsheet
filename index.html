@@ -1233,56 +1233,77 @@
     <div class="card" style="margin-top:14px">
       <div class="card-title c-amber">Relationship Map: One Base Model, Several Modifiers</div>
       <p class="note">The most important idea is that Windows does not have eight unrelated token systems. It has one token object model, then several ways to attach it, derive it, filter it, label it, or connect it to network credentials.</p>
-      <svg class="inline-diagram" viewBox="0 0 720 286" role="img" aria-label="Relationship map showing primary token, impersonation token, UAC linked tokens, restricted tokens, AppContainer tokens, integrity, virtualization, and network delegation">
-        <rect class="box amber" x="268" y="18" width="184" height="48"></rect>
-        <text class="node-text" x="360" y="36">Base Access Token</text>
-        <text class="tiny-text" x="360" y="52">user SID + groups + privileges + LUID</text>
+      <svg class="inline-diagram" viewBox="0 0 720 344" role="img" aria-label="Token relationship tree: Logon Session produces Base Token; Base Token derives Primary and Restricted Tokens; Primary spawns Impersonation Tokens and UAC Linked Pairs; Restricted spawns AppContainer Tokens; Integrity Labels, Virt/UIAccess flags, and Network Credentials apply to all tokens">
+        <defs>
+          <marker id="tm-arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#555e78"/>
+          </marker>
+        </defs>
 
-        <rect class="box teal" x="70" y="104" width="150" height="44"></rect>
-        <text class="node-text" x="145" y="121">Primary Token</text>
-        <text class="tiny-text" x="145" y="136">process default identity</text>
-        <path class="flowline" d="M303 66 C250 80, 206 91, 168 104"></path>
-        <path class="flowline" d="M176 96 L164 105 L179 108"></path>
+        <!-- ── Logon Session ── -->
+        <rect class="box-soft" x="135" y="18" width="230" height="36" rx="5"/>
+        <text class="node-text" x="250" y="36">Logon Session · LSASS</text>
 
-        <rect class="box blue" x="278" y="104" width="164" height="44"></rect>
-        <text class="node-text" x="360" y="121">Impersonation Token</text>
-        <text class="tiny-text" x="360" y="136">thread override identity</text>
-        <path class="flowline" d="M360 66 V104"></path>
-        <path class="flowline" d="M354 96 L360 108 L366 96"></path>
+        <line class="flowline" x1="250" y1="54" x2="250" y2="74" marker-end="url(#tm-arr)"/>
 
-        <rect class="box red" x="500" y="104" width="150" height="44"></rect>
-        <text class="node-text" x="575" y="121">UAC Linked Pair</text>
-        <text class="tiny-text" x="575" y="136">filtered + elevated primary</text>
-        <path class="flowline" d="M417 66 C466 82, 508 94, 553 104"></path>
-        <path class="flowline" d="M543 96 L557 105 L541 108"></path>
+        <!-- ── Base Token ── -->
+        <rect class="box amber" x="120" y="74" width="260" height="46" rx="5"/>
+        <text class="node-text" x="250" y="91">Base Token</text>
+        <text class="tiny-text" x="250" y="107">user SID + groups + privileges + LUID</text>
 
-        <rect class="box purple" x="70" y="204" width="150" height="44"></rect>
-        <text class="node-text" x="145" y="221">Restricted Token</text>
-        <text class="tiny-text" x="145" y="236">source token minus authority</text>
-        <path class="flowline" d="M145 148 V204"></path>
-        <path class="flowline" d="M139 196 L145 208 L151 196"></path>
+        <path class="flowline" d="M155,120 C145,148 130,148 130,160" marker-end="url(#tm-arr)"/>
+        <path class="flowline" d="M345,120 C355,148 370,148 370,160" marker-end="url(#tm-arr)"/>
 
-        <rect class="box purple" x="278" y="204" width="164" height="44"></rect>
-        <text class="node-text" x="360" y="221">AppContainer</text>
-        <text class="tiny-text" x="360" y="236">user + package + capabilities</text>
-        <path class="flowline" d="M220 126 H278"></path>
-        <path class="flowline" d="M270 120 L282 126 L270 132"></path>
-        <path class="flowline" d="M220 226 H278"></path>
-        <path class="flowline" d="M270 220 L282 226 L270 232"></path>
+        <!-- ── Primary Token ── -->
+        <rect class="box teal" x="45" y="160" width="170" height="46" rx="5"/>
+        <text class="node-text" x="130" y="177">Primary Token</text>
+        <text class="tiny-text" x="130" y="193">process default identity</text>
 
-        <rect class="box green" x="500" y="204" width="150" height="44"></rect>
-        <text class="node-text" x="575" y="221">Integrity Label</text>
-        <text class="tiny-text" x="575" y="236">mandatory layer on all tokens</text>
-        <path class="flowline" d="M575 148 V204"></path>
-        <path class="flowline" d="M569 196 L575 208 L581 196"></path>
-        <path class="flowline" d="M442 226 H500"></path>
-        <path class="flowline" d="M492 220 L504 226 L492 232"></path>
+        <!-- ── Restricted Token ── -->
+        <rect class="box purple" x="290" y="160" width="160" height="46" rx="5"/>
+        <text class="node-text" x="370" y="177">Restricted Token</text>
+        <text class="tiny-text" x="370" y="193">copy minus removed authority</text>
 
-        <rect class="box-soft" x="250" y="162" width="220" height="28"></rect>
-        <text class="tiny-text" x="360" y="176">virtualization / UIAccess are token flags, not separate identities</text>
+        <path class="flowline" d="M88,206 C75,228 63,228 63,246" marker-end="url(#tm-arr)"/>
+        <path class="flowline" d="M173,206 C180,228 200,228 200,246" marker-end="url(#tm-arr)"/>
+        <path class="flowline" d="M370,206 C370,228 364,228 364,246" marker-end="url(#tm-arr)"/>
 
-        <rect class="box-soft" x="238" y="258" width="244" height="24"></rect>
-        <text class="tiny-text" x="360" y="270">network-only credentials and delegation hang from the logon session / impersonation path</text>
+        <!-- ── Impersonation Token ── -->
+        <rect class="box blue" x="0" y="246" width="126" height="46" rx="5"/>
+        <text class="node-text" x="63" y="263">Impersonation</text>
+        <text class="tiny-text" x="63" y="279">thread override · 4 levels</text>
+
+        <!-- ── UAC Linked Pair ── -->
+        <rect class="box red" x="135" y="246" width="130" height="46" rx="5"/>
+        <text class="node-text" x="200" y="263">UAC Linked Pair</text>
+        <text class="tiny-text" x="200" y="279">medium + elevated high</text>
+
+        <!-- ── AppContainer Token ── -->
+        <rect class="box purple" x="288" y="246" width="152" height="46" rx="5"/>
+        <text class="node-text" x="364" y="263">AppContainer</text>
+        <text class="tiny-text" x="364" y="279">pkg SID + capabilities + Low IL</text>
+
+        <!-- ── Cross-cutting panel (applies to every token) ── -->
+        <rect class="box-soft" x="456" y="60" width="258" height="194" rx="6"/>
+        <text class="tiny-text" x="585" y="76">carried by all tokens</text>
+
+        <line class="flowline" x1="380" y1="97" x2="456" y2="97" stroke-dasharray="4 3" opacity="0.6" marker-end="url(#tm-arr)"/>
+
+        <rect class="box green" x="462" y="84" width="246" height="40" rx="5"/>
+        <text class="node-text" x="585" y="98">Integrity Label</text>
+        <text class="tiny-text" x="585" y="114">MIC check runs before DACL</text>
+
+        <rect class="box-soft" x="462" y="134" width="246" height="40" rx="5"/>
+        <text class="node-text" x="585" y="148">Virt / UIAccess flags</text>
+        <text class="tiny-text" x="585" y="164">compat flags · not a new identity</text>
+
+        <rect class="box-soft" x="462" y="182" width="246" height="44" rx="5"/>
+        <text class="node-text" x="585" y="198">Network Credentials</text>
+        <text class="tiny-text" x="585" y="214">tied to logon session / delegation</text>
+
+        <!-- ── Bottom note ── -->
+        <rect class="box-soft" x="0" y="302" width="449" height="28" rx="5"/>
+        <text class="tiny-text" x="224" y="316">4 impersonation levels: Anonymous · Identification · Impersonation · Delegation</text>
       </svg>
       <table class="ref-table">
         <thead><tr><th>Relationship</th><th>How to think about it</th><th>Access-check consequence</th></tr></thead>
@@ -1297,6 +1318,14 @@
           <tr><td class="mono-cell red">Logon session → Network behavior</td><td>The token points to a logon session. That session can hold normal credentials, NewCredentials, Kerberos tickets, or delegation-capable state.</td><td>Local access uses the local effective token; remote access may use outbound credentials or delegated client identity.</td></tr>
         </tbody>
       </table>
+      <div class="callout callout-amber" style="margin-top:10px">
+        <div class="callout-label">Why This Map Matters for Security</div>
+        Most privilege escalation paths are <strong class="hl">tree-climbing</strong>: start with a restricted or low-integrity token and find a primitive that creates or borrows a higher one.
+        <strong class="hl">SeImpersonatePrivilege</strong> is dangerous because any high-privilege client that connects to your process can be impersonated locally — this is the basis for potato-style attacks.
+        <strong class="hl">UAC bypass</strong> exploits trigger the high-integrity linked token without prompting the user.
+        <strong class="hl">Sandbox escape</strong> (AppContainer, restricted token) means reaching the less-restricted parent token.
+        <strong class="hl">MIC and DACL are independent gates</strong> — a DACL Allow ACE does not override an integrity deny; you must clear both.
+      </div>
     </div>
 
     <h4 class="sub">Token Categories</h4>
