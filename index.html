@@ -903,6 +903,120 @@
       border-radius: 0;
     }
   }
+
+  /* ── TABLET (≤ 900px) ─────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .content { padding: 0 24px 60px; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .part-banner { padding: 22px 24px; }
+    .header { padding: 32px 0 24px; }
+  }
+
+  /* ── MOBILE (≤ 680px) ─────────────────────────────────────────── */
+  @media (max-width: 680px) {
+    /* Stack layout: nav on top, content below */
+    .layout { flex-direction: column; }
+
+    /* Nav → compact horizontal scrolling tab bar */
+    .nav {
+      width: 100%;
+      min-width: 0;
+      height: auto;
+      min-height: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0;
+      border-right: none;
+      border-bottom: 1px solid var(--line2);
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      flex-wrap: nowrap;
+    }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav-title {
+      font-size: 9px;
+      padding: 0 12px;
+      border-bottom: none;
+      border-right: 1px solid var(--line2);
+      margin-bottom: 0;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+    }
+    .nav .nav-part { display: none; }
+    .nav a {
+      padding: 10px 9px;
+      font-size: 10px;
+      border-left: none;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      overflow: visible;
+      text-overflow: clip;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .nav a.accent-blue   { border-bottom-color: var(--c-blue); }
+    .nav a.accent-teal   { border-bottom-color: var(--c-teal); }
+    .nav a.accent-amber  { border-bottom-color: var(--c-amber); }
+    .nav a.accent-red    { border-bottom-color: var(--c-red); }
+    .nav a.accent-purple { border-bottom-color: var(--c-purple); }
+    .nav a.accent-green  { border-bottom-color: var(--c-green); }
+    .nav a.accent-coral  { border-bottom-color: var(--c-coral); }
+
+    /* Content */
+    .content { padding: 16px 14px 50px; max-width: 100%; }
+    .header { padding: 24px 0 18px; margin-bottom: 24px; }
+    .header h1 { font-size: 20px; }
+    .part-banner { padding: 16px 16px; margin: 32px 0 18px; }
+    .part-banner h2 { font-size: 16px; }
+    .section { margin-bottom: 36px; }
+    .section-id { display: none; }
+
+    /* Grids → single column */
+    .grid-2, .grid-3, .grid-auto { grid-template-columns: 1fr; }
+    .span-2 { grid-column: 1; }
+
+    /* Cards: allow horizontal scroll for wide child content */
+    .card { overflow-x: auto; }
+
+    /* SVG diagrams: keep minimum width so text stays readable */
+    .inline-diagram { min-width: 560px; }
+
+    /* Tables: keep minimum width so columns don't collapse */
+    .ref-table { min-width: 520px; font-size: 11px; }
+
+    /* Phase rows → vertical stack */
+    .phase-row { flex-direction: column; }
+
+    /* Field list: tighten key column */
+    .field-key { min-width: 120px; }
+
+    /* Flow steps */
+    .flow-step { padding: 5px 8px; font-size: 10px; }
+    .flow-arrow { padding: 0 3px; font-size: 12px; }
+
+    /* IL integrity table */
+    .il-label { min-width: 65px; font-size: 10px; }
+    .il-sid   { min-width: 75px; font-size: 9px; }
+    .il-note  { font-size: 10px; }
+  }
+
+  /* ── SMALL MOBILE (≤ 400px) ──────────────────────────────────── */
+  @media (max-width: 400px) {
+    .content { padding: 12px 10px 40px; }
+    .nav a { font-size: 9.5px; padding: 10px 7px; }
+    .header h1 { font-size: 17px; }
+    .part-banner h2 { font-size: 14px; }
+    .field-list li { flex-direction: column; gap: 2px; }
+    .field-key { min-width: unset; }
+    .mono-block { font-size: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -1117,69 +1231,69 @@
       <div class="card-title c-amber">Lifecycle Diagram: From Credentials to a Handle</div>
       <p class="note">The lifecycle matters because token "types" are not isolated objects. UAC linked tokens, restricted tokens, AppContainer tokens, and delegation tokens are all variations created at different points in the same pipeline.</p>
       <svg class="inline-diagram" viewBox="0 0 720 252" role="img" aria-label="Access token lifecycle from logon request through LSASS policy, token creation, process or thread attachment, access check, and auditing">
-        <rect class="box blue" x="18" y="28" width="104" height="44"></rect>
-        <text class="node-text" x="70" y="44">1 Logon</text>
-        <text class="tiny-text" x="70" y="58">interactive / service / net</text>
-        <path class="flowline" d="M122 50 H150"></path>
-        <path class="flowline" d="M144 44 L154 50 L144 56"></path>
+        <defs>
+          <marker id="lc-arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#555e78"/>
+          </marker>
+        </defs>
 
-        <rect class="box teal" x="154" y="28" width="112" height="44"></rect>
-        <text class="node-text" x="210" y="44">2 Validate</text>
-        <text class="tiny-text" x="210" y="58">SAM / AD / Kerberos</text>
-        <path class="flowline" d="M266 50 H294"></path>
-        <path class="flowline" d="M288 44 L298 50 L288 56"></path>
+        <!-- Row 1: horizontal pipeline 1 → 5 -->
+        <rect class="box blue"   x="18"  y="28" width="104" height="44" rx="5"/>
+        <text class="node-text"  x="70"  y="44">1 Logon</text>
+        <text class="tiny-text"  x="70"  y="58">interactive / service / net</text>
+        <line class="flowline" x1="122" y1="50" x2="154" y2="50" marker-end="url(#lc-arr)"/>
 
-        <rect class="box amber" x="298" y="28" width="116" height="44"></rect>
-        <text class="node-text" x="356" y="44">3 LSA Policy</text>
-        <text class="tiny-text" x="356" y="58">rights / groups / privs</text>
-        <path class="flowline" d="M414 50 H442"></path>
-        <path class="flowline" d="M436 44 L446 50 L436 56"></path>
+        <rect class="box teal"   x="154" y="28" width="112" height="44" rx="5"/>
+        <text class="node-text"  x="210" y="44">2 Validate</text>
+        <text class="tiny-text"  x="210" y="58">SAM / AD / Kerberos</text>
+        <line class="flowline" x1="266" y1="50" x2="298" y2="50" marker-end="url(#lc-arr)"/>
 
-        <rect class="box purple" x="446" y="28" width="116" height="44"></rect>
-        <text class="node-text" x="504" y="44">4 Logon Session</text>
-        <text class="tiny-text" x="504" y="58">LUID + credentials</text>
-        <path class="flowline" d="M562 50 H590"></path>
-        <path class="flowline" d="M584 44 L594 50 L584 56"></path>
+        <rect class="box amber"  x="298" y="28" width="116" height="44" rx="5"/>
+        <text class="node-text"  x="356" y="44">3 LSA Policy</text>
+        <text class="tiny-text"  x="356" y="58">rights / groups / privs</text>
+        <line class="flowline" x1="414" y1="50" x2="446" y2="50" marker-end="url(#lc-arr)"/>
 
-        <rect class="box red" x="594" y="28" width="108" height="44"></rect>
-        <text class="node-text" x="648" y="44">5 Token</text>
-        <text class="tiny-text" x="648" y="58">primary / linked / sandbox</text>
+        <rect class="box purple" x="446" y="28" width="116" height="44" rx="5"/>
+        <text class="node-text"  x="504" y="44">4 Logon Session</text>
+        <text class="tiny-text"  x="504" y="58">LUID + credentials</text>
+        <line class="flowline" x1="562" y1="50" x2="594" y2="50" marker-end="url(#lc-arr)"/>
 
-        <path class="flowline" d="M648 72 V104"></path>
-        <path class="flowline" d="M642 98 L648 108 L654 98"></path>
+        <rect class="box red"    x="594" y="28" width="108" height="44" rx="5"/>
+        <text class="node-text"  x="648" y="44">5 Token</text>
+        <text class="tiny-text"  x="648" y="58">primary / linked / sandbox</text>
+        <line class="flowline" x1="648" y1="72" x2="648" y2="108" marker-end="url(#lc-arr)"/>
 
-        <rect class="box-soft" x="484" y="108" width="148" height="42"></rect>
+        <!-- Token attachment: primary / impersonation -->
+        <rect class="box-soft" x="484" y="108" width="148" height="42" rx="5"/>
         <text class="node-text" x="558" y="124">Process Primary</text>
         <text class="tiny-text" x="558" y="138">default effective token</text>
-        <rect class="box-soft" x="484" y="166" width="148" height="42"></rect>
+        <rect class="box-soft" x="484" y="166" width="148" height="42" rx="5"/>
         <text class="node-text" x="558" y="182">Thread Impersonation</text>
         <text class="tiny-text" x="558" y="196">optional override</text>
-        <path class="flowline" d="M632 129 H664 V176 H632"></path>
-        <path class="flowline" d="M638 170 L628 176 L638 182"></path>
+        <!-- U-curve: Primary → Impersonation (right side loop) -->
+        <path class="flowline" d="M632,129 H664 V176 H628" marker-end="url(#lc-arr)"/>
 
-        <rect class="box green" x="274" y="126" width="128" height="50"></rect>
-        <text class="node-text" x="338" y="143">6 Effective Token</text>
-        <text class="tiny-text" x="338" y="158">thread token wins;</text>
-        <text class="tiny-text" x="338" y="170">else process token</text>
-        <path class="flowline" d="M484 129 H402"></path>
-        <path class="flowline" d="M408 123 L398 129 L408 135"></path>
-        <path class="flowline" d="M484 187 H446 V151 H402"></path>
-        <path class="flowline" d="M408 145 L398 151 L408 157"></path>
+        <!-- Row 2: effective token → SRM → handle (right-to-left) -->
+        <rect class="box green"  x="274" y="126" width="128" height="50" rx="5"/>
+        <text class="node-text"  x="338" y="143">6 Effective Token</text>
+        <text class="tiny-text"  x="338" y="158">thread token wins;</text>
+        <text class="tiny-text"  x="338" y="170">else process token</text>
+        <line class="flowline" x1="484" y1="129" x2="402" y2="129" marker-end="url(#lc-arr)"/>
+        <path class="flowline" d="M484,187 H446 V151 H402" marker-end="url(#lc-arr)"/>
 
-        <rect class="box coral" x="116" y="126" width="116" height="50"></rect>
-        <text class="node-text" x="174" y="143">7 SRM Check</text>
-        <text class="tiny-text" x="174" y="158">MIC + privileges +</text>
-        <text class="tiny-text" x="174" y="170">DACL + sandbox</text>
-        <path class="flowline" d="M274 151 H232"></path>
-        <path class="flowline" d="M238 145 L228 151 L238 157"></path>
+        <rect class="box coral"  x="116" y="126" width="116" height="50" rx="5"/>
+        <text class="node-text"  x="174" y="143">7 SRM Check</text>
+        <text class="tiny-text"  x="174" y="158">MIC + privileges +</text>
+        <text class="tiny-text"  x="174" y="170">DACL + sandbox</text>
+        <line class="flowline" x1="274" y1="151" x2="232" y2="151" marker-end="url(#lc-arr)"/>
 
-        <rect class="box blue" x="18" y="126" width="74" height="50"></rect>
-        <text class="node-text" x="55" y="143">8 Handle</text>
-        <text class="tiny-text" x="55" y="158">granted access</text>
-        <path class="flowline" d="M116 151 H92"></path>
-        <path class="flowline" d="M98 145 L88 151 L98 157"></path>
+        <rect class="box blue"   x="18"  y="126" width="74"  height="50" rx="5"/>
+        <text class="node-text"  x="55"  y="143">8 Handle</text>
+        <text class="tiny-text"  x="55"  y="158">granted access</text>
+        <line class="flowline" x1="116" y1="151" x2="92" y2="151" marker-end="url(#lc-arr)"/>
 
-        <rect class="box-soft" x="220" y="214" width="280" height="24"></rect>
+        <!-- Bottom note -->
+        <rect class="box-soft" x="220" y="214" width="280" height="24" rx="5"/>
         <text class="tiny-text" x="360" y="226">audit events and token lifetime follow object references, handles, and logoff</text>
       </svg>
       <table class="ref-table">

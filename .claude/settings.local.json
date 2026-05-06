@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\tsymeonidis\\\\OneDrive - Viva.com\\\\Projects\\\\windows-security-cheatsheet\\\\index.html\" | Measure-Object -Line\\).Lines)"
+    ]
+  }
+}
