@@ -1,0 +1,80 @@
+  <!-- ════════════════════════════════════════════════════════════════════════
+       PART II — AUTHENTICATION
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="part-banner auth">
+    <div class="part-eyebrow">Part II</div>
+    <h2>Authentication — Local &amp; Network Identity</h2>
+    <p>How Windows establishes identity, both on a single machine and across a domain. Pure protocol and component reference — credential validation, ticket issuance, directory services, and the audit machinery that records each event.</p>
+  </div>
+
+  <!-- ── 08 LOCAL AUTH ───────────────────────────────────────── -->
+  <section class="section" id="local-auth">
+    <div class="section-header">
+      <div class="section-dot dot-blue"></div>
+      <h3>08 — Local Authentication</h3>
+      <span class="section-id">LAUTH</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/windows-authentication/windows-authentication-overview" target="_blank" rel="noopener noreferrer">Windows authentication</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/" target="_blank" rel="noopener noreferrer">UAC overview</a>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title c-blue">Logon Types</div>
+        <table class="ref-table">
+          <thead><tr><th>Type</th><th>ID</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Interactive</td><td class="mono-cell blue">2</td><td>Physical console / local keyboard. Creates new logon session. Cached secrets in LSASS.</td></tr>
+            <tr><td>Network</td><td class="mono-cell blue">3</td><td>SMB shares, WMI, etc. No interactive logon. Credentials not stored in LSASS. Token destroyed on disconnect.</td></tr>
+            <tr><td>Batch</td><td class="mono-cell blue">4</td><td>Scheduled tasks. Non-interactive. Logon as service right required for service accounts.</td></tr>
+            <tr><td>Service</td><td class="mono-cell blue">5</td><td>SCM service startup. Uses stored credentials or virtual accounts.</td></tr>
+            <tr><td>NetworkCleartext</td><td class="mono-cell blue">8</td><td>IIS Basic Auth, WDigest. Cleartext credentials may be present in LSASS.</td></tr>
+            <tr><td>NewCredentials</td><td class="mono-cell blue">9</td><td><code>runas /netonly</code>. Local uses existing token; network connections use new credentials.</td></tr>
+            <tr><td>RemoteInteractive</td><td class="mono-cell blue">10</td><td>RDP / Terminal Services. Creates interactive session on remote host.</td></tr>
+            <tr><td>CachedInteractive</td><td class="mono-cell blue">11</td><td>Offline domain logon using cached verifier (DCC2). Default 10 hashes stored.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">Interactive Logon Flow</div>
+        <div class="flow" style="flex-direction:column; align-items:flex-start; gap:5px; margin:8px 0 12px">
+          <div class="flow-step">1 · User presses Ctrl+Alt+Del (SAS captured by Winlogon)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">2 · Winlogon collects credentials via Credential Provider</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">3 · Winlogon calls LsaLogonUser() in LSASS</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">4 · LSA routes to auth package (MSV1_0 local / Kerberos domain)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">5 · Auth package validates credentials (SAM or DC)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">6 · LSA creates logon session + access token (NtCreateToken)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">7 · Winlogon creates desktop and spawns userinit.exe with the token</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">SAM Database Internals</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Location</span><span class="field-val">HKLM\SAM — mapped to <code>%WINDIR%\System32\config\SAM</code>. Locked during runtime. Read requires SYSTEM or backup privilege.</span></li>
+          <li><span class="field-key purple">Password Storage</span><span class="field-val">NT hash = MD4(UTF-16LE(password)). No per-hash salt. Historically protected with SysKey; modernized in Win10 v1709+.</span></li>
+          <li><span class="field-key purple">RID Allocation</span><span class="field-val">500=Administrator, 501=Guest. New local accounts start at 1000.</span></li>
+          <li><span class="field-key purple">Remote Access</span><span class="field-val">SAM accessible remotely via MS-SAMR (named pipe over SMB). Restricted by default since Win10 1607.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title c-amber">LSASS Credential Cache</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">What's cached</span><span class="field-val">Interactive logons store: NT hash, LM hash if enabled, Kerberos tickets (TGT + service tickets), DES/AES keys derived from password.</span></li>
+          <li><span class="field-key amber">WDigest</span><span class="field-val">Legacy protocol that stored cleartext password reversibly in LSASS. Disabled by default since Win8.1.</span></li>
+          <li><span class="field-key amber">Credential Guard</span><span class="field-val">VSM (Virtual Secure Mode) isolates LSA secrets in a Hyper-V container (LSAIso). Kerberos keys and NT hashes protected from userspace.</span></li>
+          <li><span class="field-key amber">Protected Process Light</span><span class="field-val">LSASS can run as PPL — even processes with SeDebugPrivilege cannot open it for injection without a signed driver.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>

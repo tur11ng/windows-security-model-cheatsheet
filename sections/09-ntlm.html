@@ -1,0 +1,48 @@
+  <!-- ── 09 NTLM ───────────────────────────────────────── -->
+  <section class="section" id="ntlm">
+    <div class="section-header">
+      <div class="section-dot dot-amber"></div>
+      <h3>09 — NTLM Network Authentication</h3>
+      <span class="section-id">NTLM</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthn/microsoft-ntlm" target="_blank" rel="noopener noreferrer">Microsoft NTLM</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/kerberos/ntlm-overview" target="_blank" rel="noopener noreferrer">NTLM overview</a>
+    </div>
+
+    <p class="note">NTLM is a challenge-response protocol used when Kerberos is unavailable (workgroup, non-SPN targets, IP-based connections). The NT hash is derived from the user's password and never leaves the client — instead, a hash-based response to a server challenge is sent.</p>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-amber">NTLM 3-Way Handshake</div>
+        <div class="flow" style="flex-direction:column; align-items:flex-start; gap:5px; margin:8px 0">
+          <div class="flow-step" style="background:var(--c-amber-dim); border-color:var(--c-amber-border)">1 · NEGOTIATE (Client → Server): capabilities, domain, workstation, NTLM flags</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step" style="background:var(--c-amber-dim); border-color:var(--c-amber-border)">2 · CHALLENGE (Server → Client): 8-byte server nonce, negotiated flags, target info</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step" style="background:var(--c-amber-dim); border-color:var(--c-amber-border)">3 · AUTHENTICATE (Client → Server): NTLMv2 Response, username, domain, workstation, session key</div>
+        </div>
+        <div class="divider"></div>
+        <h4 class="sub">NTLMv1 vs NTLMv2</h4>
+        <ul class="field-list">
+          <li><span class="field-key amber">NTLMv1</span><span class="field-val">Response = DES(NT hash, ServerChallenge). No client nonce. Deprecated.</span></li>
+          <li><span class="field-key amber">NTLMv2</span><span class="field-val">Response = HMAC-MD5(NT hash, HMAC-MD5(NT hash, ServerChallenge + ClientChallenge + Timestamp + TargetInfo)).</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Channel &amp; Signing Protections</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">SMB Signing</span><span class="field-val">Each SMB packet is HMAC-signed with the session key.</span></li>
+          <li><span class="field-key blue">Channel Binding</span><span class="field-val">Binds NTLM auth to a specific TLS channel via channel binding token (CBT).</span></li>
+          <li><span class="field-key blue">EPA</span><span class="field-val">Extended Protection for Authentication — combines SPN binding and channel binding for HTTPS services.</span></li>
+          <li><span class="field-key blue">LDAP Signing</span><span class="field-val">Requires signed LDAP bind. Mandatory for sensitive AD writes.</span></li>
+          <li><span class="field-key blue">LmCompatibilityLevel</span><span class="field-val">GPO setting. Level 5 = NTLMv2 only, refuse LM and NTLMv1 (recommended).</span></li>
+        </ul>
+        <div class="callout callout-blue" style="margin-top:10px">
+          <div class="callout-label">Session Keys</div>
+          NTLM derives a session key from the NT hash and challenge material. The session key signs and seals subsequent traffic — without it, an intermediary cannot forge or read protected SMB/RPC messages.
+        </div>
+      </div>
+    </div>
+  </section>

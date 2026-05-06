@@ -1,0 +1,177 @@
+  <!-- ── 05 ACCESS CHECK ───────────────────────────────────────── -->
+  <section class="section" id="access-check">
+    <div class="section-header">
+      <div class="section-dot dot-teal"></div>
+      <h3>05 — The Access Check Process</h3>
+      <span class="section-id">AC</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/access-control/access-control" target="_blank" rel="noopener noreferrer">Access control overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-lists" target="_blank" rel="noopener noreferrer">DACL evaluation</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/how-dacls-control-access-to-an-object" target="_blank" rel="noopener noreferrer">How AccessCheck works</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-accesscheck" target="_blank" rel="noopener noreferrer">AccessCheck</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-accesscheckbytype" target="_blank" rel="noopener noreferrer">AccessCheckByType</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/generic-access-rights" target="_blank" rel="noopener noreferrer">Generic rights</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-generic_mapping" target="_blank" rel="noopener noreferrer">GENERIC_MAPPING</a>
+    </div>
+
+    <p class="note">When a thread opens a handle to a kernel object, the SRM runs a deterministic three-phase check. All three phases must pass. The SRM is the <em>only</em> component that performs this — no kernel subsystem bypasses it.</p>
+
+    <div class="phase-row" style="margin-top:16px">
+      <div class="phase-box p1">
+        <div class="phase-num">01</div>
+        <div class="phase-title">Mandatory Integrity Check</div>
+        <div class="phase-body">
+          Compare the token's <strong class="hl">Integrity Level</strong> against the object's <strong class="hl">Mandatory Label</strong> in the SACL.<br><br>
+          <strong class="hl">No-Write-Up (default):</strong> if token IL &lt; object IL → deny write access.<br>
+          <strong class="hl">No-Read-Up:</strong> optional — blocks reads from lower IL.<br>
+          <strong class="hl">No-Execute-Up:</strong> optional — blocks execute from lower IL.<br><br>
+          This check <em>precedes</em> DACL evaluation — even if the DACL would grant access, a MIC violation blocks it.
+        </div>
+      </div>
+      <div class="phase-box p2">
+        <div class="phase-num">02</div>
+        <div class="phase-title">Token Access Check</div>
+        <div class="phase-body">
+          <strong class="hl">Owner Check:</strong> if the token's user SID (or any enabled group SID) matches the object's Owner, the caller is automatically granted <code>ReadControl</code> + <code>WriteDac</code>.<br><br>
+          <strong class="hl">Privilege Check:</strong> certain privileges grant additional implicit access:<br>
+          <code>SeBackupPrivilege</code> → read any file regardless of DACL.<br>
+          <code>SeRestorePrivilege</code> → write any file regardless of DACL.<br>
+          <code>SeTakeOwnershipPrivilege</code> → WriteOwner on any object.<br>
+          <code>SeSecurityPrivilege</code> → read/write SACL.
+        </div>
+      </div>
+      <div class="phase-box p3">
+        <div class="phase-num">03</div>
+        <div class="phase-title">Discretionary Access Check</div>
+        <div class="phase-body">
+          Walk the DACL ACE list in order. For each ACE, check if the ACE's SID is present (enabled) in the token.<br><br>
+          <strong class="hl">Deny ACE match:</strong> any requested bit denied → immediately DENY entire request.<br>
+          <strong class="hl">Allow ACE match:</strong> granted bits accumulate in a running bitmask.<br>
+          <strong class="hl">Result:</strong> GRANT if all requested bits are in accumulated allows and none were denied.<br><br>
+          NULL DACL → GRANT all. Empty DACL → DENY all.
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-red">Sandboxed Token Access Checks</div>
+        <ul class="field-list">
+          <li><span class="field-key red">Restricted Token</span><span class="field-val">Two parallel DACL walks: one with normal token SIDs, one with the Restricting SIDs list. Access granted only if <em>both</em> walks independently grant access.</span></li>
+          <li><span class="field-key red">Lowbox / AppContainer</span><span class="field-val">Third additional check: the resource must have an ACE allowing the <strong class="hl">AppContainer SID</strong> and/or the required <strong class="hl">Capability SID</strong>.</span></li>
+          <li><span class="field-key red">Enterprise Checks</span><span class="field-val">Central Access Policies (from AD) can add an additional claim-based check layer using callback ACEs.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title c-amber">Traversal &amp; Other Checks</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">Traversal Check</span><span class="field-val">Opening <code>C:\A\B\C.txt</code> requires Traverse on <code>\A</code> and <code>\A\B</code>. <code>SeChangeNotifyPrivilege</code> (held by all users) bypasses per-directory traversal.</span></li>
+          <li><span class="field-key amber">Handle Duplication</span><span class="field-val">Duplicating a handle requires access to the source process object. Cannot exceed original rights.</span></li>
+          <li><span class="field-key amber">Limited Checks</span><span class="field-val">Some operations (e.g., listing directory contents) perform abbreviated checks.</span></li>
+          <li><span class="field-key amber">Object Type Check</span><span class="field-val">For AD/some kernel objects, ACEs can be scoped to a specific object type or attribute GUID.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-teal">Before the DACL Walk</div>
+        <ul class="field-list">
+          <li><span class="field-key">Requested access</span><span class="field-val">The caller asks for a bitmask such as Read, Write, Delete, WriteDac, GenericAll, or MAXIMUM_ALLOWED.</span></li>
+          <li><span class="field-key">Generic mapping</span><span class="field-val">GenericRead/Write/Execute/All are translated into object-specific bits. A file, process, token, registry key, and AD object all map generics differently.</span></li>
+          <li><span class="field-key">Valid access mask</span><span class="field-val">Bits that are meaningless for that object type are stripped or rejected. Object types define what rights exist.</span></li>
+          <li><span class="field-key">Effective token</span><span class="field-val">If a thread token exists, SRM uses it. Otherwise SRM uses the process token.</span></li>
+          <li><span class="field-key">Previously granted</span><span class="field-val">Some rights may already be granted by ownership or privileges before the DACL loop begins.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-amber">Remaining Access Algorithm</div>
+        <p class="note">The DACL walk is easiest to understand as a shrinking set of bits called <strong class="hl">RemainingAccess</strong>.</p>
+        <div class="mono-block amber" style="white-space:normal; word-break:normal">
+          Remaining = Desired - AlreadyGranted<br>
+          for each ACE in canonical order:<br>
+          &nbsp;&nbsp;if ACE does not apply: continue<br>
+          &nbsp;&nbsp;if Deny intersects Remaining: deny<br>
+          &nbsp;&nbsp;if Allow intersects Remaining: grant those bits<br>
+          &nbsp;&nbsp;if Remaining is empty: grant
+        </div>
+        <p class="note">Canonical ordering matters because the loop can stop early. If allows appear before denies, a bad DACL may grant everything before the deny ACE is reached.</p>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">SID Matching Rules</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Allow ACE</span><span class="field-val">Matches token user SID, enabled group SIDs, enabled capability SIDs, or relevant package SIDs.</span></li>
+          <li><span class="field-key purple">Deny ACE</span><span class="field-val">Matches enabled SIDs and deny-only SIDs. This is why UAC filtered admin SIDs can still be denied.</span></li>
+          <li><span class="field-key purple">Disabled SID</span><span class="field-val">Ignored for normal allow/deny checks.</span></li>
+          <li><span class="field-key purple">OWNER RIGHTS</span><span class="field-val">If present, can replace the broad implicit owner behavior with explicit owner rights.</span></li>
+          <li><span class="field-key purple">SELF</span><span class="field-val">During object-specific checks, SELF is replaced with the principal SID of the object being checked.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">MAXIMUM_ALLOWED</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">Purpose</span><span class="field-val">Ask Windows to compute the largest access mask the token can receive instead of requesting exact bits.</span></li>
+          <li><span class="field-key blue">Deny still applies</span><span class="field-val">A deny ACE removes matching bits from the possible result.</span></li>
+          <li><span class="field-key blue">Privileges count</span><span class="field-val">Owner rights and enabled privileges can add rights to the computed result.</span></li>
+          <li><span class="field-key blue">Use carefully</span><span class="field-val">Opening handles with broader rights than needed increases damage if the handle is leaked or duplicated.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-red">Privilege Short-Circuits</div>
+        <ul class="field-list">
+          <li><span class="field-key red">SeBackupPrivilege</span><span class="field-val">May grant backup/read-style access even when the DACL denies ordinary reads.</span></li>
+          <li><span class="field-key red">SeRestorePrivilege</span><span class="field-val">May grant restore/write-style access and override ownership-related restrictions.</span></li>
+          <li><span class="field-key red">SeTakeOwnershipPrivilege</span><span class="field-val">May grant WriteOwner even when DACL says no.</span></li>
+          <li><span class="field-key red">SeSecurityPrivilege</span><span class="field-val">Required to read or write SACLs through ACCESS_SYSTEM_SECURITY.</span></li>
+          <li><span class="field-key red">SeChangeNotifyPrivilege</span><span class="field-val">Bypasses directory traversal checks, not ordinary file read/write checks.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-green">Object-Type Access Checks</div>
+        <p class="note">Some resources, especially AD objects, are not just "one object with one mask." They have properties, property sets, child object classes, validated writes, and extended rights.</p>
+        <ul class="field-list" style="margin-top:8px">
+          <li><span class="field-key green">AllowedObject ACE</span><span class="field-val">Grants access only when the requested object type GUID matches the ACE's object type GUID.</span></li>
+          <li><span class="field-key green">DeniedObject ACE</span><span class="field-val">Denies only the matching property, property set, class, or extended right.</span></li>
+          <li><span class="field-key green">InheritedObjectType</span><span class="field-val">Controls which child object classes inherit an ACE.</span></li>
+          <li><span class="field-key green">Result list</span><span class="field-val">Object-type APIs can return a result per requested object type, not only one yes/no decision.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-coral">Central Access Policy Layer</div>
+        <ul class="field-list">
+          <li><span class="field-key coral">Resource attributes</span><span class="field-val">Claims stored on the resource, such as classification or department.</span></li>
+          <li><span class="field-key coral">User/device claims</span><span class="field-val">Claims in the token that describe the authenticated user or device.</span></li>
+          <li><span class="field-key coral">Scoped policy</span><span class="field-val">A SACL ACE points the object to the Central Access Policy that should apply.</span></li>
+          <li><span class="field-key coral">Callback ACEs</span><span class="field-val">Conditions are evaluated in addition to normal DACL checks. CAP can remove access that the DACL alone would allow.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-amber">End-to-End Access Check Mental Model</div>
+      <table class="ref-table">
+        <thead><tr><th>Step</th><th>Question</th><th>If it fails</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell amber">1</td><td>Can generic rights be mapped to valid object-specific rights?</td><td>The request is invalid or meaningless for this object type.</td></tr>
+          <tr><td class="mono-cell amber">2</td><td>Does MIC permit the operation at this integrity level?</td><td>Access denied before DACL evaluation.</td></tr>
+          <tr><td class="mono-cell amber">3</td><td>Does ownership or an enabled privilege grant special rights?</td><td>The request proceeds with fewer pre-granted bits.</td></tr>
+          <tr><td class="mono-cell amber">4</td><td>Does any applicable deny ACE intersect the remaining requested bits?</td><td>Access denied immediately.</td></tr>
+          <tr><td class="mono-cell amber">5</td><td>Do applicable allow ACEs grant every remaining requested bit?</td><td>Access denied unless MAXIMUM_ALLOWED is being computed.</td></tr>
+          <tr><td class="mono-cell amber">6</td><td>For restricted/lowbox tokens, do sandbox-specific checks also allow it?</td><td>Access denied even if the normal token was allowed.</td></tr>
+          <tr><td class="mono-cell amber">7</td><td>Do object-type or Central Access Policy checks remove any requested access?</td><td>Access denied or reduced for the affected object/property/right.</td></tr>
+          <tr><td class="mono-cell amber">8</td><td>Does a matching SACL require auditing?</td><td>Access may still succeed, but no relevant audit is emitted if policy/SACL do not align.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>

@@ -1,0 +1,76 @@
+  <!-- ════════════════════════════════════════════════════════════════════════
+       PART I — FOUNDATIONS
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="part-banner def">
+    <div class="part-eyebrow">Part I</div>
+    <h2>Foundations — The Windows Security Model</h2>
+    <p>How the kernel enforces identity and access. Pure engineering reference: the components that exist, the data structures they manipulate, and the rules they follow when an access decision is made.</p>
+  </div>
+
+  <!-- ── 01 ARCHITECTURE ───────────────────────────────────────── -->
+  <section class="section" id="architecture">
+    <div class="section-header">
+      <div class="section-dot dot-blue"></div>
+      <h3>01 — Windows Security Architecture</h3>
+      <span class="section-id">ARCH</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/windows-security-model" target="_blank" rel="noopener noreferrer">Windows security model</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-components" target="_blank" rel="noopener noreferrer">Access control components</a>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title c-blue">Kernel Security Components</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">SRM</span><span class="field-val"><strong class="hl">Security Reference Monitor</strong> — sole kernel authority for enforcing access control. All object open requests pass through SRM's access check algorithm.</span></li>
+          <li><span class="field-key blue">Object Manager</span><span class="field-val">Manages all kernel objects (files, processes, mutexes, tokens…) and their security descriptors. Controls handle creation and duplication.</span></li>
+          <li><span class="field-key blue">Executive</span><span class="field-val">Collection of kernel subsystems: Process Manager, Memory Manager, I/O Manager, Configuration Manager (registry), ALPC.</span></li>
+          <li><span class="field-key blue">Token</span><span class="field-val">Every process/thread carries an access token — the SRM's identity carrier.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">User-Mode Security Processes</div>
+        <ul class="field-list">
+          <li><span class="field-key">LSASS.exe</span><span class="field-val"><strong class="hl">Local Security Authority Subsystem</strong>. Hosts authentication packages, manages logon sessions, enforces LSA policy, stores credential secrets in protected memory.</span></li>
+          <li><span class="field-key">Winlogon.exe</span><span class="field-val">Orchestrates interactive logon. Captures Secure Attention Sequence (Ctrl+Alt+Del). Creates user desktops. Calls <code>LsaLogonUser</code>.</span></li>
+          <li><span class="field-key">SCM (services.exe)</span><span class="field-val">Service Control Manager. Launches services with configured tokens (SYSTEM, Local Service, Network Service, or named accounts).</span></li>
+          <li><span class="field-key">SAM (samss)</span><span class="field-val">Security Account Manager — local user/group database. Hosted in LSASS. Backed by HKLM\SAM.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-amber">Authentication Packages (in LSASS)</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">MSV1_0</span><span class="field-val">NTLM authentication. Local accounts, NTLMv1/v2.</span></li>
+          <li><span class="field-key amber">Kerberos</span><span class="field-val">Kerberos v5. Domain accounts. Default for domain-joined.</span></li>
+          <li><span class="field-key amber">Negotiate</span><span class="field-val">SPNEGO broker. Selects Kerberos first, falls back to NTLM.</span></li>
+          <li><span class="field-key amber">TSSSP / CredSSP</span><span class="field-val">RDP NLA — delegates full credentials to remote host over TLS.</span></li>
+          <li><span class="field-key amber">WDigest</span><span class="field-val">Deprecated. Originally stored cleartext passwords in LSASS memory.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-purple">Key Security Databases</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">HKLM\SAM</span><span class="field-val">Local accounts, NT hashes, group memberships. ACL: SYSTEM only.</span></li>
+          <li><span class="field-key purple">HKLM\SECURITY</span><span class="field-val">LSA secrets (service passwords, cached domain credentials, DPAPI master keys). ACL: SYSTEM only.</span></li>
+          <li><span class="field-key purple">NTDS.dit</span><span class="field-val">AD domain database on DCs. Contains all domain user hashes, objects, attributes.</span></li>
+          <li><span class="field-key purple">SYSVOL</span><span class="field-val">Group Policy templates. Replicated to all DCs via DFSR/FRS.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-red">Security Boundaries</div>
+        <ul class="field-list">
+          <li><span class="field-key red">Forest</span><span class="field-val">True security boundary in AD. Separate forests cannot implicitly trust each other.</span></li>
+          <li><span class="field-key red">Kernel/User mode</span><span class="field-val">Ring 0 vs Ring 3. User mode cannot directly bypass SRM or write to kernel memory.</span></li>
+          <li><span class="field-key red">Integrity Level</span><span class="field-val">Mandatory control. Lower IL processes cannot write to higher IL objects.</span></li>
+          <li><span class="field-key red">AppContainer</span><span class="field-val">Sandboxed IL=Low + capability-gated access. UWP apps, browsers.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>

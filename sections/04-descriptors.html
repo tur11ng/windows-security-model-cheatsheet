@@ -1,0 +1,185 @@
+  <!-- ── 04 SECURITY DESCRIPTORS ───────────────────────────────────────── -->
+  <section class="section" id="descriptors">
+    <div class="section-header">
+      <div class="section-dot dot-purple"></div>
+      <h3>04 — Security Descriptors</h3>
+      <span class="section-id">SD</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptors" target="_blank" rel="noopener noreferrer">Security descriptors</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-lists" target="_blank" rel="noopener noreferrer">ACLs and ACEs</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format" target="_blank" rel="noopener noreferrer">SDDL format</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/ace-strings" target="_blank" rel="noopener noreferrer">ACE strings</a>
+    </div>
+
+    <p class="note">Every securable kernel object carries a security descriptor. The SRM reads it during every access check. A descriptor can be in <strong class="hl">absolute</strong> form (pointers to separate ACL buffers) or <strong class="hl">relative</strong> form (self-contained flat buffer — used for persistence in registry/file).</p>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">Security Descriptor Components</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Owner SID</span><span class="field-val">Identity that owns the object. Owner automatically gets ReadControl + WriteDac regardless of DACL.</span></li>
+          <li><span class="field-key purple">Primary Group SID</span><span class="field-val">POSIX compatibility field. Rarely enforced on Windows but present.</span></li>
+          <li><span class="field-key purple">DACL</span><span class="field-val"><strong class="hl">Discretionary ACL</strong> — controls who can access the object. A <em>NULL DACL</em> grants everyone full access. An <em>empty DACL</em> denies all access.</span></li>
+          <li><span class="field-key purple">SACL</span><span class="field-val"><strong class="hl">System ACL</strong> — controls auditing and integrity labels. Requires SeSecurityPrivilege to read/write.</span></li>
+          <li><span class="field-key purple">Control Flags</span><span class="field-val">Bitfield: DaclPresent, SaclPresent, DaclProtected, SaclProtected, DaclAutoInherited, etc.</span></li>
+        </ul>
+        <div class="callout callout-blue" style="margin-top:10px">
+          <div class="callout-label">Critical Distinction</div>
+          A <strong class="hl">NULL DACL</strong> (absent) = unrestricted access to everyone. An <strong class="hl">empty DACL</strong> (present but zero ACEs) = no access to anyone. Missing DACL ≠ secure — it is maximally permissive.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">ACE Types &amp; Structure</div>
+        <p class="note" style="margin-bottom:8px">An ACE (Access Control Entry) is one rule in an ACL.</p>
+        <table class="ref-table">
+          <thead><tr><th>Type</th><th>ACL</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell">AccessAllowed</td><td>DACL</td><td>Grant specified access rights</td></tr>
+            <tr><td class="mono-cell">AccessDenied</td><td>DACL</td><td>Explicitly deny access rights</td></tr>
+            <tr><td class="mono-cell">SystemAudit</td><td>SACL</td><td>Log access attempts to Security log</td></tr>
+            <tr><td class="mono-cell">SystemMandatoryLabel</td><td>SACL</td><td>Set integrity level + NoWrite/NoRead/NoExec policy</td></tr>
+            <tr><td class="mono-cell">Callback variants</td><td>DACL/SACL</td><td>Pass extra data to auth callback (Central Access Policy)</td></tr>
+            <tr><td class="mono-cell">Object ACE variants</td><td>DACL/SACL</td><td>Scoped to a specific object class or attribute (AD only)</td></tr>
+          </tbody>
+        </table>
+        <div class="divider"></div>
+        <div class="card-title c-blue" style="margin-top:6px">ACE Inheritance Flags</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">ObjectInherit (OI)</span><span class="field-val">Propagate to child leaf objects (files in a folder).</span></li>
+          <li><span class="field-key blue">ContainerInherit (CI)</span><span class="field-val">Propagate to child containers (sub-folders).</span></li>
+          <li><span class="field-key blue">InheritOnly (IO)</span><span class="field-val">ACE does not apply to this object, only to children.</span></li>
+          <li><span class="field-key blue">NoPropagateInherit (NP)</span><span class="field-val">Inherited ACE is not further propagated beyond first level.</span></li>
+          <li><span class="field-key blue">Inherited (I)</span><span class="field-val">This ACE was inherited, not explicitly set.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-amber">ACE Ordering (Mandatory)</div>
+        <p class="note">The OS enforces strict ordering when building a DACL. Evaluation stops at first full match.</p>
+        <div class="flow" style="margin:12px 0; flex-direction:column; align-items:flex-start; gap:5px">
+          <div class="flow-step" style="width:100%">1 · Explicit Deny ACEs (non-inherited)</div>
+          <div class="flow-step" style="width:100%">2 · Explicit Allow ACEs (non-inherited)</div>
+          <div class="flow-step" style="width:100%">3 · Inherited Deny ACEs</div>
+          <div class="flow-step" style="width:100%">4 · Inherited Allow ACEs</div>
+        </div>
+        <p class="note">Explicit ACEs always take precedence over inherited ones. Within explicit ACEs, Deny beats Allow.</p>
+        <div class="callout callout-blue" style="margin-top:8px">
+          <div class="callout-label">Access Rights Taxonomy</div>
+          <strong class="hl">Generic</strong> (GRFA: GenericRead/Write/Execute/All) — mapped to specific rights via GenericMapping.<br>
+          <strong class="hl">Standard</strong> — Delete, ReadControl, WriteDac, WriteOwner, Synchronize. Present on all object types.<br>
+          <strong class="hl">Specific</strong> — Defined per object type (FILE_READ_DATA, KEY_SET_VALUE, etc.).
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-coral">SDDL — Security Descriptor Definition Language</div>
+        <p class="note">Text representation of a security descriptor. Used in policies, SCE templates, and AD.</p>
+        <div class="mono-block" style="color: var(--c-coral); font-size:11px">O:owner_sid G:group_sid D:dacl_flags(ace_list) S:sacl_flags(ace_list)</div>
+        <p class="note" style="margin-top:8px"><strong class="hl">ACE format:</strong></p>
+        <div class="mono-block" style="color: var(--c-coral); font-size:11px">(ace_type; ace_flags; rights; object_guid; inherit_guid; account_sid)</div>
+        <ul class="field-list" style="margin-top:8px">
+          <li><span class="field-key coral">D:AI</span><span class="field-val">DACL, auto-inherited from parent</span></li>
+          <li><span class="field-key coral">D:P</span><span class="field-val">DACL protected — inheritance blocked</span></li>
+          <li><span class="field-key coral">A;OICI;GA;;;BA</span><span class="field-val">Allow, ObjInherit+ContainerInherit, GenericAll, Builtin Admins</span></li>
+          <li><span class="field-key coral">D;;0x10000;;;WD</span><span class="field-val">Deny SYNCHRONIZE to Everyone</span></li>
+          <li><span class="field-key coral">ML;;NW;;;LW</span><span class="field-val">SACL: Mandatory Label — NoWriteUp, Low integrity</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">Absolute vs Self-Relative Form</div>
+        <p class="note">The same descriptor can be represented in two memory layouts. Confusing these is a common source of broken parsers and incorrect assumptions.</p>
+        <table class="ref-table">
+          <thead><tr><th>Form</th><th>Where used</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell purple">Absolute</td><td>Runtime APIs</td><td>The descriptor contains pointers to separate owner, group, DACL, and SACL buffers.</td></tr>
+            <tr><td class="mono-cell purple">Self-relative</td><td>Storage / transmission</td><td>The descriptor is one contiguous blob; fields are offsets from the start of the blob.</td></tr>
+            <tr><td class="mono-cell purple">SDDL</td><td>Text / policy</td><td>A string form that can serialize common descriptor parts and many ACE types.</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-blue" style="margin-top:10px">
+          <div class="callout-label">Practical Rule</div>
+          Registry, file system, AD, and security policy often persist descriptors as self-relative binary or SDDL. API code often converts to absolute form before modifying individual parts.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">ACL and ACE Binary Shape</div>
+        <ul class="field-list">
+          <li><span class="field-key">ACL header</span><span class="field-val">Contains ACL revision, total ACL size, and ACE count. ACEs follow immediately after the header.</span></li>
+          <li><span class="field-key">ACE header</span><span class="field-val">Every ACE begins with type, flags, and size. Unknown ACE types can be skipped using the size field.</span></li>
+          <li><span class="field-key">Access mask</span><span class="field-val">The rights bitmask granted, denied, audited, or filtered by that ACE.</span></li>
+          <li><span class="field-key">SID</span><span class="field-val">The principal to which the ACE applies. For object ACEs, GUID fields can appear before the SID.</span></li>
+          <li><span class="field-key">Extra data</span><span class="field-val">Callback, resource attribute, scoped policy, and conditional ACEs may carry additional data after the normal fields.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-blue">Creation and Inheritance</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">Creator descriptor</span><span class="field-val">The caller can pass a descriptor when creating an object. If omitted, the token default DACL is used.</span></li>
+          <li><span class="field-key blue">Parent inheritance</span><span class="field-val">Container objects can contribute inheritable ACEs to children. Files inherit from folders; AD objects inherit from containers/OUs.</span></li>
+          <li><span class="field-key blue">Merge behavior</span><span class="field-val">Windows merges explicit creator ACEs with parent inheritable ACEs unless inheritance protection flags suppress it.</span></li>
+          <li><span class="field-key blue">Auto-inherited</span><span class="field-val">Inherited ACEs are marked so tools can distinguish explicit permissions from inherited permissions.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-amber">Special SIDs in ACEs</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">OWNER RIGHTS</span><span class="field-val">Lets a descriptor explicitly restrict or define what the owner receives instead of relying only on implicit owner rights.</span></li>
+          <li><span class="field-key amber">CREATOR OWNER</span><span class="field-val">Placeholder in inheritable ACEs. Replaced by the actual creator/owner when inherited by child objects.</span></li>
+          <li><span class="field-key amber">CREATOR GROUP</span><span class="field-val">Similar placeholder for the primary group.</span></li>
+          <li><span class="field-key amber">SELF</span><span class="field-val">Common in AD. Replaced by the object's own principal SID during object-specific access checks.</span></li>
+          <li><span class="field-key amber">Everyone / Authenticated Users</span><span class="field-val">Broad trustees. Safe only when the access mask is deliberately narrow.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-red">Descriptor Footguns</div>
+        <ul class="field-list">
+          <li><span class="field-key red">NULL DACL</span><span class="field-val">Grants all access to everyone. Rarely intended.</span></li>
+          <li><span class="field-key red">Wrong ACE order</span><span class="field-val">Allow ACEs before deny ACEs can grant access before the deny is reached.</span></li>
+          <li><span class="field-key red">InheritOnly misunderstood</span><span class="field-val">Does not apply to the current object; it exists only to flow to children.</span></li>
+          <li><span class="field-key red">Generic rights not mapped</span><span class="field-val">GenericAll/Read/Write/Execute mean different specific bits depending on object type.</span></li>
+          <li><span class="field-key red">SACL ignored</span><span class="field-val">No audit event appears unless audit policy enables the relevant category and a matching audit ACE exists.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-purple">Object, Callback, and Conditional ACEs</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Object ACE</span><span class="field-val">Adds object type and/or inherited object type GUIDs. AD uses this to scope rights to a class, attribute, property set, or extended right.</span></li>
+          <li><span class="field-key purple">Callback ACE</span><span class="field-val">Carries a condition that must evaluate true before the ACE participates. Used by AuthZ and Central Access Policy scenarios.</span></li>
+          <li><span class="field-key purple">ResourceAttribute ACE</span><span class="field-val">Stores resource claims such as classification labels. CAP rules can evaluate these claims.</span></li>
+          <li><span class="field-key purple">ScopedPolicyId ACE</span><span class="field-val">Points a resource at a Central Access Policy so enterprise claim rules become part of access evaluation.</span></li>
+          <li><span class="field-key purple">Critical / TrustProtected flags</span><span class="field-val">Can mark certain ACEs as difficult or unsafe to remove. Useful around protected process trust and filter semantics.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-green">SACL: More Than Auditing</div>
+        <p class="note">The SACL is not just for event generation. Windows also stores mandatory integrity and some policy/filter ACEs there.</p>
+        <table class="ref-table">
+          <thead><tr><th>SACL ACE</th><th>Purpose</th><th>Access needed</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell green">SystemAudit</td><td>Generate success/failure audit events when the access mask matches.</td><td>SeSecurityPrivilege to read/write SACL</td></tr>
+            <tr><td class="mono-cell green">MandatoryLabel</td><td>Object integrity level and NoWriteUp/NoReadUp/NoExecuteUp policy.</td><td>WriteDac or label-specific privilege depending on change</td></tr>
+            <tr><td class="mono-cell green">ProcessTrustLabel</td><td>Protected process trust rules.</td><td>Constrained by trust-protection semantics</td></tr>
+            <tr><td class="mono-cell green">AccessFilter</td><td>Can remove access based on conditions; it cannot add access.</td><td>Security descriptor write rights</td></tr>
+            <tr><td class="mono-cell green">ScopedPolicyId</td><td>Enables Central Access Policy evaluation for a resource.</td><td>AccessSystemSecurity</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>

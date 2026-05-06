@@ -1,0 +1,180 @@
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       PART III — OFFENSIVE
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="part-banner off">
+    <div class="part-eyebrow">Part III</div>
+    <h2>Offensive — Attacks Against the Windows Security Model</h2>
+    <p>Each subsection maps to a component covered in Parts I–II and enumerates the techniques that exploit it. Mitigations are paired with each attack so the defensive response is co-located. Subsections are ordered roughly by attack chain stage: privilege escalation, credential access, lateral movement, then domain-wide compromise.</p>
+  </div>
+
+  <!-- ── 13 PRIVILEGE ESCALATION ───────────────────────────────────────── -->
+  <section class="section" id="privesc">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>13 — Privilege Escalation (Token &amp; Privilege Abuse)</h3>
+      <span class="section-id">TA0004</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens" target="_blank" rel="noopener noreferrer">Access tokens</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/privileges" target="_blank" rel="noopener noreferrer">Privileges</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/" target="_blank" rel="noopener noreferrer">UAC</a>
+    </div>
+
+    <p class="note">Privilege escalation [<strong class="hl">TA0004</strong>] is the tactic of going from limited access — typically a standard user shell after initial access — to higher authority on the host (Administrator, SYSTEM) or in the domain. Most local techniques exploit the token model, the privilege list, or UAC. Service-related path/DLL hijacking is covered separately in Section 14.</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeImpersonatePrivilege Abuse — Potato Family</span>
+        <span class="attack-mitre">T1134.001 / T1134.002</span>
+      </div>
+      <div class="attack-body">
+        <p>Any service account holding <code>SeImpersonatePrivilege</code> (LocalService, NetworkService, IIS application pool identities, MSSQL service, etc.) can impersonate any security context that authenticates to it. The attacker coerces SYSTEM to authenticate to a local listener under attacker control — historically via DCOM/RPC (RottenPotato, JuicyPotato), the Print Spooler and Print Notification (PrintSpoofer), or COM type-coercion (RoguePotato, GenericPotato) — captures the resulting authentication, and uses the impersonation token to spawn a SYSTEM process.</p>
+        <p>Co-occurs with <code>SeAssignPrimaryTokenPrivilege</code>, which permits assigning the impersonation token as a primary token of a new process directly.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Remove <code>SeImpersonatePrivilege</code> from accounts that don't need it; review URA on web/SQL servers</li>
+          <li>Apply latest patches — Microsoft has progressively closed coercion vectors (Spooler, EFS-RPC, DCOM type confusion)</li>
+          <li>Disable Print Spooler service on hosts that don't need it (servers, DCs)</li>
+          <li>Use AppContainers / virtual service accounts where possible to limit blast radius</li>
+          <li>Monitor 4672 and 4673 events for unusual privilege use, and 4688 for SYSTEM children of non-system parents</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeBackupPrivilege / SeRestorePrivilege Abuse</span>
+        <span class="attack-mitre">T1003.002</span>
+      </div>
+      <div class="attack-body">
+        <p>These privileges bypass DACL checks for read/write respectively. <code>SeBackupPrivilege</code> permits opening any file or registry hive — including locked SAM and SECURITY hives — and exporting them for offline analysis. <code>SeRestorePrivilege</code> permits writing arbitrary files, including system binaries that run as SYSTEM at next boot. Backup Operators is the canonical privileged group, but third-party backup software often grants these rights to service accounts.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Treat Backup Operators as Tier-0 equivalent; restrict membership and audit rigorously</li>
+          <li>Ensure backup service accounts use gMSAs and are isolated from interactive use</li>
+          <li>Enable Credential Guard so SAM/SECURITY extraction yields encrypted blobs only</li>
+          <li>Monitor 4673 (privileged service called) when these privileges are exercised</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeDebugPrivilege — LSASS Access</span>
+        <span class="attack-mitre">T1003.001</span>
+      </div>
+      <div class="attack-body">
+        <p>Permits opening any process for full read/write access regardless of its DACL. The canonical use is opening LSASS to extract credentials from memory. Held by Administrators by default but disabled — must be explicitly enabled in the token. Many anti-malware drivers also rely on this privilege, complicating policy tightening.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Enable LSASS as a Protected Process Light (PPL) — blocks userland injection even with SeDebugPrivilege</li>
+          <li>Enable Credential Guard — isolates secrets in VSM (LSAIso) so memory dumps don't contain usable material</li>
+          <li>Restrict <code>SeDebugPrivilege</code> via URA to only the accounts that genuinely need it</li>
+          <li>Deploy EDR with kernel callbacks (PsSetCreateProcessNotifyRoutineEx, ObRegisterCallbacks) to detect LSASS handle requests</li>
+          <li>Remove debug privilege from local Administrators on workstations where developers don't operate</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeLoadDriverPrivilege — Bring Your Own Vulnerable Driver (BYOVD)</span>
+        <span class="attack-mitre">T1068</span>
+      </div>
+      <div class="attack-body">
+        <p>Loading a kernel driver yields immediate Ring 0 code execution — the maximum privilege available on the host. Microsoft requires drivers to be signed, but many <em>legitimately signed</em> drivers contain vulnerabilities (arbitrary read/write primitives) that the attacker can chain to execute kernel shellcode. Public lists of known-vulnerable signed drivers exist (<em>loldrivers.io</em>).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Enable Microsoft Vulnerable Driver Blocklist (built-in since Win11; configurable in WDAC)</li>
+          <li>Require Hypervisor-Protected Code Integrity (HVCI) — blocks unsigned and disallowed-signature drivers</li>
+          <li>Restrict <code>SeLoadDriverPrivilege</code> via URA</li>
+          <li>Enable Smart App Control / WDAC policies in audit then enforce mode</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SeTakeOwnershipPrivilege — DACL Rewrite</span>
+        <span class="attack-mitre">T1222.001</span>
+      </div>
+      <div class="attack-body">
+        <p>Permits taking ownership of any object. Once owned, the actor automatically has WriteDac (per Token Access Check Phase 02) and can rewrite the DACL to grant themselves any access — including writing to system binaries or rewriting service registry keys.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit and minimize URA assignment of this privilege</li>
+          <li>Monitor 4670 (Permissions on object changed) and 4674 (privileged operation attempted)</li>
+          <li>WDAC code integrity policy prevents executing tampered binaries even after takeover</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">UAC Bypass</span>
+        <span class="attack-mitre">T1548.002</span>
+      </div>
+      <div class="attack-body">
+        <p>UAC produces a Medium IL filtered token from an admin's split token. Bypass techniques exploit the auto-elevation behavior of trusted Microsoft binaries that elevate without prompting, plus a writable input that the trusted binary consumes. Common vectors: registry/COM hijacks targeting <code>fodhelper.exe</code>, <code>computerdefaults.exe</code>, <code>eventvwr.exe</code> and similar; environment variable hijacks against <code>sdclt.exe</code>; DLL hijacks against signed elevated binaries with insecure search paths; and ICMLuaUtil / IFileOperation COM elevation moniker abuse. The attacker writes to a per-user registry/key/file consumed by the auto-elevating binary, then triggers it; the resulting child process runs at High IL.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Set UAC to <strong class="hl">Always Notify</strong> (highest) — disables silent auto-elevation</li>
+          <li>Remove standard users from the local Administrators group; use LAPS for emergency local admin</li>
+          <li>Apply Secure Desktop for elevation prompts (default; do not disable)</li>
+          <li>Disable <code>EnableLUA=0</code> alarms in monitoring — disabling UAC is itself an indicator</li>
+          <li>WDAC / AppLocker to constrain which binaries can execute as elevated</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Token Impersonation / Theft (Generic)</span>
+        <span class="attack-mitre">T1134</span>
+      </div>
+      <div class="attack-body">
+        <p>An attacker with sufficient access to a process holding a privileged token can duplicate its primary or impersonation token and either impersonate the security context (thread-level) or spawn a new process with the duplicated primary token. Common with SYSTEM tokens already present in service processes when the attacker first achieves admin-level local access.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Restrict <code>SeImpersonatePrivilege</code> and <code>SeAssignPrimaryTokenPrivilege</code></li>
+          <li>Run sensitive services as Protected Processes where supported</li>
+          <li>EDR detection on token duplication / DuplicateTokenEx + CreateProcessAsUser sequences</li>
+          <li>Network segmentation so a SYSTEM-on-host token has limited lateral reach</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Generic Software Vulnerabilities — Local EoP</span>
+        <span class="attack-mitre">T1068</span>
+      </div>
+      <div class="attack-body">
+        <p>Memory corruption or logic bugs in kernel components, IPC endpoints (ALPC, RPC), drivers, or privileged user-mode services that allow a low-privileged process to coerce execution at higher integrity. Frequently chained from sandbox escapes or used directly when a vulnerable third-party driver/service is present. Reverse engineering with Ghidra or IDA against native binaries (and dnSpy/dotPeek for .NET services) is the standard discovery workflow.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Aggressive patching cadence — local EoP CVEs are routinely weaponized within days</li>
+          <li>Exploit Protection (DEP, ASLR, CFG, CET, ACG, Code Integrity Guard) for user-mode services</li>
+          <li>Reduce attack surface: disable unused services, restrict third-party kernel components</li>
+          <li>WDAC / HVCI to constrain post-exploitation</li>
+        </ul>
+      </div>
+    </div>
+  </section>

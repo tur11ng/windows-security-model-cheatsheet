@@ -1,0 +1,143 @@
+  <!-- ── 14 VULNERABLE SERVICES ───────────────────────────────────────── -->
+  <section class="section" id="vuln-services">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>14 — Vulnerable Services &amp; Binary Hijacking</h3>
+      <span class="section-id">SVC</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/group-managed-service-accounts/getting-started-with-group-managed-service-accounts" target="_blank" rel="noopener noreferrer">Service accounts</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670" target="_blank" rel="noopener noreferrer">Event 4670</a>
+    </div>
+
+    <p class="note">Services are one of the largest local attack surfaces because most run as SYSTEM and many are configured with weak file system, registry, or path-resolution properties. Discovery is straightforward via <code>sc query</code>, <code>wmic service</code>, or PowerShell <code>Get-Service</code> / <code>Get-CimInstance Win32_Service</code>; automated tooling such as PowerSploit's <em>PowerUp</em> module and SharpUp enumerate misconfigurations. The categories below all yield SYSTEM-level code execution when the service is privileged.</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">DLL Search Order Hijacking</span>
+        <span class="attack-mitre">T1574.001</span>
+      </div>
+      <div class="attack-body">
+        <p>When a process loads a DLL by name without an absolute path, Windows searches a defined sequence of directories. If the attacker can plant a malicious DLL in a directory that is searched <em>before</em> the legitimate location, the malicious DLL is loaded into the privileged process. Common when a service binary's own application directory or any directory in the PATH is writable by lower-privileged users. The default search order roughly is: KnownDLLs → application directory → System32 → System → Windows → current directory → PATH directories — but this is altered by SafeDllSearchMode, manifests, and side-by-side configuration.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Ensure <code>SafeDllSearchMode</code> is enabled (default) so the current directory is searched last</li>
+          <li>Use the <code>KnownDLLs</code> registry list — these are loaded from System32 only and cannot be hijacked</li>
+          <li>Audit service install directories — they should not be writable by non-admins</li>
+          <li>Use absolute paths or <code>LOAD_LIBRARY_SEARCH_*</code> flags in service code</li>
+          <li>WDAC publisher rules block unsigned/untrusted DLLs from loading into protected processes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">PATH Environment Variable Hijacking</span>
+        <span class="attack-mitre">T1574.007</span>
+      </div>
+      <div class="attack-body">
+        <p>If the system or service PATH contains a directory writable by low-privileged users, the attacker plants an executable matching a name the service or its child processes invoke without an absolute path. The injected binary is found first in PATH lookup and executes at the service's privilege level. Often arises from sloppy installer behavior that prepends application directories with weak ACLs to system PATH.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit system PATH for entries with weak ACLs (<code>icacls</code> on each directory)</li>
+          <li>Remove writable directories from system PATH; place application binaries in protected directories</li>
+          <li>Always invoke binaries with full paths in scripts and service configurations</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Search Order Hijacking (Executable)</span>
+        <span class="attack-mitre">T1574.008</span>
+      </div>
+      <div class="attack-body">
+        <p>The executable equivalent of DLL search order hijacking — when a process spawns a child by name without an absolute path, the same directory search rules apply, and a malicious binary higher in the search order will be executed instead.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Always specify absolute paths in <code>CreateProcess</code> / <code>ShellExecute</code> service code</li>
+          <li>Sanitize PATH; remove user-writable entries</li>
+          <li>AppLocker / WDAC publisher rules block unauthorized binaries from running</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Unquoted Service Path</span>
+        <span class="attack-mitre">T1574.009</span>
+      </div>
+      <div class="attack-body">
+        <p>When a service's <code>BINARY_PATH_NAME</code> contains spaces and is not enclosed in quotes (e.g. <code>C:\Program Files\Bad Service\bin\svc.exe</code>), the SCM tries each tokenized prefix as a candidate executable: <code>C:\Program.exe</code>, <code>C:\Program Files\Bad.exe</code>, <code>C:\Program Files\Bad Service\bin\svc.exe</code>. If the attacker can write a binary at one of the earlier candidate paths, the SCM launches it as the service identity (often SYSTEM).</p>
+        <p>The frequency of this misconfiguration in third-party software, combined with the default writable status of <code>C:\</code> root for some legacy installers, makes this a perennial finding.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Quote service binary paths properly: <code>sc config &lt;svc&gt; binpath= "\"C:\Program Files\...\"</code></li>
+          <li>Audit ACLs on <code>C:\</code> and intermediate directories — should not be writable by non-admins</li>
+          <li>Periodic scan via <code>wmic service get name,pathname,startmode</code> piped through unquoted-path detection</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Weak Service File Permissions</span>
+        <span class="attack-mitre">T1574.010</span>
+      </div>
+      <div class="attack-body">
+        <p>The service's executable, or any DLL it loads, has a DACL granting write access to a low-privileged identity (Users, Authenticated Users, or a specific user). The attacker overwrites or replaces the binary with a malicious payload; on next service start (or after forcing a restart), the SCM executes the attacker-controlled binary as the service principal.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit DACLs on all service binaries and dependencies — only Administrators / SYSTEM should have Modify</li>
+          <li>WDAC code integrity policy — even if the file is replaced, an unsigned/untrusted replacement won't execute</li>
+          <li>Monitor 4663 events with WriteData / AppendData on service executables</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Weak Service Registry Permissions</span>
+        <span class="attack-mitre">T1574.011</span>
+      </div>
+      <div class="attack-body">
+        <p>The service's configuration key under <code>HKLM\SYSTEM\CurrentControlSet\Services\&lt;ServiceName&gt;</code> is writable by a low-privileged identity. The attacker rewrites <code>ImagePath</code> to point to their own binary, or modifies <code>ObjectName</code> to change the run-as identity. Next service start uses the new configuration. Even without write access to the binary, controlling the registry key fully owns the service.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit registry DACLs on all service keys — only SYSTEM/Admins should have SetValue</li>
+          <li>Monitor 4657 (Registry value changed) on service ImagePath / ObjectName attributes</li>
+          <li>Group Policy: Restricted Groups / Security Templates to enforce baseline service ACLs</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Weak SCM ACL on Service Object</span>
+        <span class="attack-mitre">T1574.011</span>
+      </div>
+      <div class="attack-body">
+        <p>Even when binaries and registry keys are protected, the service object itself — managed by the SCM — has its own DACL. If a low-privileged user holds <code>SERVICE_CHANGE_CONFIG</code> on the service, they can call <code>ChangeServiceConfig</code> to alter the binPath or the run-as account directly through SCM APIs. <code>SERVICE_ALL_ACCESS</code> on a SYSTEM service is equivalent to local SYSTEM compromise.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit per-service SDDL with <code>sc sdshow &lt;service&gt;</code> — verify only SYSTEM/Admins have CC/CR (CHANGE_CONFIG)</li>
+          <li>Group Policy security templates can enforce service security descriptors</li>
+          <li>Monitor 4670 (object permissions changed) on Service objects</li>
+        </ul>
+      </div>
+    </div>
+  </section>

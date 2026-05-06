@@ -1,0 +1,52 @@
+  <!-- ── 02 SIDs ───────────────────────────────────────── -->
+  <section class="section" id="sids">
+    <div class="section-header">
+      <div class="section-dot dot-teal"></div>
+      <h3>02 — Security Identifiers (SIDs)</h3>
+      <span class="section-id">SID</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-identifiers" target="_blank" rel="noopener noreferrer">Security identifiers</a>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title c-teal">SID Structure</div>
+        <p class="note">Every security principal (user, group, computer, service, built-in identity) has a unique SID.</p>
+        <div class="mono-block teal">S - R - I - SA1 - SA2 - ... - RID</div>
+        <ul class="field-list" style="margin-top:8px">
+          <li><span class="field-key">S</span><span class="field-val">Literal prefix</span></li>
+          <li><span class="field-key">R (Revision)</span><span class="field-val">Always <code>1</code></span></li>
+          <li><span class="field-key">I (Identifier Authority)</span><span class="field-val"><code>5</code> = NT Authority (most accounts). <code>16</code> = Mandatory Label Authority.</span></li>
+          <li><span class="field-key">SA (Sub-authorities)</span><span class="field-val">Up to 15. For domain accounts, first sub-authorities form the domain SID.</span></li>
+          <li><span class="field-key">RID (last SA)</span><span class="field-val">Relative Identifier — unique within domain. 500=Administrator, 501=Guest, 512=Domain Admins, 1000+=created users.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Well-Known SIDs</div>
+        <table class="ref-table">
+          <thead><tr><th>SID</th><th>Identity</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell">S-1-0-0</td><td>Null / Nobody</td></tr>
+            <tr><td class="mono-cell">S-1-1-0</td><td>Everyone (all authenticated + anonymous)</td></tr>
+            <tr><td class="mono-cell">S-1-2-0</td><td>Local (interactive logon users)</td></tr>
+            <tr><td class="mono-cell">S-1-5-2</td><td>Network (net logon users)</td></tr>
+            <tr><td class="mono-cell">S-1-5-7</td><td>Anonymous Logon</td></tr>
+            <tr><td class="mono-cell">S-1-5-11</td><td>Authenticated Users</td></tr>
+            <tr><td class="mono-cell">S-1-5-18</td><td>SYSTEM (LocalSystem)</td></tr>
+            <tr><td class="mono-cell">S-1-5-19</td><td>Local Service</td></tr>
+            <tr><td class="mono-cell">S-1-5-20</td><td>Network Service</td></tr>
+            <tr><td class="mono-cell">S-1-5-32-544</td><td>BUILTIN\Administrators</td></tr>
+            <tr><td class="mono-cell">S-1-5-32-545</td><td>BUILTIN\Users</td></tr>
+            <tr><td class="mono-cell">S-1-5-32-551</td><td>BUILTIN\Backup Operators</td></tr>
+            <tr><td class="mono-cell">S-1-16-0</td><td>Integrity: Untrusted</td></tr>
+            <tr><td class="mono-cell">S-1-16-4096</td><td>Integrity: Low</td></tr>
+            <tr><td class="mono-cell">S-1-16-8192</td><td>Integrity: Medium (default users)</td></tr>
+            <tr><td class="mono-cell">S-1-16-12288</td><td>Integrity: High (elevated admins)</td></tr>
+            <tr><td class="mono-cell">S-1-16-16384</td><td>Integrity: System</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>

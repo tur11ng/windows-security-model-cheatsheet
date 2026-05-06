@@ -1,0 +1,129 @@
+  <!-- ── 15 CREDENTIAL ACCESS ───────────────────────────────────────── -->
+  <section class="section" id="cred-access">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>15 — Credential Access</h3>
+      <span class="section-id">TA0006</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/credential-guard/how-it-works" target="_blank" rel="noopener noreferrer">Credential Guard</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata" target="_blank" rel="noopener noreferrer">DPAPI CryptProtectData</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptunprotectdata" target="_blank" rel="noopener noreferrer">DPAPI CryptUnprotectData</a>
+    </div>
+
+    <p class="note">Once local admin or SYSTEM is achieved, the next objective is harvesting credentials for lateral movement and persistence. Targets are LSASS memory, the SAM/SECURITY hives, the DPAPI master key chain, and (on a DC) the directory database itself.</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">LSASS Memory Dumping</span>
+        <span class="attack-mitre">T1003.001</span>
+      </div>
+      <div class="attack-body">
+        <p>LSASS holds, for every interactive logon session on the host, the user's NT hash, Kerberos AES/RC4 keys and tickets, and (if WDigest enabled) cleartext password. Dumping the process — via Mimikatz, comsvcs.dll <code>MiniDump</code>, taskmgr, ProcDump, or direct <code>MiniDumpWriteDump</code> — yields all of those secrets for offline parsing. Requires <code>SeDebugPrivilege</code> to open the process.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Run LSASS as Protected Process Light — registry <code>RunAsPPL=1</code> (or <code>=2</code> on Win11 22H2+ for boot-time enforcement)</li>
+          <li>Enable Credential Guard (VSM) — secrets isolated in LSAIso, dumps yield encrypted material</li>
+          <li>EDR with kernel callbacks to alert on LSASS handle requests with PROCESS_VM_READ</li>
+          <li>Enable Attack Surface Reduction rule "Block credential stealing from LSASS"</li>
+          <li>Restrict <code>SeDebugPrivilege</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SAM &amp; SECURITY Hive Extraction</span>
+        <span class="attack-mitre">T1003.002 / T1003.004</span>
+      </div>
+      <div class="attack-body">
+        <p>The SAM hive contains local NT hashes; the SECURITY hive contains LSA Secrets (service account passwords stored in cleartext, cached domain credentials as DCC2 verifiers, DPAPI keys). The hives are locked at runtime, so direct file copy fails — but Volume Shadow Copy, <code>reg save</code> with <code>SeBackupPrivilege</code>, or raw NTFS access (<code>ntfsclone</code>, <code>esentutl /y</code>) all bypass the lock. Decryption uses the SYSTEM hive's BootKey (legacy) or DPAPI machine key (modern).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Disable cleartext WDigest, restrict use of cached domain credentials (<code>CachedLogonsCount</code>)</li>
+          <li>Use LAPS so even if local Administrator hash is recovered, it cannot be reused</li>
+          <li>Disable VSS where not required; monitor VSS shadow creation events (8222)</li>
+          <li>Monitor 4663/4670 events on \Windows\System32\config\SAM and SECURITY</li>
+          <li>EDR detection on <code>reg save HKLM\SAM</code> and similar patterns</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">DCSync — Replication of Domain Secrets</span>
+        <span class="attack-mitre">T1003.006</span>
+      </div>
+      <div class="attack-body">
+        <p>The MS-DRSR replication protocol allows a DC (or any principal granted the <code>DS-Replication-Get-Changes</code> + <code>DS-Replication-Get-Changes-All</code> extended rights on the domain root) to request replication of secret attributes — including the NT hash and Kerberos keys — for any account in the domain, krbtgt included. The attack runs against any DC over the network, requiring no code execution on the DC. Domain Admins, Enterprise Admins, and Domain Controllers hold these rights by default; misconfigured AD ACLs frequently grant them to other accounts.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit and minimize accounts holding <code>DS-Replication-Get-Changes-All</code> on the domain root (use the Active Directory module's DSACLs / ACL queries)</li>
+          <li>Enable advanced auditing for Directory Service Access (4662) on the domain object — alert on replication right exercise from non-DC sources</li>
+          <li>Network segment DCs; DC-to-DC replication should not be reachable from user subnets</li>
+          <li>Tier-0 enforcement: identity admins never log into Tier-1/2 systems</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">DPAPI Master Key Abuse</span>
+        <span class="attack-mitre">T1555.003 / T1003.004</span>
+      </div>
+      <div class="attack-body">
+        <p>The Data Protection API encrypts user secrets — saved browser passwords, RDP credentials, certificate private keys — with a per-user master key derived from the user's password (or, for domain users, backed by a domain-wide DPAPI backup key on a DC). With local SYSTEM, an attacker can extract user master keys; with the domain DPAPI backup key (extractable via LSADUMP::backupkeys against a DC), they can decrypt <em>any</em> user's protected blob in the domain offline, even without that user's hash.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Treat the DPAPI domain backup key as a Tier-0 secret; restrict access on DCs</li>
+          <li>Credential Guard isolates DPAPI keys within VSM</li>
+          <li>EDR detection on LSARPC <code>LsarRetrievePrivateData</code> calls referencing <code>G$BCKUPKEY*</code></li>
+          <li>Discourage browser-stored credentials; use centralized password managers with hardware-backed keys</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Cached Domain Credentials (DCC2)</span>
+        <span class="attack-mitre">T1003.005</span>
+      </div>
+      <div class="attack-body">
+        <p>For offline-logon support, Windows stores up to 10 (default) domain users' password verifiers in HKLM\SECURITY\Cache. The format (DCC2/MSCASHv2) is PBKDF2-HMAC-SHA1 over the username and NT hash and is not directly usable for authentication — but is offline-crackable. A successful crack gives the cleartext password, which can be replayed against any service.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Reduce <code>CachedLogonsCount</code> to 0 or 1 on hosts that don't go offline</li>
+          <li>Strong password policies (length &gt;14) — DCC2 cracking depends on password strength</li>
+          <li>Add privileged users to Protected Users group — disables credential caching for those accounts</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">WDigest Re-enable</span>
+        <span class="attack-mitre">T1112 + T1003</span>
+      </div>
+      <div class="attack-body">
+        <p>WDigest stored cleartext passwords reversibly in LSASS. Disabled by default since Win8.1, but the registry value <code>HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest\UseLogonCredential = 1</code> re-enables it. After flipping the value, the attacker waits for users to authenticate (or forces RDP reconnections) — subsequent LSASS dumps yield cleartext credentials.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Group Policy enforcement of <code>UseLogonCredential = 0</code> with refresh interval</li>
+          <li>Monitor 4657 events on the WDigest registry path</li>
+          <li>Credential Guard prevents extraction even if WDigest re-enabled</li>
+        </ul>
+      </div>
+    </div>
+  </section>

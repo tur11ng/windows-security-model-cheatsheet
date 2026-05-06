@@ -1,0 +1,104 @@
+  <!-- ── 11 ACTIVE DIRECTORY ───────────────────────────────────────── -->
+  <section class="section" id="active-directory">
+    <div class="section-header">
+      <div class="section-dot dot-purple"></div>
+      <h3>11 — Active Directory Security Model</h3>
+      <span class="section-id">AD</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview" target="_blank" rel="noopener noreferrer">AD DS overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/ad/active-directory-domain-services" target="_blank" rel="noopener noreferrer">AD DS API overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-lists" target="_blank" rel="noopener noreferrer">AD ACLs</a>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title c-purple">Forest &amp; Domain Structure</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">Forest</span><span class="field-val">The true security boundary. Shared schema, GC, and Enterprise Admins group.</span></li>
+          <li><span class="field-key purple">Domain</span><span class="field-val">Admin and replication boundary within a forest. Has its own DC, krbtgt, and domain admins.</span></li>
+          <li><span class="field-key purple">OU</span><span class="field-val">Organizational Unit. Container for GPO application and delegated admin. Not a security boundary.</span></li>
+          <li><span class="field-key purple">GC</span><span class="field-val">Global Catalog. Partial replica of all objects in the forest.</span></li>
+          <li><span class="field-key purple">FSMO Roles</span><span class="field-val">5 single-master roles: Schema Master, Domain Naming Master (forest); PDC Emulator, RID Master, Infrastructure Master (per domain).</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Trust Types</div>
+        <table class="ref-table">
+          <thead><tr><th>Type</th><th>Transitivity</th><th>Direction</th></tr></thead>
+          <tbody>
+            <tr><td>Parent-Child</td><td>Transitive</td><td>Bi-directional (auto)</td></tr>
+            <tr><td>Tree-Root</td><td>Transitive</td><td>Bi-directional (auto)</td></tr>
+            <tr><td>Shortcut</td><td>Transitive</td><td>Configurable</td></tr>
+            <tr><td>External</td><td>Non-transitive</td><td>Configurable</td></tr>
+            <tr><td>Forest</td><td>Transitive within forests</td><td>Configurable</td></tr>
+            <tr><td>Realm</td><td>Configurable</td><td>Configurable</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-blue" style="margin-top:8px">
+          <div class="callout-label">SID Filtering</div>
+          Cross-forest trusts apply <strong class="hl">SID Filtering</strong> by default — strips SIDs from foreign domains out of the PAC at the trust boundary. Within a single forest, SID history is trusted.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">Group Scopes</div>
+        <ul class="field-list">
+          <li><span class="field-key">Domain Local</span><span class="field-val">Members from any domain. Used for resource permissions in same domain.</span></li>
+          <li><span class="field-key">Global</span><span class="field-val">Members from same domain only. Usable in any domain. Replicated to own DC only.</span></li>
+          <li><span class="field-key">Universal</span><span class="field-val">Members from any domain in forest. Replicated to Global Catalog.</span></li>
+        </ul>
+        <div class="divider"></div>
+        <h4 class="sub">Privileged Groups</h4>
+        <div class="badge-grid">
+          <span class="badge badge-purple">Domain Admins</span>
+          <span class="badge badge-purple">Enterprise Admins</span>
+          <span class="badge badge-purple">Schema Admins</span>
+          <span class="badge badge-purple">Domain Controllers</span>
+          <span class="badge badge-amber">Account Operators</span>
+          <span class="badge badge-amber">Backup Operators</span>
+          <span class="badge badge-amber">Server Operators</span>
+          <span class="badge badge-amber">DnsAdmins</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-coral">AD Object Security Descriptors</div>
+        <p class="note">Every AD object has a full security descriptor stored in the directory. ACEs can apply to the object itself or be scoped to specific <strong class="hl">object types</strong> (classes) or <strong class="hl">properties</strong> (attributes).</p>
+        <ul class="field-list" style="margin-top:8px">
+          <li><span class="field-key coral">Standard Access Rights</span><span class="field-val">GenericAll, GenericRead, GenericWrite, GenericExecute — mapped to AD-specific rights.</span></li>
+          <li><span class="field-key coral">Object-Specific Rights</span><span class="field-val"><code>DS-Read-Property</code>, <code>DS-Write-Property</code> scoped to specific attribute GUIDs.</span></li>
+          <li><span class="field-key coral">Control Access Rights</span><span class="field-val">Extended rights identified by GUID. Examples: <code>Reset-Password</code>, <code>DS-Replication-Get-Changes-All</code>.</span></li>
+          <li><span class="field-key coral">Property Sets</span><span class="field-val">Groups of attributes under one right GUID.</span></li>
+          <li><span class="field-key coral">Write-Validated Rights</span><span class="field-val">Constrain writes to validated values only (e.g., Self-Membership).</span></li>
+          <li><span class="field-key coral">AdminSDHolder</span><span class="field-val">Template object whose ACL is propagated to all protected group members by SDProp every 60 minutes.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Group Policy Enforcement</div>
+        <h4 class="sub">Application Order (LSDOU)</h4>
+        <div class="flow" style="flex-direction:column; align-items:flex-start; gap:4px">
+          <div class="flow-step">1 · Local GPO</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">2 · Site GPO</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">3 · Domain GPO</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">4 · OU GPO (outermost first)</div>
+        </div>
+        <p class="note" style="margin-top:6px">Later GPO wins unless Enforced or Block Inheritance is set.</p>
+        <div class="divider"></div>
+        <h4 class="sub">Security-Relevant GPO Settings</h4>
+        <ul class="field-list">
+          <li><span class="field-key blue">Password Policy</span><span class="field-val">Min length, complexity, history, max age. One per domain unless PSO used.</span></li>
+          <li><span class="field-key blue">Audit Policy</span><span class="field-val">Categories logged. Set at domain or OU level.</span></li>
+          <li><span class="field-key blue">User Rights</span><span class="field-val">URA / privilege assignments per machine.</span></li>
+          <li><span class="field-key blue">Restricted Groups</span><span class="field-val">Enforce local group membership on machines.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>

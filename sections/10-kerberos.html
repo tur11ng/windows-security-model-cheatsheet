@@ -1,0 +1,94 @@
+  <!-- ── 10 KERBEROS ───────────────────────────────────────── -->
+  <section class="section" id="kerberos">
+    <div class="section-header">
+      <div class="section-dot dot-teal"></div>
+      <h3>10 — Kerberos Authentication</h3>
+      <span class="section-id">KRB5</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview" target="_blank" rel="noopener noreferrer">Kerberos overview</a>
+    </div>
+
+    <p class="note">Kerberos v5 is the default protocol for domain authentication. It is ticket-based and mutual — both client and server authenticate each other. The KDC (Key Distribution Center) runs on every Domain Controller. No passwords travel the network; all encryption uses keys derived from account passwords.</p>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-teal">Components</div>
+        <ul class="field-list">
+          <li><span class="field-key">KDC</span><span class="field-val">Key Distribution Center. Runs on DC. Contains AS + TGS + database of all account keys.</span></li>
+          <li><span class="field-key">AS</span><span class="field-val">Authentication Service. Issues TGTs in response to valid pre-auth.</span></li>
+          <li><span class="field-key">TGS</span><span class="field-val">Ticket Granting Service. Issues service tickets in exchange for valid TGTs.</span></li>
+          <li><span class="field-key">Principal</span><span class="field-val">Any identity: user, computer, or service account.</span></li>
+          <li><span class="field-key">SPN</span><span class="field-val">Service Principal Name. Format: <code>service/host@REALM</code>.</span></li>
+          <li><span class="field-key">Realm</span><span class="field-val">Domain (uppercase). Cross-realm trusts enable inter-domain auth.</span></li>
+          <li><span class="field-key">krbtgt</span><span class="field-val">Special account whose hash encrypts ALL TGTs.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Ticket Types &amp; Lifetime</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">TGT</span><span class="field-val">Ticket Granting Ticket. Issued by AS. Encrypted with krbtgt hash. Default 10 hours, renewable up to 7 days.</span></li>
+          <li><span class="field-key blue">Service Ticket</span><span class="field-val">Issued by TGS. Encrypted with target service account's hash.</span></li>
+          <li><span class="field-key blue">PAC</span><span class="field-val">Privileged Attribute Certificate embedded in tickets. Contains user SID, group SIDs, logon info. Signed by KDC.</span></li>
+          <li><span class="field-key blue">Authenticator</span><span class="field-val">Client-generated timestamp encrypted with session key. Sent with each ticket use to prevent replay.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-purple">Encryption Types</div>
+        <ul class="field-list">
+          <li><span class="field-key purple">RC4-HMAC</span><span class="field-val">Uses NT hash directly as key. Legacy.</span></li>
+          <li><span class="field-key purple">AES-128/256</span><span class="field-val">Uses PBKDF2-derived key from password + salt (username@domain). Modern standard.</span></li>
+          <li><span class="field-key purple">DES-CBC-CRC</span><span class="field-val">Legacy, disabled by default since Win7/2008R2.</span></li>
+        </ul>
+        <div class="divider"></div>
+        <h4 class="sub">Pre-authentication</h4>
+        <p class="note">By default, the AS-REQ includes a timestamp encrypted with the user's long-term key. This proves the client knows the password before the KDC issues a TGT. Without it, the AS-REP becomes offline-crackable.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-teal">Full Authentication Flow</div>
+      <div style="overflow-x:auto; margin-top:8px">
+        <table class="ref-table">
+          <thead><tr><th>#</th><th>Message</th><th>Direction</th><th>Contents</th><th>Encrypted With</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell">1</td><td><strong class="hl">AS-REQ</strong></td><td>Client → KDC/AS</td><td>Username, service name (krbtgt), pre-auth timestamp</td><td>User's long-term key</td></tr>
+            <tr><td class="mono-cell">2</td><td><strong class="hl">AS-REP</strong></td><td>KDC/AS → Client</td><td>TGT + session key</td><td>TGT → krbtgt key; session key → user's key</td></tr>
+            <tr><td class="mono-cell">3</td><td><strong class="hl">TGS-REQ</strong></td><td>Client → KDC/TGS</td><td>TGT + Authenticator + target SPN</td><td>Authenticator → TGS session key</td></tr>
+            <tr><td class="mono-cell">4</td><td><strong class="hl">TGS-REP</strong></td><td>KDC/TGS → Client</td><td>Service Ticket + new service session key</td><td>ST → service account's key</td></tr>
+            <tr><td class="mono-cell">5</td><td><strong class="hl">AP-REQ</strong></td><td>Client → Service</td><td>Service Ticket + Authenticator</td><td>Authenticator → service session key</td></tr>
+            <tr><td class="mono-cell">6</td><td><strong class="hl">AP-REP</strong></td><td>Service → Client</td><td>Confirmation timestamp (mutual auth)</td><td>Service session key</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-purple">Kerberos Delegation Models</div>
+      <p class="note">Delegation allows a service to act on behalf of a user against another service — necessary for multi-tier applications.</p>
+      <ul class="field-list" style="margin-top:8px">
+        <li>
+          <span class="field-key purple">Unconstrained</span>
+          <span class="field-val">User's TGT is forwarded to the front-end service and cached there. The service can request tickets to <em>any</em> downstream service. Configured by <code>TrustedForDelegation</code> on the account object.</span>
+        </li>
+        <li>
+          <span class="field-key purple">Constrained (KCD)</span>
+          <span class="field-val">Front-end service can only delegate to a specific list of SPNs in <code>msDS-AllowedToDelegateTo</code>. Uses <strong class="hl">S4U2Self</strong> (obtain a self-ticket for any user — protocol transition) and <strong class="hl">S4U2Proxy</strong> (use that ticket to get one for the back-end service).</span>
+        </li>
+        <li>
+          <span class="field-key purple">Resource-Based (RBCD)</span>
+          <span class="field-val">Configured on the back-end resource via <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code>. The resource lists which front-end principals may delegate to it.</span>
+        </li>
+        <li>
+          <span class="field-key purple">PKINIT</span>
+          <span class="field-val">Certificate-based Kerberos pre-authentication. Smart cards and ADCS-issued certificates. The KDC trusts certificates issued by an Enterprise CA mapped to a user account.</span>
+        </li>
+      </ul>
+      <div class="callout callout-blue" style="margin-top:10px">
+        <div class="callout-label">Sensitive Account Protection</div>
+        Adding accounts to the <strong class="hl">Protected Users</strong> group disables NTLM auth, unconstrained delegation, DES/RC4 Kerberos, and CredSSP caching. TGT lifetime is forced to 4 hours, non-renewable. The <code>Account is sensitive and cannot be delegated</code> flag prevents an account's tickets from being forwarded.
+      </div>
+    </div>
+  </section>

@@ -1,0 +1,1339 @@
+  <div class="diagram-rail-title">Reference Rail</div>
+
+  <div class="rail-tabs" role="tablist" aria-label="Right column views">
+    <button class="rail-tab active" type="button" role="tab" aria-selected="true" aria-controls="railDiagrams" data-rail-tab="diagrams">Diagrams</button>
+    <button class="rail-tab" type="button" role="tab" aria-selected="false" aria-controls="railExamples" data-rail-tab="examples">Code</button>
+  </div>
+
+  <div class="rail-panel active" id="railDiagrams" role="tabpanel" data-rail-panel="diagrams">
+  <a class="diagram-card blue" href="#architecture">
+    <div class="diagram-title">Kernel Access Path</div>
+    <svg class="diagram-svg" viewBox="0 0 260 118" role="img" aria-label="Access request from caller through Object Manager and SRM to a handle">
+      <rect class="box blue" x="12" y="16" width="66" height="30"></rect>
+      <text class="node-text" x="45" y="31">Caller</text>
+      <path class="flowline" d="M78 31 H106"></path>
+      <path class="flowline" d="M101 26 L108 31 L101 36"></path>
+      <rect class="box" x="108" y="16" width="66" height="30"></rect>
+      <text class="node-text" x="141" y="31">ObjMgr</text>
+      <path class="flowline" d="M141 46 V68"></path>
+      <path class="flowline" d="M136 63 L141 70 L146 63"></path>
+      <rect class="box teal" x="108" y="70" width="66" height="30"></rect>
+      <text class="node-text" x="141" y="85">SRM</text>
+      <path class="flowline" d="M174 31 H202"></path>
+      <path class="flowline" d="M197 26 L204 31 L197 36"></path>
+      <rect class="box green" x="204" y="16" width="44" height="30"></rect>
+      <text class="node-text" x="226" y="31">Handle</text>
+      <text class="tiny-text" x="141" y="110">token + descriptor + requested access</text>
+    </svg>
+    <div class="diagram-note">Object Manager asks SRM to decide whether a token may open a secured object.</div>
+  </a>
+
+  <a class="diagram-card amber" href="#tokens">
+    <div class="diagram-title">Token Ingredients</div>
+    <svg class="diagram-svg" viewBox="0 0 260 128" role="img" aria-label="Access token made from user SID, group SIDs, privileges and integrity">
+      <rect class="box amber" x="86" y="44" width="88" height="38"></rect>
+      <text class="node-text" x="130" y="63">Access</text>
+      <text class="node-text" x="130" y="75">Token</text>
+      <rect class="box-soft" x="12" y="12" width="66" height="28"></rect>
+      <text class="tiny-text" x="45" y="26">User SID</text>
+      <rect class="box-soft" x="182" y="12" width="66" height="28"></rect>
+      <text class="tiny-text" x="215" y="26">Groups</text>
+      <rect class="box-soft" x="12" y="88" width="66" height="28"></rect>
+      <text class="tiny-text" x="45" y="102">Privileges</text>
+      <rect class="box-soft" x="182" y="88" width="66" height="28"></rect>
+      <text class="tiny-text" x="215" y="102">Integrity</text>
+      <path class="flowline" d="M78 40 L94 51"></path>
+      <path class="flowline" d="M182 40 L166 51"></path>
+      <path class="flowline" d="M78 88 L94 77"></path>
+      <path class="flowline" d="M182 88 L166 77"></path>
+    </svg>
+    <div class="diagram-note">Authorization is mostly token math: identity, memberships, privileges, and integrity level.</div>
+  </a>
+
+  <a class="diagram-card amber" href="#tokens-lifecycle">
+    <div class="diagram-title">Token Lifecycle</div>
+    <svg class="diagram-svg" viewBox="0 0 260 154" role="img" aria-label="Access token lifecycle from logon request to access check">
+      <rect class="box blue" x="12" y="12" width="62" height="28"></rect>
+      <text class="tiny-text" x="43" y="26">Logon</text>
+      <path class="flowline" d="M74 26 H94"></path>
+      <path class="flowline" d="M89 21 L96 26 L89 31"></path>
+      <rect class="box teal" x="96" y="12" width="68" height="28"></rect>
+      <text class="tiny-text" x="130" y="26">LSASS</text>
+      <path class="flowline" d="M164 26 H184"></path>
+      <path class="flowline" d="M179 21 L186 26 L179 31"></path>
+      <rect class="box amber" x="186" y="12" width="62" height="28"></rect>
+      <text class="tiny-text" x="217" y="26">Policy</text>
+
+      <path class="flowline" d="M217 40 V58"></path>
+      <path class="flowline" d="M212 53 L217 60 L222 53"></path>
+      <rect class="box purple" x="162" y="60" width="86" height="30"></rect>
+      <text class="tiny-text" x="205" y="75">Logon Session</text>
+      <path class="flowline" d="M162 75 H138"></path>
+      <path class="flowline" d="M143 70 L136 75 L143 80"></path>
+      <rect class="box red" x="64" y="60" width="72" height="30"></rect>
+      <text class="tiny-text" x="100" y="75">Token</text>
+
+      <path class="flowline" d="M100 90 V110"></path>
+      <path class="flowline" d="M95 105 L100 112 L105 105"></path>
+      <rect class="box green" x="34" y="112" width="80" height="30"></rect>
+      <text class="tiny-text" x="74" y="127">Effective</text>
+      <path class="flowline" d="M114 127 H146"></path>
+      <path class="flowline" d="M141 122 L148 127 L141 132"></path>
+      <rect class="box" x="148" y="112" width="78" height="30"></rect>
+      <text class="tiny-text" x="187" y="127">SRM Check</text>
+    </svg>
+    <div class="diagram-note">The token is born from logon policy, attaches to a process or thread, then becomes input to SRM.</div>
+  </a>
+
+  <a class="diagram-card amber" href="#tokens-relationships">
+    <div class="diagram-title">Token Relationships</div>
+    <svg class="diagram-svg" viewBox="0 0 260 154" role="img" aria-label="How access token types relate to each other">
+      <rect class="box amber" x="84" y="10" width="92" height="30"></rect>
+      <text class="tiny-text" x="130" y="25">Base Token</text>
+      <path class="flowline" d="M101 40 L64 64"></path>
+      <path class="flowline" d="M70 55 L61 66 L75 64"></path>
+      <rect class="box teal" x="14" y="66" width="82" height="26"></rect>
+      <text class="tiny-text" x="55" y="79">Primary</text>
+      <path class="flowline" d="M130 40 V66"></path>
+      <path class="flowline" d="M125 59 L130 68 L135 59"></path>
+      <rect class="box blue" x="98" y="66" width="64" height="26"></rect>
+      <text class="tiny-text" x="130" y="79">Imperson.</text>
+      <path class="flowline" d="M159 40 L196 64"></path>
+      <path class="flowline" d="M185 64 L199 66 L190 55"></path>
+      <rect class="box red" x="164" y="66" width="82" height="26"></rect>
+      <text class="tiny-text" x="205" y="79">UAC Pair</text>
+      <path class="flowline" d="M55 92 V114"></path>
+      <path class="flowline" d="M50 107 L55 116 L60 107"></path>
+      <rect class="box purple" x="14" y="116" width="82" height="26"></rect>
+      <text class="tiny-text" x="55" y="129">Restricted</text>
+      <path class="flowline" d="M96 129 H164"></path>
+      <path class="flowline" d="M157 124 L166 129 L157 134"></path>
+      <rect class="box purple" x="166" y="116" width="80" height="26"></rect>
+      <text class="tiny-text" x="206" y="129">AppContainer</text>
+      <text class="tiny-text" x="130" y="105">integrity + network session apply across them</text>
+    </svg>
+    <div class="diagram-note">Primary, impersonation, UAC, restricted, AppContainer, integrity, and network state are dimensions of one token model.</div>
+  </a>
+
+  <a class="diagram-card purple" href="#access-check">
+    <div class="diagram-title">Access Check Order</div>
+    <svg class="diagram-svg" viewBox="0 0 260 116" role="img" aria-label="Access check evaluates deny ACEs, allow ACEs, then auditing">
+      <rect class="box amber" x="12" y="18" width="58" height="30"></rect>
+      <text class="node-text" x="41" y="33">Request</text>
+      <path class="flowline" d="M70 33 H94"></path>
+      <path class="flowline" d="M89 28 L96 33 L89 38"></path>
+      <rect class="box red" x="96" y="18" width="54" height="30"></rect>
+      <text class="node-text" x="123" y="33">Deny</text>
+      <path class="flowline" d="M150 33 H174"></path>
+      <path class="flowline" d="M169 28 L176 33 L169 38"></path>
+      <rect class="box green" x="176" y="18" width="54" height="30"></rect>
+      <text class="node-text" x="203" y="33">Allow</text>
+      <path class="flowline" d="M203 48 V72"></path>
+      <path class="flowline" d="M198 67 L203 74 L208 67"></path>
+      <rect class="box blue" x="176" y="74" width="54" height="30"></rect>
+      <text class="node-text" x="203" y="89">SACL</text>
+      <text class="tiny-text" x="87" y="89">DACL grants or blocks</text>
+    </svg>
+    <div class="diagram-note">A matching deny ACE can end the decision before allow entries finish accumulating rights.</div>
+  </a>
+
+  <a class="diagram-card teal" href="#access-check">
+    <div class="diagram-title">Full Access Pipeline</div>
+    <svg class="diagram-svg" viewBox="0 0 260 154" role="img" aria-label="Full Windows access check pipeline from desired access to final decision">
+      <rect class="box amber" x="14" y="12" width="66" height="24"></rect>
+      <text class="tiny-text" x="47" y="24">Desired</text>
+      <path class="flowline" d="M80 24 H104"></path>
+      <path class="flowline" d="M99 19 L106 24 L99 29"></path>
+      <rect class="box blue" x="106" y="12" width="66" height="24"></rect>
+      <text class="tiny-text" x="139" y="24">Map Generic</text>
+      <path class="flowline" d="M172 24 H196"></path>
+      <path class="flowline" d="M191 19 L198 24 L191 29"></path>
+      <rect class="box purple" x="198" y="12" width="48" height="24"></rect>
+      <text class="tiny-text" x="222" y="24">MIC</text>
+      <path class="flowline" d="M222 36 V56"></path>
+      <path class="flowline" d="M217 51 L222 58 L227 51"></path>
+      <rect class="box-soft" x="176" y="58" width="70" height="24"></rect>
+      <text class="tiny-text" x="211" y="70">Owner/Privs</text>
+      <path class="flowline" d="M176 70 H150"></path>
+      <path class="flowline" d="M155 65 L148 70 L155 75"></path>
+      <rect class="box red" x="88" y="58" width="60" height="24"></rect>
+      <text class="tiny-text" x="118" y="70">Deny ACE</text>
+      <path class="flowline" d="M88 70 H62"></path>
+      <path class="flowline" d="M67 65 L60 70 L67 75"></path>
+      <rect class="box green" x="12" y="58" width="48" height="24"></rect>
+      <text class="tiny-text" x="36" y="70">Allow</text>
+      <path class="flowline" d="M36 82 V102"></path>
+      <path class="flowline" d="M31 97 L36 104 L41 97"></path>
+      <rect class="box-soft" x="12" y="104" width="70" height="24"></rect>
+      <text class="tiny-text" x="47" y="116">Sandbox/CAP</text>
+      <path class="flowline" d="M82 116 H122"></path>
+      <path class="flowline" d="M117 111 L124 116 L117 121"></path>
+      <rect class="box teal" x="124" y="104" width="54" height="24"></rect>
+      <text class="tiny-text" x="151" y="116">Audit</text>
+      <path class="flowline" d="M178 116 H208"></path>
+      <path class="flowline" d="M203 111 L210 116 L203 121"></path>
+      <rect class="box green" x="210" y="104" width="38" height="24"></rect>
+      <text class="tiny-text" x="229" y="116">Grant</text>
+      <text class="tiny-text" x="130" y="145">each phase can deny or reduce remaining access</text>
+    </svg>
+    <div class="diagram-note">The DACL is only one phase: generic mapping, MIC, privilege, sandbox, CAP, and audit layers also matter.</div>
+  </a>
+
+  <a class="diagram-card teal" href="#ntlm">
+    <div class="diagram-title">NTLM Challenge</div>
+    <svg class="diagram-svg" viewBox="0 0 260 120" role="img" aria-label="NTLM challenge response between client, server, and domain controller">
+      <rect class="box teal" x="10" y="18" width="58" height="28"></rect>
+      <text class="node-text" x="39" y="32">Client</text>
+      <rect class="box amber" x="101" y="18" width="58" height="28"></rect>
+      <text class="node-text" x="130" y="32">Server</text>
+      <rect class="box purple" x="192" y="18" width="58" height="28"></rect>
+      <text class="node-text" x="221" y="32">DC</text>
+      <path class="flowline" d="M68 32 H101"></path>
+      <path class="flowline" d="M96 27 L103 32 L96 37"></path>
+      <text class="tiny-text" x="84" y="22">1</text>
+      <path class="flowline" d="M101 57 H68"></path>
+      <path class="flowline" d="M73 52 L66 57 L73 62"></path>
+      <text class="tiny-text" x="84" y="69">2 challenge</text>
+      <path class="flowline" d="M68 84 H101"></path>
+      <path class="flowline" d="M96 79 L103 84 L96 89"></path>
+      <text class="tiny-text" x="84" y="98">3 response</text>
+      <path class="flowline" d="M159 84 H192"></path>
+      <path class="flowline" d="M187 79 L194 84 L187 89"></path>
+      <text class="tiny-text" x="176" y="98">validate</text>
+    </svg>
+    <div class="diagram-note">The server proves the response by asking the DC, which is why relay defenses matter.</div>
+  </a>
+
+  <a class="diagram-card teal" href="#kerberos">
+    <div class="diagram-title">Kerberos Tickets</div>
+    <svg class="diagram-svg" viewBox="0 0 260 126" role="img" aria-label="Kerberos client gets TGT, then service ticket, then accesses service">
+      <rect class="box teal" x="10" y="14" width="54" height="28"></rect>
+      <text class="node-text" x="37" y="28">Client</text>
+      <rect class="box purple" x="103" y="14" width="54" height="28"></rect>
+      <text class="node-text" x="130" y="28">KDC</text>
+      <rect class="box green" x="196" y="14" width="54" height="28"></rect>
+      <text class="node-text" x="223" y="28">Svc</text>
+      <path class="flowline" d="M64 28 H103"></path>
+      <path class="flowline" d="M98 23 L105 28 L98 33"></path>
+      <text class="tiny-text" x="84" y="18">AS</text>
+      <path class="flowline" d="M103 55 H64"></path>
+      <path class="flowline" d="M69 50 L62 55 L69 60"></path>
+      <text class="tiny-text" x="84" y="68">TGT</text>
+      <path class="flowline" d="M64 84 H103"></path>
+      <path class="flowline" d="M98 79 L105 84 L98 89"></path>
+      <text class="tiny-text" x="84" y="98">TGS</text>
+      <path class="flowline" d="M157 84 H196"></path>
+      <path class="flowline" d="M191 79 L198 84 L191 89"></path>
+      <text class="tiny-text" x="177" y="98">ST</text>
+      <path class="flowline" d="M64 111 H196"></path>
+      <path class="flowline" d="M191 106 L198 111 L191 116"></path>
+      <text class="tiny-text" x="130" y="121">present service ticket</text>
+    </svg>
+    <div class="diagram-note">Kerberos separates identity proof from service access using TGTs and service tickets.</div>
+  </a>
+
+  <a class="diagram-card red" href="#ad-abuse">
+    <div class="diagram-title">AD Control Path</div>
+    <svg class="diagram-svg" viewBox="0 0 260 116" role="img" aria-label="AD ACL abuse path from delegated right to tier zero control">
+      <rect class="box red" x="12" y="18" width="54" height="30"></rect>
+      <text class="node-text" x="39" y="33">ACE</text>
+      <path class="flowline" d="M66 33 H93"></path>
+      <path class="flowline" d="M88 28 L95 33 L88 38"></path>
+      <rect class="box amber" x="95" y="18" width="70" height="30"></rect>
+      <text class="node-text" x="130" y="33">Write</text>
+      <path class="flowline" d="M165 33 H192"></path>
+      <path class="flowline" d="M187 28 L194 33 L187 38"></path>
+      <rect class="box purple" x="194" y="18" width="54" height="30"></rect>
+      <text class="node-text" x="221" y="33">Admin</text>
+      <path class="flowline" d="M39 48 C52 82, 83 90, 118 86"></path>
+      <path class="flowline" d="M113 81 L120 86 L113 91"></path>
+      <rect class="box-soft" x="122" y="70" width="94" height="28"></rect>
+      <text class="tiny-text" x="169" y="84">group, SPN, RBCD</text>
+    </svg>
+    <div class="diagram-note">Small delegated rights can become a control path when they touch high-value objects.</div>
+  </a>
+
+  <a class="diagram-card purple" href="#descriptors">
+    <div class="diagram-title">Descriptor Layout</div>
+    <svg class="diagram-svg" viewBox="0 0 260 122" role="img" aria-label="Security descriptor layout with owner, group, DACL, SACL and ACEs">
+      <rect class="box purple" x="16" y="14" width="228" height="28"></rect>
+      <text class="node-text" x="130" y="28">Security Descriptor</text>
+      <rect class="box-soft" x="18" y="56" width="48" height="24"></rect>
+      <text class="tiny-text" x="42" y="68">Owner</text>
+      <rect class="box-soft" x="74" y="56" width="48" height="24"></rect>
+      <text class="tiny-text" x="98" y="68">Group</text>
+      <rect class="box green" x="130" y="56" width="48" height="24"></rect>
+      <text class="tiny-text" x="154" y="68">DACL</text>
+      <rect class="box amber" x="186" y="56" width="48" height="24"></rect>
+      <text class="tiny-text" x="210" y="68">SACL</text>
+      <path class="flowline" d="M154 80 V99 H66"></path>
+      <path class="flowline" d="M210 80 V99 H194"></path>
+      <rect class="box-soft" x="34" y="94" width="64" height="20"></rect>
+      <text class="tiny-text" x="66" y="104">allow/deny ACE</text>
+      <rect class="box-soft" x="162" y="94" width="64" height="20"></rect>
+      <text class="tiny-text" x="194" y="104">audit ACE</text>
+    </svg>
+    <div class="diagram-note">Descriptors bind ownership, discretionary access, and audit intent to each secured object.</div>
+  </a>
+
+  <a class="diagram-card blue" href="#local-auth">
+    <div class="diagram-title">LSA Logon Path</div>
+    <svg class="diagram-svg" viewBox="0 0 260 120" role="img" aria-label="Winlogon and LSASS logon path producing a token">
+      <rect class="box blue" x="10" y="18" width="56" height="28"></rect>
+      <text class="node-text" x="38" y="32">Winlogon</text>
+      <path class="flowline" d="M66 32 H94"></path>
+      <path class="flowline" d="M89 27 L96 32 L89 37"></path>
+      <rect class="box teal" x="96" y="18" width="54" height="28"></rect>
+      <text class="node-text" x="123" y="32">LSASS</text>
+      <path class="flowline" d="M150 32 H178"></path>
+      <path class="flowline" d="M173 27 L180 32 L173 37"></path>
+      <rect class="box amber" x="180" y="18" width="66" height="28"></rect>
+      <text class="node-text" x="213" y="32">Auth Pkg</text>
+      <path class="flowline" d="M123 46 V75"></path>
+      <path class="flowline" d="M118 70 L123 77 L128 70"></path>
+      <rect class="box green" x="92" y="78" width="62" height="28"></rect>
+      <text class="node-text" x="123" y="92">Token</text>
+      <text class="tiny-text" x="180" y="92">SAM / AD / policy</text>
+    </svg>
+    <div class="diagram-note">Interactive logon asks LSASS to authenticate, build a logon session, and return a token.</div>
+  </a>
+
+  <a class="diagram-card blue" href="#service-accounts">
+    <div class="diagram-title">URA Enforcement Flow</div>
+    <svg class="diagram-svg" viewBox="0 0 260 142" role="img" aria-label="User Rights Assignment policy flows through LSA, LSASS, token creation, and SRM access checks">
+      <rect class="box blue" x="12" y="14" width="74" height="26"></rect>
+      <text class="tiny-text" x="49" y="27">GPO / CSP</text>
+      <path class="flowline" d="M86 27 H110"></path>
+      <path class="flowline" d="M105 22 L112 27 L105 32"></path>
+      <rect class="box purple" x="112" y="14" width="62" height="26"></rect>
+      <text class="tiny-text" x="143" y="27">LSA Policy</text>
+      <path class="flowline" d="M174 27 H198"></path>
+      <path class="flowline" d="M193 22 L200 27 L193 32"></path>
+      <rect class="box teal" x="200" y="14" width="48" height="26"></rect>
+      <text class="tiny-text" x="224" y="27">LSASS</text>
+      <rect class="box-soft" x="12" y="62" width="62" height="24"></rect>
+      <text class="tiny-text" x="43" y="74">SCM</text>
+      <rect class="box-soft" x="82" y="62" width="62" height="24"></rect>
+      <text class="tiny-text" x="113" y="74">RDP</text>
+      <rect class="box-soft" x="152" y="62" width="62" height="24"></rect>
+      <text class="tiny-text" x="183" y="74">SMB/RPC</text>
+      <path class="flowline" d="M43 62 C75 48, 161 48, 224 40"></path>
+      <path class="flowline" d="M113 62 C137 50, 179 45, 224 40"></path>
+      <path class="flowline" d="M183 62 C197 53, 213 47, 224 40"></path>
+      <path class="flowline" d="M224 40 V100"></path>
+      <path class="flowline" d="M219 95 L224 102 L229 95"></path>
+      <rect class="box amber" x="194" y="102" width="60" height="26"></rect>
+      <text class="tiny-text" x="224" y="115">Token</text>
+      <path class="flowline" d="M194 115 H156"></path>
+      <path class="flowline" d="M161 110 L154 115 L161 120"></path>
+      <rect class="box green" x="92" y="102" width="62" height="26"></rect>
+      <text class="tiny-text" x="123" y="115">SRM</text>
+      <text class="tiny-text" x="74" y="136">deny rights gate logon; privileges affect later access checks</text>
+    </svg>
+    <div class="diagram-note">URA gates logon before a token exists, then token privileges influence later object access decisions.</div>
+  </a>
+
+  <a class="diagram-card red" href="#cred-access">
+    <div class="diagram-title">DPAPI Scope</div>
+    <svg class="diagram-svg" viewBox="0 0 260 116" role="img" aria-label="DPAPI protection layers for current user and local machine">
+      <rect class="box red" x="16" y="16" width="70" height="28"></rect>
+      <text class="node-text" x="51" y="30">Secret</text>
+      <path class="flowline" d="M86 30 H116"></path>
+      <path class="flowline" d="M111 25 L118 30 L111 35"></path>
+      <rect class="box amber" x="118" y="16" width="58" height="28"></rect>
+      <text class="node-text" x="147" y="30">DPAPI</text>
+      <path class="flowline" d="M147 44 V62"></path>
+      <path class="flowline" d="M142 57 L147 64 L152 57"></path>
+      <rect class="box-soft" x="68" y="66" width="72" height="28"></rect>
+      <text class="tiny-text" x="104" y="80">CurrentUser</text>
+      <rect class="box-soft" x="152" y="66" width="72" height="28"></rect>
+      <text class="tiny-text" x="188" y="80">LocalMachine</text>
+      <text class="tiny-text" x="130" y="108">credential files remain encrypted at rest</text>
+    </svg>
+    <div class="diagram-note">DPAPI wraps secrets to a user or machine context; audits should inventory, not expose, protected blobs.</div>
+  </a>
+
+  <a class="diagram-card green" href="#auditing">
+    <div class="diagram-title">Audit Decision Flow</div>
+    <svg class="diagram-svg" viewBox="0 0 260 118" role="img" aria-label="Audit policy and SACL produce security events">
+      <rect class="box blue" x="12" y="18" width="54" height="28"></rect>
+      <text class="node-text" x="39" y="32">Access</text>
+      <path class="flowline" d="M66 32 H94"></path>
+      <path class="flowline" d="M89 27 L96 32 L89 37"></path>
+      <rect class="box amber" x="96" y="18" width="54" height="28"></rect>
+      <text class="node-text" x="123" y="32">SACL</text>
+      <path class="flowline" d="M150 32 H178"></path>
+      <path class="flowline" d="M173 27 L180 32 L173 37"></path>
+      <rect class="box green" x="180" y="18" width="58" height="28"></rect>
+      <text class="node-text" x="209" y="32">Event</text>
+      <rect class="box-soft" x="44" y="72" width="76" height="26"></rect>
+      <text class="tiny-text" x="82" y="85">audit policy</text>
+      <path class="flowline" d="M82 72 C91 55, 105 47, 123 46"></path>
+      <rect class="box-soft" x="140" y="72" width="76" height="26"></rect>
+      <text class="tiny-text" x="178" y="85">WEF / SIEM</text>
+      <path class="flowline" d="M209 46 C209 61, 198 70, 184 72"></path>
+    </svg>
+    <div class="diagram-note">A SACL matters only when audit policy enables that category and logs are collected.</div>
+  </a>
+
+  <a class="diagram-card green" href="#detection">
+    <div class="diagram-title">Telemetry Pipeline</div>
+    <svg class="diagram-svg" viewBox="0 0 260 116" role="img" aria-label="Telemetry pipeline from logs to SIEM correlation and response">
+      <rect class="box green" x="12" y="20" width="54" height="28"></rect>
+      <text class="node-text" x="39" y="34">Logs</text>
+      <path class="flowline" d="M66 34 H91"></path>
+      <path class="flowline" d="M86 29 L93 34 L86 39"></path>
+      <rect class="box blue" x="93" y="20" width="54" height="28"></rect>
+      <text class="node-text" x="120" y="34">WEF</text>
+      <path class="flowline" d="M147 34 H172"></path>
+      <path class="flowline" d="M167 29 L174 34 L167 39"></path>
+      <rect class="box purple" x="174" y="20" width="64" height="28"></rect>
+      <text class="node-text" x="206" y="34">SIEM</text>
+      <rect class="box-soft" x="52" y="76" width="156" height="26"></rect>
+      <text class="tiny-text" x="130" y="89">correlate 4624 + 4769 + 5136</text>
+      <path class="flowline" d="M206 48 C206 66, 190 76, 174 76"></path>
+      <path class="flowline" d="M179 71 L172 76 L179 81"></path>
+    </svg>
+    <div class="diagram-note">The strongest detections join host, DC, directory-change, and network evidence.</div>
+  </a>
+  </div>
+
+  <div class="rail-panel" id="railExamples" role="tabpanel" data-rail-panel="examples" hidden>
+    <div class="example-tabs" role="tablist" aria-label="Code example type">
+      <button class="example-tab active" type="button" role="tab" aria-selected="true" aria-controls="examplesCommands" data-example-tab="commands">Commands</button>
+      <button class="example-tab" type="button" role="tab" aria-selected="false" aria-controls="examplesCSharp" data-example-tab="csharp">C#</button>
+      <button class="example-tab" type="button" role="tab" aria-selected="false" aria-controls="examplesCpp" data-example-tab="cpp">C/C++</button>
+    </div>
+
+    <div class="example-panel active" id="examplesCommands" role="tabpanel" data-example-panel="commands">
+      <div class="example-card blue">
+        <a class="example-link" href="#architecture">01 Architecture</a>
+        <pre><code>Get-ComputerInfo |
+  Select-Object WindowsProductName,OsVersion,OsBuildNumber,CsDomain
+
+systeminfo | findstr /B /C:"OS Name" /C:"OS Version"</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#sids">02 SIDs</a>
+        <pre><code>whoami /user
+
+Get-LocalUser |
+  Select-Object Name,Enabled,SID</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#tokens">03 Access Tokens</a>
+        <pre><code>whoami /all
+whoami /groups
+whoami /priv
+
+[Security.Principal.WindowsIdentity]::GetCurrent() |
+  Select-Object Name,AuthenticationType,IsAuthenticated</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#descriptors">04 Security Descriptors</a>
+        <pre><code>$path = 'C:\Windows\System32\drivers\etc\hosts'
+Get-Acl $path | Format-List Owner,Group,AccessToString
+icacls $path</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#access-check">05 Access Check</a>
+        <pre><code>$me = [Security.Principal.WindowsIdentity]::GetCurrent()
+$me.Groups |
+  ForEach-Object { $_.Translate([Security.Principal.NTAccount]) } |
+  Sort-Object Value</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#privileges">06 Privileges</a>
+        <pre><code>whoami /priv
+
+secedit /export /cfg "$env:TEMP\secpol.cfg"
+Select-String "$env:TEMP\secpol.cfg" -Pattern '^Se.*Privilege'</code></pre>
+      </div>
+
+      <div class="example-card blue">
+        <a class="example-link" href="#service-accounts">07 Service Accounts</a>
+        <pre><code>Get-CimInstance Win32_Service |
+  Select-Object Name,StartName,State,StartMode,PathName |
+  Sort-Object StartName,Name</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#local-auth">08 Local Auth</a>
+        <pre><code>Get-LocalUser |
+  Select-Object Name,Enabled,PasswordRequired,LastLogon
+
+Get-LocalGroupMember Administrators</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#ntlm">09 NTLM</a>
+        <pre><code>Get-WinEvent -FilterHashtable @{ LogName='Security'; Id=4624 } -MaxEvents 200 |
+  Where-Object { $_.Properties.Value -contains 'NTLM' } |
+  Select-Object TimeCreated,Id,ProviderName -First 25</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#kerberos">10 Kerberos</a>
+        <pre><code>klist
+klist sessions
+
+Get-WinEvent -FilterHashtable @{
+  LogName='Security'; Id=4768,4769,4771
+} -MaxEvents 30</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#active-directory">11 Active Directory</a>
+        <pre><code>Get-ADUser -Filter * -Properties ServicePrincipalName |
+  Where-Object ServicePrincipalName |
+  Select-Object Name,Enabled,ServicePrincipalName</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#active-directory">11 Delegation Audit</a>
+        <pre><code>Get-ADComputer -Filter * -Properties TrustedForDelegation,TrustedToAuthForDelegation |
+  Where-Object { $_.TrustedForDelegation -or $_.TrustedToAuthForDelegation } |
+  Select-Object Name,TrustedForDelegation,TrustedToAuthForDelegation</code></pre>
+      </div>
+
+      <div class="example-card green">
+        <a class="example-link" href="#auditing">12 Auditing</a>
+        <pre><code>auditpol /get /category:*
+
+Get-WinEvent -ListLog Security |
+  Select-Object LogName,RecordCount,IsEnabled,MaximumSizeInBytes</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#privesc">13 Privilege Escalation</a>
+        <pre><code>Get-LocalGroupMember Administrators
+whoami /priv
+
+Get-CimInstance Win32_LoggedOnUser |
+  Select-Object Antecedent,Dependent</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#vuln-services">14 Vulnerable Services</a>
+        <pre><code>Get-CimInstance Win32_Service |
+  Where-Object { $_.PathName -and $_.PathName -notmatch '^".*"$' } |
+  Select-Object Name,StartName,PathName</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#vuln-services">14 Service ACL Review</a>
+        <pre><code>Get-CimInstance Win32_Service |
+  Where-Object PathName |
+  ForEach-Object {
+    $exe = ($_.PathName -replace '^"([^"]+)".*','$1')
+    if (Test-Path $exe) { icacls $exe }
+  }</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#cred-access">15 Credential Access</a>
+        <pre><code>Get-CimInstance Win32_DeviceGuard |
+  Select-Object SecurityServicesConfigured,SecurityServicesRunning
+
+Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' |
+  Select-Object RunAsPPL,LsaCfgFlags</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#ntlm-attacks">16 NTLM Attack Surface</a>
+        <pre><code>Get-SmbServerConfiguration |
+  Select-Object EnableSecuritySignature,RequireSecuritySignature
+
+Get-SmbClientConfiguration |
+  Select-Object EnableSecuritySignature,RequireSecuritySignature</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#kerberos-attacks">17 Kerberos Detection</a>
+        <pre><code>Get-WinEvent -FilterHashtable @{ LogName='Security'; Id=4769 } -MaxEvents 500 |
+  Where-Object { $_.Properties.Value -contains '0x17' } |
+  Select-Object TimeCreated,Id,MachineName -First 30</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#ad-abuse">18 AD ACL Abuse</a>
+        <pre><code>Get-ADObject 'CN=AdminSDHolder,CN=System,DC=example,DC=com' -Properties nTSecurityDescriptor |
+  Select-Object DistinguishedName,nTSecurityDescriptor</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#detection">19 Detection</a>
+        <pre><code>Get-WinEvent -FilterHashtable @{
+  LogName='Security'
+  Id=1102,4670,4719,5136,4624,4769
+} -MaxEvents 100 |
+  Format-Table TimeCreated,Id,ProviderName -Auto</code></pre>
+      </div>
+
+      <div class="example-card blue">
+        <a class="example-link" href="#architecture">01 Object Namespace</a>
+        <pre><code>Get-ChildItem '\\.\GLOBALROOT' -ErrorAction SilentlyContinue
+
+Get-ChildItem '\\.\GLOBALROOT\Device' -ErrorAction SilentlyContinue |
+  Select-Object -First 30</code></pre>
+      </div>
+
+      <div class="example-card blue">
+        <a class="example-link" href="#architecture">01 Process Handles</a>
+        <pre><code>Get-Process |
+  Select-Object Name,Id,HandleCount,WorkingSet64 |
+  Sort-Object HandleCount -Descending |
+  Select-Object -First 25</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#sids">02 SID Translation</a>
+        <pre><code>$sid = New-Object Security.Principal.SecurityIdentifier 'S-1-5-32-544'
+$sid.Translate([Security.Principal.NTAccount])
+
+$acct = New-Object Security.Principal.NTAccount 'BUILTIN\Users'
+$acct.Translate([Security.Principal.SecurityIdentifier])</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#sids">02 Well-Known SIDs</a>
+        <pre><code>'S-1-5-18','S-1-5-19','S-1-5-20','S-1-5-32-544','S-1-5-32-545' |
+  ForEach-Object {
+    $sid = [Security.Principal.SecurityIdentifier]::new($_)
+    [pscustomobject]@{ SID = $_; Name = $sid.Translate([Security.Principal.NTAccount]) }
+  }</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#tokens">03 Linked Token Clues</a>
+        <pre><code>whoami /groups | findstr /i "mandatory administrators deny"
+
+Get-Process -IncludeUserName -ErrorAction SilentlyContinue |
+  Where-Object UserName |
+  Select-Object ProcessName,Id,UserName -First 30</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#tokens">03 AppContainer Packages</a>
+        <pre><code>Get-AppxPackage |
+  Select-Object Name,PackageFamilyName,InstallLocation |
+  Sort-Object Name |
+  Select-Object -First 30</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#descriptors">04 SDDL Round Trip</a>
+        <pre><code>$acl = Get-Acl 'C:\Windows\Temp'
+$sddl = $acl.GetSecurityDescriptorSddlForm('All')
+$sddl
+
+$copy = New-Object Security.AccessControl.DirectorySecurity
+$copy.SetSecurityDescriptorSddlForm($sddl)</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#descriptors">04 Find World-Writable Folders</a>
+        <pre><code>$roots = 'C:\Program Files','C:\Program Files (x86)'
+Get-ChildItem $roots -Directory -ErrorAction SilentlyContinue |
+  ForEach-Object {
+    $acl = Get-Acl $_.FullName
+    if ($acl.Access | Where-Object {
+      $_.IdentityReference -match 'Everyone|Users' -and
+      $_.FileSystemRights -match 'Write|Modify|FullControl'
+    }) { $_.FullName }
+  }</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#access-check">05 Effective Folder Rights</a>
+        <pre><code>$path = 'C:\Windows\Temp'
+$user = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+(Get-Acl $path).Access |
+  Where-Object { $_.IdentityReference -eq $user -or $_.IdentityReference -match 'Users|Everyone' } |
+  Select-Object IdentityReference,FileSystemRights,AccessControlType,IsInherited</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#privileges">06 User Rights Assignment</a>
+        <pre><code>$cfg = Join-Path $env:TEMP 'user-rights.cfg'
+secedit /export /cfg $cfg | Out-Null
+Select-String $cfg -Pattern '^Se.*Right|^Se.*Privilege' |
+  Sort-Object Line</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#privileges">06 High-Risk Privileges</a>
+        <pre><code>$highRisk = 'SeDebugPrivilege','SeImpersonatePrivilege','SeBackupPrivilege',
+  'SeRestorePrivilege','SeTakeOwnershipPrivilege','SeLoadDriverPrivilege'
+whoami /priv | Select-String ($highRisk -join '|')</code></pre>
+      </div>
+
+      <div class="example-card blue">
+        <a class="example-link" href="#service-accounts">07 Service SDDL</a>
+        <pre><code>Get-Service |
+  Select-Object -First 10 |
+  ForEach-Object {
+    "[$($_.Name)]"
+    sc.exe sdshow $_.Name
+  }</code></pre>
+      </div>
+
+      <div class="example-card blue">
+        <a class="example-link" href="#service-accounts">07 gMSA Discovery</a>
+        <pre><code>Get-ADServiceAccount -Filter * -Properties PrincipalsAllowedToRetrieveManagedPassword |
+  Select-Object Name,Enabled,PrincipalsAllowedToRetrieveManagedPassword</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#local-auth">08 Logon Sessions</a>
+        <pre><code>query user
+
+Get-CimInstance Win32_LogonSession |
+  Select-Object LogonId,LogonType,StartTime |
+  Sort-Object StartTime -Descending |
+  Select-Object -First 25</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#local-auth">08 Account Policy</a>
+        <pre><code>net accounts
+
+Get-LocalUser |
+  Select-Object Name,Enabled,PasswordRequired,PasswordLastSet,UserMayChangePassword</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#ntlm">09 LM/NTLM Policy</a>
+        <pre><code>Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' |
+  Select-Object LmCompatibilityLevel,RestrictAnonymous,RestrictAnonymousSAM
+
+Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0' -ErrorAction SilentlyContinue</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#ntlm-attacks">16 Relay Hardening</a>
+        <pre><code>Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters' |
+  Select-Object RequireSecuritySignature,EnableSecuritySignature,SMB1
+
+Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\LDAP' -ErrorAction SilentlyContinue</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#kerberos">10 Kerberos Cache Details</a>
+        <pre><code>klist tickets
+klist tgt
+klist kdcoptions</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#kerberos-attacks">17 Kerberos Policy</a>
+        <pre><code>Get-ADDefaultDomainPasswordPolicy |
+  Select-Object MaxTicketAge,MaxRenewAge,MaxServiceAge,LockoutThreshold
+
+Get-ADUser krbtgt -Properties PasswordLastSet,msDS-KeyVersionNumber</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#active-directory">11 Protected Users</a>
+        <pre><code>Get-ADGroupMember 'Protected Users' -Recursive |
+  Select-Object Name,ObjectClass,SamAccountName</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#active-directory">11 AdminSDHolder</a>
+        <pre><code>$dn = 'CN=AdminSDHolder,CN=System,DC=example,DC=com'
+(Get-Acl "AD:\$dn").Access |
+  Select-Object IdentityReference,ActiveDirectoryRights,AccessControlType,IsInherited</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#active-directory">11 RBCD Attribute Check</a>
+        <pre><code>Get-ADComputer -Filter * -Properties msDS-AllowedToActOnBehalfOfOtherIdentity |
+  Where-Object { $_.'msDS-AllowedToActOnBehalfOfOtherIdentity' } |
+  Select-Object Name,DistinguishedName</code></pre>
+      </div>
+
+      <div class="example-card green">
+        <a class="example-link" href="#auditing">12 SACL Presence</a>
+        <pre><code>$path = 'C:\Windows\System32'
+$acl = Get-Acl $path -Audit
+$acl.Audit |
+  Select-Object IdentityReference,FileSystemRights,AuditFlags,IsInherited</code></pre>
+      </div>
+
+      <div class="example-card green">
+        <a class="example-link" href="#auditing">12 Event XML Helper</a>
+        <pre><code>$event = Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4624} -MaxEvents 1
+$xml = [xml]$event.ToXml()
+$xml.Event.EventData.Data |
+  ForEach-Object { [pscustomobject]@{ Name=$_.Name; Value=$_.'#text' } }</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#cred-access">15 Credential Guard</a>
+        <pre><code>Get-CimInstance -ClassName Win32_DeviceGuard |
+  Select-Object VirtualizationBasedSecurityStatus,
+    SecurityServicesConfigured,SecurityServicesRunning</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#cred-access">15 Credential Manager Inventory</a>
+        <pre><code>cmdkey /list
+
+Get-ChildItem "$env:LOCALAPPDATA\Microsoft\Credentials" -Force -ErrorAction SilentlyContinue |
+  Select-Object Name,Length,LastWriteTime</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#cred-access">15 DPAPI Own-User Test</a>
+        <pre><code>$bytes = [Text.Encoding]::UTF8.GetBytes('sample')
+$protected = [Security.Cryptography.ProtectedData]::Protect($bytes,$null,'CurrentUser')
+$plain = [Security.Cryptography.ProtectedData]::Unprotect($protected,$null,'CurrentUser')
+[Text.Encoding]::UTF8.GetString($plain)</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#detection">19 LSASS Protection Checks</a>
+        <pre><code>Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' |
+  Select-Object RunAsPPL,RunAsPPLBoot,LsaCfgFlags
+
+Get-Process lsass | Select-Object Id,Path,StartTime</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#detection">19 Authentication Failures</a>
+        <pre><code>Get-WinEvent -FilterHashtable @{ LogName='Security'; Id=4625 } -MaxEvents 50 |
+  ForEach-Object {
+    $x = [xml]$_.ToXml()
+    [pscustomobject]@{
+      Time=$_.TimeCreated
+      Account=($x.Event.EventData.Data | Where-Object Name -eq 'TargetUserName').'#text'
+      Type=($x.Event.EventData.Data | Where-Object Name -eq 'LogonType').'#text'
+    }
+  }</code></pre>
+      </div>
+    </div>
+
+    <div class="example-panel" id="examplesCSharp" role="tabpanel" data-example-panel="csharp" hidden>
+      <div class="example-card amber">
+        <a class="example-link" href="#tokens">03 Token Identity</a>
+        <pre><code>using System;
+using System.Security.Principal;
+
+var id = WindowsIdentity.GetCurrent();
+Console.WriteLine($"Name: {id.Name}");
+Console.WriteLine($"Auth: {id.AuthenticationType}");
+Console.WriteLine($"SID : {id.User?.Value}");</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#tokens">03 Token Groups</a>
+        <pre><code>using System;
+using System.Security.Principal;
+
+var id = WindowsIdentity.GetCurrent();
+foreach (var sid in id.Groups)
+{
+    Console.WriteLine(sid.Translate(typeof(NTAccount)));
+}</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#descriptors">04 File DACL</a>
+        <pre><code>using System;
+using System.IO;
+using System.Security.AccessControl;
+
+var path = @"C:\Windows\System32\drivers\etc\hosts";
+var acl = File.GetAccessControl(path);
+Console.WriteLine($"Owner: {acl.GetOwner(typeof(System.Security.Principal.NTAccount))}");
+foreach (FileSystemAccessRule ace in acl.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount)))
+{
+    Console.WriteLine($"{ace.IdentityReference}: {ace.FileSystemRights} {ace.AccessControlType}");
+}</code></pre>
+      </div>
+
+      <div class="example-card blue">
+        <a class="example-link" href="#service-accounts">07 Services</a>
+        <pre><code>using System;
+using System.Management;
+
+using var searcher = new ManagementObjectSearcher(
+    "SELECT Name, StartName, State, PathName FROM Win32_Service");
+
+foreach (ManagementObject svc in searcher.Get())
+{
+    Console.WriteLine($"{svc["Name"]} | {svc["StartName"]} | {svc["State"]}");
+}</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#local-auth">08 Local Admins</a>
+        <pre><code>using System;
+using System.DirectoryServices.AccountManagement;
+
+using var ctx = new PrincipalContext(ContextType.Machine);
+using var group = GroupPrincipal.FindByIdentity(ctx, "Administrators");
+foreach (var member in group.GetMembers())
+{
+    Console.WriteLine($"{member.SamAccountName} ({member.StructuralObjectClass})");
+}</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#active-directory">11 SPN Inventory</a>
+        <pre><code>using System;
+using System.DirectoryServices;
+
+using var root = new DirectoryEntry("LDAP://RootDSE");
+var baseDn = root.Properties["defaultNamingContext"].Value;
+using var searchRoot = new DirectoryEntry($"LDAP://{baseDn}");
+using var searcher = new DirectorySearcher(searchRoot);
+searcher.Filter = "(&amp;(objectClass=user)(servicePrincipalName=*))";
+searcher.PropertiesToLoad.Add("samAccountName");
+searcher.PropertiesToLoad.Add("servicePrincipalName");
+foreach (SearchResult result in searcher.FindAll())
+{
+    Console.WriteLine(result.Properties["samAccountName"][0]);
+}</code></pre>
+      </div>
+
+      <div class="example-card green">
+        <a class="example-link" href="#auditing">12 Security Events</a>
+        <pre><code>using System;
+using System.Diagnostics.Eventing.Reader;
+
+var query = new EventLogQuery(
+    "Security", PathType.LogName,
+    "*[System[(EventID=4624 or EventID=4672 or EventID=4769)]]");
+
+using var reader = new EventLogReader(query);
+for (EventRecord record = reader.ReadEvent(); record != null; record = reader.ReadEvent())
+{
+    Console.WriteLine($"{record.TimeCreated} {record.Id}");
+}</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#detection">19 Process Start Watch</a>
+        <pre><code>using System;
+using System.Management;
+
+var query = new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace");
+using var watcher = new ManagementEventWatcher(query);
+watcher.EventArrived += (_, e) =&gt;
+    Console.WriteLine($"{e.NewEvent["ProcessName"]} pid={e.NewEvent["ProcessID"]}");
+watcher.Start();
+Console.ReadLine();</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#sids">02 SID Translation</a>
+        <pre><code>using System;
+using System.Security.Principal;
+
+var sid = new SecurityIdentifier("S-1-5-32-544");
+Console.WriteLine(sid.Translate(typeof(NTAccount)));
+
+var account = new NTAccount("BUILTIN", "Users");
+Console.WriteLine(account.Translate(typeof(SecurityIdentifier)));</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#privileges">06 Admin Membership</a>
+        <pre><code>using System;
+using System.Security.Principal;
+
+var identity = WindowsIdentity.GetCurrent();
+var principal = new WindowsPrincipal(identity);
+Console.WriteLine(principal.IsInRole(WindowsBuiltInRole.Administrator));</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#tokens">03 Integrity SID</a>
+        <pre><code>using System;
+using System.Security.Principal;
+
+var id = WindowsIdentity.GetCurrent();
+foreach (var group in id.Groups)
+{
+    var value = group.Value;
+    if (value.StartsWith("S-1-16-"))
+        Console.WriteLine($"Integrity SID: {value}");
+}</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#cred-access">15 LSA Protection Keys</a>
+        <pre><code>using System;
+using Microsoft.Win32;
+
+using var key = Registry.LocalMachine.OpenSubKey(
+    @"SYSTEM\CurrentControlSet\Control\Lsa");
+
+Console.WriteLine($"RunAsPPL: {key?.GetValue("RunAsPPL")}");
+Console.WriteLine($"LsaCfgFlags: {key?.GetValue("LsaCfgFlags")}");</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#cred-access">15 DPAPI Current User</a>
+        <pre><code>using System;
+using System.Security.Cryptography;
+using System.Text;
+
+var data = Encoding.UTF8.GetBytes("sample");
+var protectedBytes = ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser);
+var plain = ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser);
+Console.WriteLine(Encoding.UTF8.GetString(plain));</code></pre>
+      </div>
+
+      <div class="example-card green">
+        <a class="example-link" href="#auditing">12 Event XML Data</a>
+        <pre><code>using System;
+using System.Diagnostics.Eventing.Reader;
+using System.Xml.Linq;
+
+using var reader = new EventLogReader(new EventLogQuery(
+    "Security", PathType.LogName, "*[System[(EventID=4624)]]"));
+
+using var record = reader.ReadEvent();
+var xml = XDocument.Parse(record.ToXml());
+foreach (var data in xml.Descendants("Data"))
+{
+    Console.WriteLine($"{data.Attribute("Name")?.Value}: {data.Value}");
+}</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#local-auth">08 Logon Session Join</a>
+        <pre><code>using System;
+using System.Management;
+
+using var query = new ManagementObjectSearcher(
+    "ASSOCIATORS OF {Win32_LogonSession.LogonId='999'} WHERE AssocClass=Win32_LoggedOnUser");
+
+foreach (ManagementObject user in query.Get())
+{
+    Console.WriteLine(user["Name"]);
+}</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#ntlm">09 NTLM Event Filter</a>
+        <pre><code>using System;
+using System.Diagnostics.Eventing.Reader;
+
+var xPath = "*[System[(EventID=4624)] and EventData[Data='NTLM']]";
+using var reader = new EventLogReader(
+    new EventLogQuery("Security", PathType.LogName, xPath));
+
+for (var record = reader.ReadEvent(); record != null; record = reader.ReadEvent())
+{
+    Console.WriteLine($"{record.TimeCreated} {record.Id}");
+}</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#kerberos">10 TLS Certificate Grab</a>
+        <pre><code>using System;
+using System.Net.Security;
+using System.Net.Sockets;
+
+using var client = new TcpClient("example.com", 443);
+using var ssl = new SslStream(client.GetStream(), false,
+    (sender, certificate, chain, errors) =&gt; true);
+
+ssl.AuthenticateAsClient("example.com");
+Console.WriteLine(ssl.RemoteCertificate?.Subject);</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#active-directory">11 LDAP Computer Delegation</a>
+        <pre><code>using System;
+using System.DirectoryServices;
+
+using var root = new DirectoryEntry("LDAP://RootDSE");
+var nc = root.Properties["defaultNamingContext"].Value;
+using var ds = new DirectorySearcher(new DirectoryEntry($"LDAP://{nc}"));
+ds.Filter = "(&amp;(objectClass=computer)(|(userAccountControl:1.2.840.113556.1.4.803:=524288)(msDS-AllowedToDelegateTo=*)))";
+ds.PropertiesToLoad.Add("name");
+foreach (SearchResult row in ds.FindAll())
+{
+    Console.WriteLine(row.Properties["name"][0]);
+}</code></pre>
+      </div>
+
+      <div class="example-card green">
+        <a class="example-link" href="#detection">19 Security Log Query</a>
+        <pre><code>using System;
+using System.Diagnostics.Eventing.Reader;
+
+var ids = "EventID=1102 or EventID=4670 or EventID=4719 or EventID=5136";
+using var reader = new EventLogReader(
+    new EventLogQuery("Security", PathType.LogName, $"*[System[({ids})]]"));
+
+for (var r = reader.ReadEvent(); r != null; r = reader.ReadEvent())
+{
+    Console.WriteLine($"{r.TimeCreated:u} {r.Id}");
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="example-panel" id="examplesCpp" role="tabpanel" data-example-panel="cpp" hidden>
+      <div class="example-card amber">
+        <a class="example-link" href="#tokens">03 Current Token User</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;sddl.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  HANDLE token = NULL;
+  OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &amp;token);
+  DWORD len = 0;
+  GetTokenInformation(token, TokenUser, NULL, 0, &amp;len);
+  TOKEN_USER* user = (TOKEN_USER*)LocalAlloc(LPTR, len);
+  GetTokenInformation(token, TokenUser, user, len, &amp;len);
+  LPSTR sid = NULL;
+  ConvertSidToStringSidA(user-&gt;User.Sid, &amp;sid);
+  printf("User SID: %s\n", sid);
+  LocalFree(sid);
+  LocalFree(user);
+  CloseHandle(token);
+}</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#privileges">06 Token Privileges</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;vector&gt;
+
+int main() {
+  HANDLE token = NULL;
+  OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &amp;token);
+  DWORD len = 0;
+  GetTokenInformation(token, TokenPrivileges, NULL, 0, &amp;len);
+  std::vector&lt;BYTE&gt; buf(len);
+  auto privs = (TOKEN_PRIVILEGES*)buf.data();
+  GetTokenInformation(token, TokenPrivileges, privs, len, &amp;len);
+  for (DWORD i = 0; i &lt; privs-&gt;PrivilegeCount; i++) {
+    char name[128]; DWORD size = sizeof(name);
+    LookupPrivilegeNameA(NULL, &amp;privs-&gt;Privileges[i].Luid, name, &amp;size);
+    printf("%s\n", name);
+  }
+  CloseHandle(token);
+}</code></pre>
+      </div>
+
+      <div class="example-card amber">
+        <a class="example-link" href="#tokens">03 Integrity Level</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;vector&gt;
+
+int main() {
+  HANDLE token = NULL;
+  OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &amp;token);
+  DWORD len = 0;
+  GetTokenInformation(token, TokenIntegrityLevel, NULL, 0, &amp;len);
+  std::vector&lt;BYTE&gt; buf(len);
+  auto label = (TOKEN_MANDATORY_LABEL*)buf.data();
+  GetTokenInformation(token, TokenIntegrityLevel, label, len, &amp;len);
+  DWORD rid = *GetSidSubAuthority(
+    label-&gt;Label.Sid,
+    *GetSidSubAuthorityCount(label-&gt;Label.Sid) - 1);
+  printf("Integrity RID: 0x%lx\n", rid);
+  CloseHandle(token);
+}</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#descriptors">04 File Owner</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;aclapi.h&gt;
+#include &lt;sddl.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  PSID owner = NULL;
+  PSECURITY_DESCRIPTOR sd = NULL;
+  GetNamedSecurityInfoA(
+    "C:\\Windows\\System32\\drivers\\etc\\hosts",
+    SE_FILE_OBJECT, OWNER_SECURITY_INFORMATION,
+    &amp;owner, NULL, NULL, NULL, &amp;sd);
+  LPSTR sid = NULL;
+  ConvertSidToStringSidA(owner, &amp;sid);
+  printf("Owner SID: %s\n", sid);
+  LocalFree(sid);
+  LocalFree(sd);
+}</code></pre>
+      </div>
+
+      <div class="example-card blue">
+        <a class="example-link" href="#service-accounts">07 SCM Query</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  SC_HANDLE scm = OpenSCManagerA(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
+  DWORD bytes = 0, count = 0, resume = 0;
+  EnumServicesStatusExA(scm, SC_ENUM_PROCESS_INFO, SERVICE_WIN32,
+    SERVICE_STATE_ALL, NULL, 0, &amp;bytes, &amp;count, &amp;resume, NULL);
+  printf("Bytes needed for service list: %lu\n", bytes);
+  CloseServiceHandle(scm);
+}</code></pre>
+      </div>
+
+      <div class="example-card green">
+        <a class="example-link" href="#auditing">12 Event Log Read</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;winevt.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  EVT_HANDLE query = EvtQuery(
+    NULL, L"Security",
+    L"*[System[(EventID=4624 or EventID=4672)]]",
+    EvtQueryChannelPath);
+  printf("Query handle: %p\n", query);
+  if (query) EvtClose(query);
+}</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#sids">02 Lookup Account SID</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;sddl.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  BYTE sidBuf[SECURITY_MAX_SID_SIZE];
+  DWORD sidSize = sizeof(sidBuf);
+  char domain[256]; DWORD domainSize = sizeof(domain);
+  SID_NAME_USE use;
+  LookupAccountNameA(NULL, "Administrators", sidBuf, &amp;sidSize,
+    domain, &amp;domainSize, &amp;use);
+  LPSTR sidText = NULL;
+  ConvertSidToStringSidA(sidBuf, &amp;sidText);
+  printf("%s\\Administrators = %s\n", domain, sidText);
+  LocalFree(sidText);
+}</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#privileges">06 Check Admin Group</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  SID_IDENTIFIER_AUTHORITY nt = SECURITY_NT_AUTHORITY;
+  PSID admins = NULL;
+  AllocateAndInitializeSid(&amp;nt, 2, SECURITY_BUILTIN_DOMAIN_RID,
+    DOMAIN_ALIAS_RID_ADMINS, 0,0,0,0,0,0, &amp;admins);
+  BOOL isMember = FALSE;
+  CheckTokenMembership(NULL, admins, &amp;isMember);
+  printf("Is admin token: %s\n", isMember ? "yes" : "no");
+  FreeSid(admins);
+}</code></pre>
+      </div>
+
+      <div class="example-card purple">
+        <a class="example-link" href="#descriptors">04 Parse SDDL</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;sddl.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  PSECURITY_DESCRIPTOR sd = NULL;
+  LPCSTR sddl = "O:BAG:BAD:(A;;GA;;;SY)(A;;GR;;;BU)";
+  if (ConvertStringSecurityDescriptorToSecurityDescriptorA(
+      sddl, SDDL_REVISION_1, &amp;sd, NULL)) {
+    printf("Parsed security descriptor\n");
+    LocalFree(sd);
+  }
+}</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#access-check">05 AccessCheck Skeleton</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  GENERIC_MAPPING map = {
+    FILE_GENERIC_READ, FILE_GENERIC_WRITE,
+    FILE_GENERIC_EXECUTE, FILE_ALL_ACCESS
+  };
+  DWORD desired = GENERIC_READ;
+  MapGenericMask(&amp;desired, &amp;map);
+  printf("Mapped GENERIC_READ mask: 0x%08lx\n", desired);
+}</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#cred-access">15 DPAPI Current User</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;dpapi.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  char text[] = "sample";
+  DATA_BLOB in = { sizeof(text), (BYTE*)text };
+  DATA_BLOB out = {};
+  if (CryptProtectData(&amp;in, L"demo", NULL, NULL, NULL, 0, &amp;out)) {
+    printf("Protected bytes: %lu\n", out.cbData);
+    LocalFree(out.pbData);
+  }
+}</code></pre>
+      </div>
+
+      <div class="example-card red">
+        <a class="example-link" href="#cred-access">15 LSA Protection Key</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  DWORD value = 0, size = sizeof(value);
+  LSTATUS status = RegGetValueA(HKEY_LOCAL_MACHINE,
+    "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+    "RunAsPPL", RRF_RT_REG_DWORD, NULL, &amp;value, &amp;size);
+  printf("RunAsPPL status=%ld value=%lu\n", status, value);
+}</code></pre>
+      </div>
+
+      <div class="example-card teal">
+        <a class="example-link" href="#local-auth">08 Logon Session Count</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;ntsecapi.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  ULONG count = 0;
+  PLUID sessions = NULL;
+  if (LsaEnumerateLogonSessions(&amp;count, &amp;sessions) == 0) {
+    printf("Logon sessions: %lu\n", count);
+    LsaFreeReturnBuffer(sessions);
+  }
+}</code></pre>
+      </div>
+
+      <div class="example-card green">
+        <a class="example-link" href="#detection">19 Process Mitigation</a>
+        <pre><code>#include &lt;windows.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+  PROCESS_MITIGATION_DYNAMIC_CODE_POLICY policy = {};
+  if (GetProcessMitigationPolicy(GetCurrentProcess(),
+      ProcessDynamicCodePolicy, &amp;policy, sizeof(policy))) {
+    printf("ProhibitDynamicCode: %u\n", policy.ProhibitDynamicCode);
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,36 @@
+  <!-- ── 06 PRIVILEGES ───────────────────────────────────────── -->
+  <section class="section" id="privileges">
+    <div class="section-header">
+      <div class="section-dot dot-coral"></div>
+      <h3>06 — Privileges</h3>
+      <span class="section-id">PRIV</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/privileges" target="_blank" rel="noopener noreferrer">Privileges</a>
+    </div>
+    <p class="note">Privileges are special rights in a token that override normal access checks. They must be <strong class="hl">enabled</strong> in the token (some are disabled by default and must be explicitly activated) and are distinct from access rights (which are checked against object DACLs). Privileges are assigned via <em>User Rights Assignment</em> security policy — see Section 07.</p>
+
+    <div class="card" style="margin-top:12px">
+      <table class="ref-table">
+        <thead>
+          <tr><th>Privilege</th><th>Effect</th><th>Default Holders</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono-cell amber">SeDebugPrivilege</td><td>Open any process/thread regardless of DACL. Read/write memory of any process.</td><td>Administrators (disabled)</td></tr>
+          <tr><td class="mono-cell amber">SeImpersonatePrivilege</td><td>Impersonate any user who authenticates to the local machine, including SYSTEM via named pipe or RPC.</td><td>Service accounts, Admins</td></tr>
+          <tr><td class="mono-cell amber">SeAssignPrimaryTokenPrivilege</td><td>Replace the primary token of a process — effectively run code as another user.</td><td>SYSTEM, SCM</td></tr>
+          <tr><td class="mono-cell amber">SeCreateTokenPrivilege</td><td>Create arbitrary access tokens with any SIDs/privileges.</td><td>SYSTEM only</td></tr>
+          <tr><td class="mono-cell">SeTcbPrivilege</td><td>Act as part of the OS (Trusted Computing Base). Required to create tokens for arbitrary users.</td><td>SYSTEM</td></tr>
+          <tr><td class="mono-cell">SeBackupPrivilege</td><td>Read any file/registry key regardless of DACL.</td><td>Backup Operators, Admins</td></tr>
+          <tr><td class="mono-cell">SeRestorePrivilege</td><td>Write any file/registry key regardless of DACL.</td><td>Backup Operators, Admins</td></tr>
+          <tr><td class="mono-cell">SeTakeOwnershipPrivilege</td><td>Take ownership of any object (grants WriteDac → can then rewrite DACL).</td><td>Administrators</td></tr>
+          <tr><td class="mono-cell">SeLoadDriverPrivilege</td><td>Load/unload kernel drivers — direct code execution in Ring 0.</td><td>Administrators</td></tr>
+          <tr><td class="mono-cell">SeSecurityPrivilege</td><td>Read/write SACL on any object. View/clear Security event log.</td><td>Administrators</td></tr>
+          <tr><td class="mono-cell">SeChangeNotifyPrivilege</td><td>Bypass traversal checking (directory access check skipped). Held by all users.</td><td>All users (mandatory)</td></tr>
+          <tr><td class="mono-cell">SeRelabelPrivilege</td><td>Raise or lower the integrity label of an object.</td><td>Administrators</td></tr>
+          <tr><td class="mono-cell">SeEnableDelegationPrivilege</td><td>Mark user/computer accounts as trusted for Kerberos delegation in AD.</td><td>Domain Admins</td></tr>
+          <tr><td class="mono-cell">SeSyncAgentPrivilege</td><td>Synchronize directory data (DirSync).</td><td>SYSTEM on DCs</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>

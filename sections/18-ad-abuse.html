@@ -1,0 +1,128 @@
+  <!-- ── 18 AD ACL ABUSE ───────────────────────────────────────── -->
+  <section class="section" id="ad-abuse">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>18 — Active Directory ACL &amp; Configuration Abuse</h3>
+      <span class="section-id">AD-OFF</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview" target="_blank" rel="noopener noreferrer">AD DS overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-lists" target="_blank" rel="noopener noreferrer">ACLs</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670" target="_blank" rel="noopener noreferrer">Permissions changed event</a>
+    </div>
+
+    <p class="note">Modern AD attacks rarely rely on credential theft alone — they trace ACL paths in the directory until reaching a high-privilege identity. Each ACE that grants write-class permissions to a low-tier identity is a potential edge in an attack graph (BloodHound). The patterns below are the canonical primitives.</p>
+
+    <div class="card">
+      <div class="card-title c-red">High-Value ACL Primitives</div>
+      <table class="ref-table">
+        <thead><tr><th>ACE / Right</th><th>On Target</th><th>Path to Compromise</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell red">GenericAll</td><td>Any object</td><td>Full control — reset password, add to group, write attributes, take ownership</td></tr>
+          <tr><td class="mono-cell red">WriteDACL</td><td>Any object</td><td>Modify DACL → grant self GenericAll → escalate</td></tr>
+          <tr><td class="mono-cell red">WriteOwner</td><td>Any object</td><td>Become owner → automatic WriteDac</td></tr>
+          <tr><td class="mono-cell red">GenericWrite</td><td>User</td><td>Write SPN → Kerberoast; write <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code> → RBCD</td></tr>
+          <tr><td class="mono-cell red">GenericWrite</td><td>Computer</td><td>RBCD setup; write <code>msDS-KeyCredentialLink</code> → Shadow Credentials</td></tr>
+          <tr><td class="mono-cell red">GenericWrite</td><td>Group</td><td>Add member → group membership escalation</td></tr>
+          <tr><td class="mono-cell red">DS-Replication-Get-Changes-All</td><td>Domain root</td><td>DCSync — dump all hashes including krbtgt</td></tr>
+          <tr><td class="mono-cell red">ForceChangePassword</td><td>User</td><td>Reset password without knowing current → takeover</td></tr>
+          <tr><td class="mono-cell red">AllowedToAct</td><td>Computer</td><td>RBCD → S4U2Proxy as any user (incl. DA) to that computer</td></tr>
+          <tr><td class="mono-cell red">AddMember</td><td>Group</td><td>Add controlled account to privileged group</td></tr>
+          <tr><td class="mono-cell red">ReadGMSAPassword</td><td>gMSA object</td><td>Retrieve managed password → authenticate as service account</td></tr>
+          <tr><td class="mono-cell red">WriteSPN</td><td>User</td><td>Set arbitrary SPN → Targeted Kerberoasting</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="attack-block" style="margin-top:14px">
+      <div class="attack-head">
+        <span class="attack-name">AdminSDHolder Backdoor</span>
+        <span class="attack-mitre">T1098</span>
+      </div>
+      <div class="attack-body">
+        <p>The AdminSDHolder object's DACL is propagated by SDProp every 60 minutes to all members of protected groups (Domain Admins, Enterprise Admins, etc.). An attacker who plants a backdoor ACE (e.g., GenericAll for a controlled account) on AdminSDHolder achieves persistent access — even if defenders manually fix individual user ACLs, SDProp re-applies the malicious template at the next cycle.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit AdminSDHolder ACL routinely and on every 4670/4662 event affecting it</li>
+          <li>Detect SDProp execution (events 4780) and verify expected ACEs only</li>
+          <li>Monitor any ACE addition to AdminSDHolder as a high-severity alert</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SYSVOL / cPassword Exposure</span>
+        <span class="attack-mitre">T1552.006</span>
+      </div>
+      <div class="attack-body">
+        <p>Group Policy Preferences (GPP) historically allowed setting passwords for local accounts, scheduled tasks, and services via XML files in SYSVOL. The passwords were AES-encrypted with a key Microsoft published — trivially decryptable (<strong class="hl">CVE-2014-1812</strong>). Patched by removing the password-setting capability, but legacy GPPs still in SYSVOL retain the encrypted blobs and remain readable by all domain users.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit SYSVOL for <code>cpassword=</code> in *.xml files; remove and rotate any exposed credentials</li>
+          <li>Use LAPS instead of GPP for local account password management</li>
+          <li>Restrict SYSVOL write access to domain admins and Group Policy creators</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">GPO Abuse — Logon Script / Scheduled Task Injection</span>
+        <span class="attack-mitre">T1484.001</span>
+      </div>
+      <div class="attack-body">
+        <p>An attacker with write access to a GPO (or to the SYSVOL files backing it) can inject malicious logon scripts, immediate scheduled tasks, or registry modifications that are applied to every machine and user in scope at next gpupdate. Common edges: GenericWrite on a GPO; write access to a linked OU's gPLink attribute; or membership in Group Policy Creator Owners with edit access to a GPO linked to high-value OUs (like Domain Controllers).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit GPO ACLs and linkage; least-privilege on Group Policy editing</li>
+          <li>Monitor 4739 (Domain Policy changed), 5136 (Directory object modified) on GPO containers</li>
+          <li>SYSVOL write access tightly controlled; FS auditing on \\domain\sysvol\Policies</li>
+          <li>WDAC / AppLocker on endpoints to block unauthorized scripts</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">SID History Injection (Cross-Domain)</span>
+        <span class="attack-mitre">T1134.005</span>
+      </div>
+      <div class="attack-body">
+        <p>The <code>sIDHistory</code> attribute lets a migrated account retain SIDs from its previous domain. Within a forest, SID history is honored — meaning an attacker who controls a child domain (compromise of any child Domain Admin) can inject SIDs of forest-root Enterprise Admins into a sIDHistory-permitted ticket and escalate forest-wide. The <em>SID Filter Quarantining</em> setting on a trust normally strips foreign SIDs but is disabled within a single forest by design.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Treat the forest as the security boundary — child-domain compromise = forest compromise</li>
+          <li>Enable SID Filtering on cross-forest trusts; quarantine external trusts</li>
+          <li>Monitor 4662 events for sIDHistory writes; should be rare outside migrations</li>
+          <li>Detect Kerberos tickets with extra SIDs in PAC that don't match the issuing domain</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">DnsAdmins → SYSTEM on DC</span>
+        <span class="attack-mitre">T1574 (legacy)</span>
+      </div>
+      <div class="attack-body">
+        <p>Members of the DnsAdmins group could historically register a malicious DLL as a DNS plugin via <code>dnscmd /config /serverlevelplugindll</code>; the DNS service (running as SYSTEM on a DC) loads the DLL on next restart, yielding SYSTEM on the DC and effectively domain compromise. Microsoft mitigated by limiting the registry path and patching dnscmd (see CVE-2021-40469 / KB5006744 era), but legacy systems remain vulnerable.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit and minimize DnsAdmins membership — treat as Tier-0</li>
+          <li>Apply current patches; verify <code>HKLM\SYSTEM\...\DNS\Parameters\ServerLevelPluginDll</code> is restricted</li>
+          <li>Run DNS on dedicated, non-DC servers where feasible</li>
+        </ul>
+      </div>
+    </div>
+  </section>

@@ -1,0 +1,62 @@
+  <!-- ── 12 AUDITING ───────────────────────────────────────── -->
+  <section class="section" id="auditing">
+    <div class="section-header">
+      <div class="section-dot dot-green"></div>
+      <h3>12 — Security Auditing</h3>
+      <span class="section-id">AUDIT</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/advanced-audit-policy-configuration" target="_blank" rel="noopener noreferrer">Advanced audit policy</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/audit-generation" target="_blank" rel="noopener noreferrer">Audit generation</a>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title c-green">Audit Policy Architecture</div>
+        <ul class="field-list">
+          <li><span class="field-key green">System Audit Policy</span><span class="field-val">Machine-wide settings configured via Group Policy or <code>auditpol</code>. Two types: legacy (category) and advanced (subcategory). Advanced takes precedence.</span></li>
+          <li><span class="field-key green">Per-User Audit Policy</span><span class="field-val">Override system policy for specific users.</span></li>
+          <li><span class="field-key green">Resource SACL</span><span class="field-val">Per-object audit ACEs. Audit events generated only when a request matches both the system policy AND a SACL ACE on the target.</span></li>
+          <li><span class="field-key green">Global SACL</span><span class="field-val">Apply audit rules to all objects of a type without per-object configuration.</span></li>
+          <li><span class="field-key green">Policy Security</span><span class="field-val">CrashOnAuditFail prevents system operation if auditing fails. Modifying audit policy requires SeSecurityPrivilege.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">Critical Event ID Reference</div>
+        <table class="ref-table">
+          <thead><tr><th>Event ID</th><th>Category</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell teal">4624</td><td>Logon</td><td>Successful logon (with logon type)</td></tr>
+            <tr><td class="mono-cell teal">4625</td><td>Logon</td><td>Failed logon</td></tr>
+            <tr><td class="mono-cell teal">4634/4647</td><td>Logon</td><td>Logoff</td></tr>
+            <tr><td class="mono-cell teal">4648</td><td>Logon</td><td>Explicit credential logon (runas)</td></tr>
+            <tr><td class="mono-cell">4672</td><td>Special Logon</td><td>Sensitive privileges in token</td></tr>
+            <tr><td class="mono-cell">4688</td><td>Process</td><td>Process creation</td></tr>
+            <tr><td class="mono-cell">4663</td><td>Object Access</td><td>Access on audited object</td></tr>
+            <tr><td class="mono-cell">4698/4702</td><td>Task Sched</td><td>Scheduled task created/modified</td></tr>
+            <tr><td class="mono-cell">4720/4722</td><td>Account Mgmt</td><td>Account created / enabled</td></tr>
+            <tr><td class="mono-cell">4728/4732</td><td>Account Mgmt</td><td>Member added to global / local group</td></tr>
+            <tr><td class="mono-cell">4768</td><td>Kerberos</td><td>TGT request (AS-REQ)</td></tr>
+            <tr><td class="mono-cell">4769</td><td>Kerberos</td><td>Service ticket request (TGS-REQ)</td></tr>
+            <tr><td class="mono-cell">4771</td><td>Kerberos</td><td>Pre-auth failure</td></tr>
+            <tr><td class="mono-cell">4776</td><td>NTLM</td><td>Credential validation on DC</td></tr>
+            <tr><td class="mono-cell">4662</td><td>DS Access</td><td>Directory service object access</td></tr>
+            <tr><td class="mono-cell">7045</td><td>System</td><td>New service installed</td></tr>
+            <tr><td class="mono-cell">4719</td><td>Policy</td><td>Audit policy changed</td></tr>
+            <tr><td class="mono-cell">1102</td><td>Log</td><td>Audit log cleared</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-blue">SACL ACE Mechanics</div>
+      <p class="note">A SACL ACE triggers an event log entry when a matching access occurs on the object. Both conditions must hold for an event to be generated: the SACL ACE must match (SID + access mask), AND the system audit policy must have the relevant category enabled.</p>
+      <ul class="field-list" style="margin-top:8px">
+        <li><span class="field-key blue">SUCCESSFUL_ACCESS</span><span class="field-val">Log on successful access.</span></li>
+        <li><span class="field-key blue">FAILED_ACCESS</span><span class="field-val">Log on access denial.</span></li>
+        <li><span class="field-key blue">Access Mask</span><span class="field-val">Targeted — can audit only specific access rights (e.g., DELETE attempts only).</span></li>
+      </ul>
+    </div>
+  </section>

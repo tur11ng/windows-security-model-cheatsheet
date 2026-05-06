@@ -1,0 +1,93 @@
+  <!-- ── 16 NTLM ATTACKS ───────────────────────────────────────── -->
+  <section class="section" id="ntlm-attacks">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>16 — NTLM Attacks</h3>
+      <span class="section-id">NTLM-OFF</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthn/microsoft-ntlm" target="_blank" rel="noopener noreferrer">Microsoft NTLM</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/kerberos/ntlm-overview" target="_blank" rel="noopener noreferrer">NTLM overview</a>
+    </div>
+
+    <p class="note">NTLM's challenge-response design is vulnerable to relay (because the client cannot verify the server's identity in many configurations), to offline cracking (because the response is computed deterministically from the NT hash), and to credential reuse (because the NT hash itself is a sufficient authenticator).</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">NTLM Relay</span>
+        <span class="attack-mitre">T1557.001</span>
+      </div>
+      <div class="attack-body">
+        <p>The attacker positions themselves between client and server (LLMNR/NBT-NS/mDNS poisoning, ARP spoofing, malicious WPAD, IPv6 DHCPv6 takeover, or coercion via PrinterBug, PetitPotam, DFSCoerce, Coerced Authentication). They forward the captured NEGOTIATE/CHALLENGE/AUTHENTICATE messages to a target server, authenticating <em>as the victim</em>. Common targets: SMB (file share access, admin operations), LDAP/LDAPS (write to AD attributes — RBCD, addUserToGroup), HTTP (OWA, ADFS), AD CS web enrollment endpoints (ESC8 — request a certificate as the victim, then use it for Kerberos PKINIT). Privileged victims (Domain Admin, computer accounts) yield direct domain compromise.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Enforce SMB Signing on all hosts (<code>RequireSecuritySignature=1</code>) — relay across SMB fails</li>
+          <li>Enforce LDAP Signing and LDAP Channel Binding on DCs — closes the LDAP/LDAPS relay path</li>
+          <li>Enable EPA on AD CS web endpoints, OWA, ECP, and any HTTPS that uses NTLM — closes ESC8</li>
+          <li>Disable LLMNR (GPO) and NetBIOS-over-TCP/IP — eliminates name-resolution poisoning</li>
+          <li>Disable IPv6 if not in use, or enforce DHCPv6 guard / RA guard at the switch</li>
+          <li>Patch coercion vectors (Spooler, EFS-RPC PetitPotam, DFS) and consider disabling Print Spooler on servers</li>
+          <li>Restrict NTLM via GPO (<em>Network security: Restrict NTLM</em>) — audit then enforce</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Pass-the-Hash (PtH)</span>
+        <span class="attack-mitre">T1550.002</span>
+      </div>
+      <div class="attack-body">
+        <p>NTLM authentication does not require the cleartext password — only the NT hash. An attacker holding a stolen hash can inject it into LSASS (or use a tool that performs NTLM auth directly with the hash) and authenticate to any service that accepts NTLM. Used extensively for lateral movement: PSExec, WMI, WinRM, SMB admin shares (C$, ADMIN$), scheduled tasks. Effective until the password is rotated.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>LAPS for local Administrator passwords — each host has a unique, rotated password, breaking lateral PtH</li>
+          <li>Credential Guard prevents hash extraction in the first place</li>
+          <li>Restrict local account network logon (<em>Deny access to this computer from the network</em> for local accounts) — UAC remote restrictions also block this</li>
+          <li>Network segmentation; jump boxes (PAWs) for admin operations</li>
+          <li>Disable NTLM where possible; enforce Kerberos-only</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Hash Capture (Responder-style)</span>
+        <span class="attack-mitre">T1187 / T1557.001</span>
+      </div>
+      <div class="attack-body">
+        <p>The attacker stands up a malicious SMB / HTTP / LDAP server and induces clients to authenticate to it (typically by poisoning name resolution). The captured NTLMv2 challenge-response is offline-crackable — for weak passwords, recovery in seconds to hours. Yields the cleartext password, which is then usable everywhere.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Disable LLMNR, NBT-NS, mDNS at the host</li>
+          <li>Strong password policy — long passphrases resist offline cracking</li>
+          <li>Block outbound SMB to the internet (egress filtering on TCP/445, /139)</li>
+          <li>Detection: alert on UDP 5355 (LLMNR) traffic; honeypot SMB shares with names like AAA</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">NTLM Downgrade</span>
+        <span class="attack-mitre">T1562 / T1556</span>
+      </div>
+      <div class="attack-body">
+        <p>The attacker manipulates the NTLM negotiate flags or relies on lax server compatibility settings to force NTLMv1, which uses DES on the challenge with the NT hash. NTLMv1 challenge-response is far easier to crack offline (constant <code>1122334455667788</code> challenge with crack.sh yields the hash directly).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Set <code>LmCompatibilityLevel = 5</code> via GPO — refuse LM &amp; NTLMv1, send NTLMv2 only</li>
+          <li>Audit 4624 events for NTLMv1 authentications</li>
+          <li>Disable NTLM entirely on servers that don't require it (Restrict NTLM in GPO)</li>
+        </ul>
+      </div>
+    </div>
+  </section>

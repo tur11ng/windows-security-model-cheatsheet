@@ -1,0 +1,184 @@
+  <!-- ── 17 KERBEROS ATTACKS ───────────────────────────────────────── -->
+  <section class="section" id="kerberos-attacks">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>17 — Kerberos Attacks</h3>
+      <span class="section-id">KRB-OFF</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview" target="_blank" rel="noopener noreferrer">Kerberos overview</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4769" target="_blank" rel="noopener noreferrer">Event 4769</a>
+    </div>
+
+    <p class="note">Kerberos is structurally stronger than NTLM but exposes its own attack surface: ticket forgery (when a long-term key is compromised), offline cracking of tickets encrypted with a service principal's key, abuse of misconfigured delegation, and certificate-based authentication bypasses via AD CS.</p>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Kerberoasting</span>
+        <span class="attack-mitre">T1558.003</span>
+      </div>
+      <div class="attack-body">
+        <p>Any authenticated domain user can request a service ticket for any SPN. The TGS-REP contains a portion encrypted with the target service account's long-term key. By preferring RC4-HMAC etype (which uses the NT hash directly as key), the attacker obtains material that can be cracked offline to recover the service account password. Targets accounts with SPNs registered — typically service accounts, often privileged.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Use Group Managed Service Accounts (gMSA) — auto-rotated 240-byte random passwords resist offline cracking</li>
+          <li>Disable RC4 on the KDC (<em>Network Security: Configure encryption types allowed for Kerberos</em>) — forces AES, slower to crack</li>
+          <li>Audit accounts with SPNs and ensure long, random passwords</li>
+          <li>Detect: 4769 with Ticket Encryption Type <code>0x17</code> (RC4) at high volume from a single source</li>
+          <li>Add sensitive service accounts to Protected Users where compatible</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">AS-REP Roasting</span>
+        <span class="attack-mitre">T1558.004</span>
+      </div>
+      <div class="attack-body">
+        <p>If an account has the <code>DONT_REQ_PREAUTH</code> flag set, the KDC issues an AS-REP without first verifying the client knows the password. The AS-REP contains material encrypted with the user's long-term key — directly offline-crackable. No prior authentication to the domain is required (an unauthenticated attacker with network access to the DC can enumerate and roast).</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit AD for accounts with <code>DONT_REQ_PREAUTH</code> set; remove the flag unless strictly required</li>
+          <li>Detect: 4768 with pre-auth type 0 (no pre-auth) — anomalous when not from known legacy clients</li>
+          <li>Strong password policy — offline crack resistance</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Pass-the-Ticket</span>
+        <span class="attack-mitre">T1550.003</span>
+      </div>
+      <div class="attack-body">
+        <p>An attacker with admin/SYSTEM on a host extracts Kerberos tickets (TGT or service ticket) from LSASS memory or from credential cache files. The stolen ticket is injected into the attacker's logon session and used as if it were their own. Distinct from PtH because it does not require the user's hash — only the (time-limited) ticket — and the resulting authentication is indistinguishable from legitimate Kerberos to the receiving service.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Credential Guard — tickets are isolated in VSM, not extractable from userland</li>
+          <li>Reduce TGT lifetime for sensitive accounts (Protected Users default: 4 hours, non-renewable)</li>
+          <li>Privileged account isolation — admins use PAWs and never log into Tier-1/2 hosts</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Golden Ticket</span>
+        <span class="attack-mitre">T1558.001</span>
+      </div>
+      <div class="attack-body">
+        <p>Once the krbtgt account's NT hash (RC4) or AES key is compromised, the attacker can forge arbitrary TGTs offline. The forged TGT can claim any user identity, any group memberships (Domain Admins, Enterprise Admins), and any validity period. Persists across user password resets and domain admin removal — only rotating the krbtgt password (twice, due to password history) invalidates them.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>If krbtgt compromise suspected: rotate the krbtgt password twice (not once — replication and password history matter)</li>
+          <li>Detect: 4769 events for service tickets where the source TGT was never observed at the AS layer (PAC validation logs)</li>
+          <li>Detect: anomalous TGT lifetimes (10+ year tickets are common forgery indicators)</li>
+          <li>Limit Domain Admin / Enterprise Admin membership to absolute minimum; segregate Tier-0</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Silver Ticket</span>
+        <span class="attack-mitre">T1558.002</span>
+      </div>
+      <div class="attack-body">
+        <p>The attacker compromises a single service account's hash and forges service tickets for that one service. Because the service ticket is only validated by the target service (not the KDC, in standard configurations without PAC validation), no DC interaction is required at use-time — the attack is silent against centralized monitoring. Limited to that specific service.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Enable PAC validation (<code>ValidateKdcPacSignature</code>) on services where supported — service contacts DC to verify PAC signature</li>
+          <li>Use gMSA for service accounts</li>
+          <li>Detect tickets without PAC, or with malformed PAC structure (Sysmon and EDR Kerberos parsing)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Overpass-the-Hash</span>
+        <span class="attack-mitre">T1550.002 + T1558</span>
+      </div>
+      <div class="attack-body">
+        <p>An attacker holding a user's NT hash (or AES key) sends an AS-REQ with RC4 (or AES) pre-authentication using that key. The KDC issues a legitimate TGT — converting the hash into a Kerberos credential, which is more useful than the raw hash because it works against Kerberos-only services and produces normal-looking authentication telemetry.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Same as PtH: Credential Guard, LAPS, Protected Users, network segmentation</li>
+          <li>Disable RC4 — forces AES-only, narrower attack window</li>
+          <li>Detect: 4768 with RC4 etype for accounts that should authenticate AES-only</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Unconstrained Delegation Abuse</span>
+        <span class="attack-mitre">T1558 / T1134</span>
+      </div>
+      <div class="attack-body">
+        <p>A server with unconstrained delegation receives users' TGTs cached in LSASS. An attacker who compromises that server can extract any TGT that arrives. Combined with a coercion technique (PrinterBug, PetitPotam) to force a Domain Controller's computer account to authenticate to the unconstrained-delegation server, the attacker captures a DC's TGT — sufficient for DCSync and full domain compromise.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit AD for <code>TRUSTED_FOR_DELEGATION</code> on accounts; minimize use; prefer constrained or RBCD</li>
+          <li>Mark sensitive accounts (DA/EA, DCs) as "Account is sensitive and cannot be delegated" or add to Protected Users</li>
+          <li>Patch coercion vectors and disable Print Spooler on DCs</li>
+          <li>Detect: 4769 for DC computer accounts targeting non-DC SPNs (unusual)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">Constrained Delegation / RBCD Abuse</span>
+        <span class="attack-mitre">T1134.003</span>
+      </div>
+      <div class="attack-body">
+        <p>Constrained Delegation (KCD): if the attacker compromises a service account configured for KCD, they can use S4U2Self + S4U2Proxy to obtain a service ticket as <em>any user</em> to any SPN listed in <code>msDS-AllowedToDelegateTo</code>. With "use any auth protocol" (protocol transition) flag, no pre-existing user TGT is needed. Resource-Based Constrained Delegation (RBCD): if the attacker can write <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code> on a target computer object (commonly via ACL abuse — see Section 18), they configure the target to trust an attacker-controlled computer account, then S4U2Proxy as Domain Admin to that target and execute as DA. RBCD is the most common ACL-abuse-to-RCE primitive in modern AD.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit AD for <code>msDS-AllowedToDelegateTo</code> populations and review necessity</li>
+          <li>Audit <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code> across all computers — should normally be empty</li>
+          <li>Restrict who can write to computer objects (ACL hygiene; remove "Authenticated Users" creation rights — MS-DS-Machine-Account-Quota)</li>
+          <li>Add sensitive accounts to Protected Users (cannot be delegated)</li>
+          <li>Detect: 4624 with logon process Kerberos and authentication package S4U; cross-reference with TGS-REQ S4U flags</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="attack-block">
+      <div class="attack-head">
+        <span class="attack-name">AD CS Abuse (ESC1–ESC15)</span>
+        <span class="attack-mitre">T1649</span>
+      </div>
+      <div class="attack-body">
+        <p>Active Directory Certificate Services trust relationship to Kerberos (PKINIT) and weak default templates / endpoint configurations create a wide range of escalation paths catalogued as ESC1 through ESC15+. Common patterns: ESC1 — request a certificate with arbitrary SAN as a low-privileged user from a misconfigured template (Enrollee Supplies Subject), then PKINIT as Domain Admin; ESC8 — NTLM-relay HTTP enrollment endpoint to issue a certificate as a privileged victim; ESC4 — write access to a certificate template lets you reconfigure it to be vulnerable; Shadow Credentials — write <code>msDS-KeyCredentialLink</code> on a target to add an attacker-controlled key, then PKINIT as the target.</p>
+      </div>
+      <div class="attack-mitigations">
+        <div class="mit-label">Mitigations</div>
+        <ul>
+          <li>Audit certificate templates for ESC1 conditions (Enrollee Supplies Subject + Client Auth EKU + low-privileged enrollment)</li>
+          <li>Disable HTTP enrollment endpoints; if HTTPS, enforce EPA + LDAP signing</li>
+          <li>Restrict template ACLs to admins; review enrollment permissions</li>
+          <li>Audit <code>msDS-KeyCredentialLink</code> writes (Shadow Credentials primitive)</li>
+          <li>Use Microsoft's <em>Certify</em> / <em>Locksmith</em> / <em>PSPKIAudit</em> tools to detect misconfigurations</li>
+        </ul>
+      </div>
+    </div>
+  </section>

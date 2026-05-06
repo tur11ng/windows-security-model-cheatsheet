@@ -1,0 +1,184 @@
+  <!-- ── 19 DETECTION ───────────────────────────────────────── -->
+  <section class="section" id="detection">
+    <div class="section-header">
+      <div class="section-dot dot-red"></div>
+      <h3>19 — Detection &amp; Telemetry Mapping</h3>
+      <span class="section-id">DET</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/audit-policy-recommendations" target="_blank" rel="noopener noreferrer">Audit recommendations</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4624" target="_blank" rel="noopener noreferrer">Event 4624</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4769" target="_blank" rel="noopener noreferrer">Event 4769</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4670" target="_blank" rel="noopener noreferrer">Event 4670</a>
+    </div>
+
+    <p class="note">A telemetry-first view of the attacks above. Each row maps an attack pattern to the specific Windows event IDs and additional sources (Sysmon, EDR, network) that produce signal. Use as a baseline for hunt queries.</p>
+
+    <div class="card">
+      <table class="ref-table">
+        <thead>
+          <tr><th>Attack Pattern</th><th>Primary Telemetry</th><th>Hunt Hint</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong class="hl">LSASS dumping</strong></td>
+            <td>4688 (process create), Sysmon 10 (ProcessAccess), EDR kernel callbacks</td>
+            <td>Any non-system parent opening lsass.exe with PROCESS_VM_READ; comsvcs.dll MiniDump invocations</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Token impersonation / Potato</strong></td>
+            <td>4672 (special privileges), 4673 (privilege use), 4624 type 9 (NewCredentials)</td>
+            <td>SYSTEM child of IIS/SQL/service process; SeImpersonatePrivilege use spike</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">UAC bypass</strong></td>
+            <td>4688, 4657 (registry), Sysmon 13 (Reg value set), Sysmon 11 (FileCreate)</td>
+            <td>Auto-elevating binary spawned with non-default registry/file inputs in user-controlled paths</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Service hijack (T1574.x)</strong></td>
+            <td>7045 (service install), 4697, 4670 (object permissions), Sysmon 7 (ImageLoad)</td>
+            <td>Service binPath/ImagePath rewrites; DLL load from non-System32 path by privileged service</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">SAM/SECURITY hive theft</strong></td>
+            <td>4663 on \config\SAM &amp; SECURITY, 8222 (VSS shadow), 4688 (reg.exe save)</td>
+            <td><code>reg save</code>, <code>esentutl /y</code>, <code>vssadmin create shadow</code> patterns</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">DCSync</strong></td>
+            <td>4662 with DS-Replication-Get-Changes GUIDs</td>
+            <td>Replication right exercised by non-DC source IP</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">NTLM relay</strong></td>
+            <td>4624 type 3 + LogonProcessName=NtLmSsp + AuthenticationPackage=NTLM, 4776, network IDS</td>
+            <td>Workstation account logging into another workstation; LLMNR/NBNS query floods</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Pass-the-Hash</strong></td>
+            <td>4624 type 3 with NTLM auth from local account; 4672 on lateral host</td>
+            <td>Local Administrator network logons across hosts (LAPS makes each unique)</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Hash capture (Responder)</strong></td>
+            <td>Network: outbound SMB to unusual destinations; UDP 5355 LLMNR queries</td>
+            <td>Unexpected SMB connection attempts from clients to non-domain hosts</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Kerberoasting</strong></td>
+            <td>4769 with Ticket Encryption Type 0x17 (RC4)</td>
+            <td>Single source requesting many distinct SPNs in short window</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">AS-REP Roasting</strong></td>
+            <td>4768 with PreAuthType 0</td>
+            <td>Bulk AS-REQ for multiple users without pre-auth</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Golden Ticket</strong></td>
+            <td>4769 without preceding 4768 (no AS-REQ); ticket lifetime anomalies</td>
+            <td>Service ticket requests for users whose TGT was never issued by the KDC observably</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Silver Ticket</strong></td>
+            <td>4624 / 4769 without DC interaction</td>
+            <td>Service authentications without corresponding TGS-REQ on DC</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">RBCD / S4U abuse</strong></td>
+            <td>4769 with S4U flags; 5136 on msDS-AllowedToActOnBehalfOfOtherIdentity</td>
+            <td>Computer object attribute writes by non-admin; S4U2Self+S4U2Proxy chains</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">AD CS abuse (ESC1/8)</strong></td>
+            <td>4886/4887 (CA enrollment), 4768 with PKINIT, IIS logs on /certsrv</td>
+            <td>Certificate issued with SAN ≠ requester; PKINIT logons for admins from unusual hosts</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">ACL / GPO abuse</strong></td>
+            <td>5136 (DS object modified), 4670 (perms changed), 4719 (audit policy changed)</td>
+            <td>Modifications to AdminSDHolder, GPO containers, computer/user objects by unexpected principals</td>
+          </tr>
+          <tr>
+            <td><strong class="hl">Defense evasion</strong></td>
+            <td>1102 (log cleared), 4719 (audit policy changed), 4904/4905 (security source registered/removed)</td>
+            <td>Any of these events from non-admin process tree is high-severity</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-blue" style="margin-top:14px">
+      <div class="callout-label">Layered Hardening Stack</div>
+      The most resilient posture combines: <strong class="hl">Credential Guard</strong> + <strong class="hl">LSASS PPL</strong> for credential isolation; <strong class="hl">LAPS</strong> for local account uniqueness; <strong class="hl">tiered admin model</strong> with Deny logon rights enforcing separation; <strong class="hl">SMB/LDAP signing + EPA</strong> for relay resistance; <strong class="hl">Disable NTLM</strong> where compatible; <strong class="hl">gMSA</strong> for service accounts; <strong class="hl">AD CS hardening + EPA on enrollment endpoints</strong>; <strong class="hl">BloodHound ACL audits</strong> on a regular cadence; <strong class="hl">Protected Users</strong> for all Tier-0 identities.
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-green">Log Source Priority</div>
+        <table class="ref-table">
+          <thead><tr><th>Source</th><th>What it covers</th><th>Minimum config</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell green">DC Security Log</td><td>All Kerberos (4768/4769/4771), NTLM validation (4776), DS access (4662/5136)</td><td>Advanced Audit Policy — all Kerberos sub-categories Success+Failure</td></tr>
+            <tr><td class="mono-cell green">Workstation Security Log</td><td>Local logon (4624/4625), process creation (4688), token/privilege use (4672/4673)</td><td>Enable 4688 command-line logging; forward via WEF</td></tr>
+            <tr><td class="mono-cell green">Sysmon</td><td>ProcessAccess (10) for LSASS handles, NetworkConnect (3), ImageLoad (7), RegValue (13)</td><td>SwiftOnSecurity config at minimum; tune LSASS rule</td></tr>
+            <tr><td class="mono-cell green">EDR Kernel Telemetry</td><td>ObRegisterCallbacks — process handle requests with VM_READ; ETW Microsoft-Windows-Threat-Intelligence provider</td><td>Any modern EDR (Defender for Endpoint, CrowdStrike, etc.)</td></tr>
+            <tr><td class="mono-cell green">Network / NDR</td><td>NTLM relay traffic patterns; SMB to anomalous destinations; Kerberos RC4 concentration</td><td>Zeek + Suricata; alert on outbound SMB port 445 from clients</td></tr>
+            <tr><td class="mono-cell green">AD Change Auditing</td><td>5136 on all schema classes (user, computer, group, GPO, adminSDHolder)</td><td>Advanced Audit — DS Changes; SIEM correlation on object writes</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-amber">High-Fidelity Hunt Queries (Skeleton)</div>
+        <ul class="field-list">
+          <li>
+            <span class="field-key amber">LSASS Handle</span>
+            <span class="field-val">Sysmon 10 where TargetImage contains lsass.exe AND GrantedAccess in (0x1010, 0x1038, 0x143a) AND SourceImage NOT IN (AV/EDR known paths)</span>
+          </li>
+          <li>
+            <span class="field-key amber">DCSync</span>
+            <span class="field-val">Event 4662, Properties includes DS-Replication-Get-Changes-All GUID (1131f6ad-…), SubjectUserName is NOT a DC computer account</span>
+          </li>
+          <li>
+            <span class="field-key amber">Kerberoasting Burst</span>
+            <span class="field-val">Event 4769, TicketEncryptionType=0x17, count(distinct ServiceName) &gt; 5 per SourceIP per minute</span>
+          </li>
+          <li>
+            <span class="field-key amber">Golden Ticket</span>
+            <span class="field-val">Event 4769 where no corresponding 4768 for same account in last 10 hours on any DC; OR ticket lifetime &gt; 10 hours</span>
+          </li>
+          <li>
+            <span class="field-key amber">RBCD Write</span>
+            <span class="field-val">Event 5136, AttributeLDAPDisplayName = msDS-AllowedToActOnBehalfOfOtherIdentity, ModifierSID NOT admin group</span>
+          </li>
+          <li>
+            <span class="field-key amber">Lateral PtH</span>
+            <span class="field-val">Event 4624, LogonType=3, AuthenticationPackageName=NTLM, SubjectUserName matches local admin naming convention, across &gt;2 hosts</span>
+          </li>
+          <li>
+            <span class="field-key amber">Service Install (Persistence)</span>
+            <span class="field-val">Event 7045 or 4697, ServiceType=0x10 (WIN32_OWN_PROCESS), ServiceStartType=2 (AUTO_START), within hours of 4625/4624 anomaly</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-red">Indicators of Compromise — Quick Reference</div>
+      <table class="ref-table">
+        <thead><tr><th>Indicator</th><th>Implication</th><th>Response Priority</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell red">Event 1102 (log cleared)</td><td>Attacker covering tracks; often precedes exfiltration or persistence</td><td>P1 — immediate investigation</td></tr>
+          <tr><td class="mono-cell red">krbtgt password not rotated &gt;180 days</td><td>Golden ticket window is open if hash ever exposed</td><td>Rotate immediately (twice); check for anomalous TGTs</td></tr>
+          <tr><td class="mono-cell red">AdminSDHolder modified (4670 / 5136)</td><td>Backdoor persistence on all protected group members</td><td>P1 — revert and investigate path to Domain Admin</td></tr>
+          <tr><td class="mono-cell red">New SPN on privileged account</td><td>Targeted Kerberoasting setup</td><td>Remove SPN; audit who set it (5136)</td></tr>
+          <tr><td class="mono-cell red">LSASS child process (4688)</td><td>Code injection / credential dump in progress</td><td>P1 — isolate host</td></tr>
+          <tr><td class="mono-cell red">WDigest UseLogonCredential = 1 (4657)</td><td>Attacker staging for cleartext credential harvest</td><td>Revert; check what credentials were exposed</td></tr>
+          <tr><td class="mono-cell red">Certificate issued with arbitrary SAN</td><td>ESC1/ESC8 ADCS abuse; attacker may have a DA certificate</td><td>Revoke; restrict template; audit CA logs</td></tr>
+          <tr><td class="mono-cell red">msDS-AllowedToActOnBehalfOfOtherIdentity written</td><td>RBCD setup — S4U2Proxy attack likely pending</td><td>Clear attribute; investigate writer identity</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
