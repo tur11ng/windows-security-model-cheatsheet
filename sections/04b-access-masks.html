@@ -1,0 +1,217 @@
+  <!-- ── 04b ACCESS MASKS & ACCESS RIGHTS ────────────────────────────────── -->
+  <section class="section" id="access-masks">
+    <div class="section-header">
+      <div class="section-dot dot-blue"></div>
+      <h3>Access Masks &amp; Access Rights</h3>
+      <span class="section-id">AM</span>
+    </div>
+    <div class="ref-links">
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/access-mask-format" target="_blank" rel="noopener noreferrer">Access-mask format</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/generic-access-rights" target="_blank" rel="noopener noreferrer">Generic access rights</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/standard-access-rights" target="_blank" rel="noopener noreferrer">Standard access rights</a>
+      <a class="ref-link" href="https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-generic_mapping" target="_blank" rel="noopener noreferrer">GENERIC_MAPPING</a>
+    </div>
+
+    <p class="note">Every <code>OpenXxx</code> call and every ACE carries a 32-bit <strong class="hl">ACCESS_MASK</strong>. The SRM compares the requested mask against DACL ACE masks bit-for-bit. The 32 bits are partitioned into four tiers with fixed semantics assigned by the kernel.</p>
+
+    <!-- 32-bit field layout diagram -->
+    <svg class="inline-diagram" viewBox="0 0 580 75" role="img" aria-label="ACCESS_MASK 32-bit field layout: bits 31-28 generic, 27-24 special, 23-16 standard, 15-0 object-specific">
+      <rect class="box blue"   x="0"   y="6" width="72"  height="36" rx="5"/>
+      <rect class="box amber"  x="75"  y="6" width="72"  height="36" rx="5"/>
+      <rect class="box teal"   x="150" y="6" width="145" height="36" rx="5"/>
+      <rect class="box purple" x="298" y="6" width="280" height="36" rx="5"/>
+
+      <text class="node-text" x="36"  y="20" style="font-size:9.5px">GENERIC</text>
+      <text class="node-text" x="111" y="20" style="font-size:9.5px">SPECIAL</text>
+      <text class="node-text" x="222" y="20" style="font-size:9.5px">STANDARD</text>
+      <text class="node-text" x="438" y="20" style="font-size:9.5px">OBJECT-SPECIFIC</text>
+
+      <text class="tiny-text" x="36"  y="34">31–28</text>
+      <text class="tiny-text" x="111" y="34">27–24</text>
+      <text class="tiny-text" x="222" y="34">23–16</text>
+      <text class="tiny-text" x="438" y="34">15–0</text>
+
+      <text class="tiny-text" x="36"  y="58">GR · GW · GX · GA</text>
+      <text class="tiny-text" x="111" y="58">— · — · MA · SS</text>
+      <text class="tiny-text" x="222" y="58">— · — · — · SY · WO · WD · RC · DEL</text>
+      <text class="tiny-text" x="438" y="58">16 bits — defined per object type</text>
+    </svg>
+
+    <div class="grid-2" style="margin-top:16px">
+      <div class="card">
+        <div class="card-title c-blue">Generic Rights &nbsp;[bits 31–28]</div>
+        <p class="note" style="margin-bottom:10px">Coarse-grained, object-agnostic rights. Resolved by <code>RtlMapGenericMask()</code> before the access check runs — they are never stored in an ACE or returned in a granted-access mask.</p>
+        <table class="ref-table">
+          <thead><tr><th>Constant</th><th>Hex</th><th>Bit</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell blue">GENERIC_READ</td>    <td class="mono-cell">0x80000000</td><td>31</td></tr>
+            <tr><td class="mono-cell blue">GENERIC_WRITE</td>   <td class="mono-cell">0x40000000</td><td>30</td></tr>
+            <tr><td class="mono-cell blue">GENERIC_EXECUTE</td> <td class="mono-cell">0x20000000</td><td>29</td></tr>
+            <tr><td class="mono-cell blue">GENERIC_ALL</td>     <td class="mono-cell">0x10000000</td><td>28</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-teal">Standard Rights &nbsp;[bits 23–16]</div>
+        <p class="note" style="margin-bottom:10px">Apply uniformly to every securable object type. Always combinable with object-specific rights in a single mask.</p>
+        <table class="ref-table">
+          <thead><tr><th>Constant</th><th>Hex</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell teal">DELETE</td>        <td class="mono-cell">0x00010000</td><td>Delete the object</td></tr>
+            <tr><td class="mono-cell teal">READ_CONTROL</td>  <td class="mono-cell">0x00020000</td><td>Read owner, group, and DACL</td></tr>
+            <tr><td class="mono-cell teal">WRITE_DAC</td>     <td class="mono-cell">0x00040000</td><td>Replace the DACL</td></tr>
+            <tr><td class="mono-cell teal">WRITE_OWNER</td>   <td class="mono-cell">0x00080000</td><td>Change the owner SID</td></tr>
+            <tr><td class="mono-cell teal">SYNCHRONIZE</td>   <td class="mono-cell">0x00100000</td><td>Wait on the object handle (waitable objects)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-amber">Special Rights &nbsp;[bits 25–24]</div>
+        <table class="ref-table">
+          <thead><tr><th>Constant</th><th>Hex</th><th>Semantics</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="mono-cell amber">MAXIMUM_ALLOWED</td>
+              <td class="mono-cell">0x02000000</td>
+              <td>Instructs the SRM to grant the largest access mask the caller's token allows. The SRM resolves it and returns the actual set of bits — the caller does not specify a desired mask.</td>
+            </tr>
+            <tr>
+              <td class="mono-cell amber">ACCESS_SYSTEM_SECURITY</td>
+              <td class="mono-cell">0x01000000</td>
+              <td>Read or write the SACL (audit rules) on an object. Requires <code>SeSecurityPrivilege</code> regardless of the DACL — it is a privilege-gated right, not a DACL-gated one.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout callout-amber" style="margin-top:10px">
+          <div class="callout-label">Attacker note</div>
+          <code>MAXIMUM_ALLOWED</code> on <code>OpenProcess</code> is a common malware pattern — it avoids specifying exact rights and silently receives everything the DACL permits, which defeats detection rules keyed on specific requested-access bits such as <code>PROCESS_VM_READ | PROCESS_VM_WRITE</code>.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-purple">Combined Masks</div>
+        <table class="ref-table">
+          <thead><tr><th>Constant</th><th>Hex</th><th>Composition</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell purple">STANDARD_RIGHTS_ALL</td>    <td class="mono-cell">0x001F0000</td><td>All 5 standard rights</td></tr>
+            <tr><td class="mono-cell purple">STANDARD_RIGHTS_READ</td>   <td class="mono-cell">0x00020000</td><td>READ_CONTROL only</td></tr>
+            <tr><td class="mono-cell purple">STANDARD_RIGHTS_WRITE</td>  <td class="mono-cell">0x00020000</td><td>READ_CONTROL only</td></tr>
+            <tr><td class="mono-cell purple">STANDARD_RIGHTS_EXECUTE</td><td class="mono-cell">0x00020000</td><td>READ_CONTROL only</td></tr>
+            <tr><td class="mono-cell purple">SPECIFIC_RIGHTS_ALL</td>    <td class="mono-cell">0x0000FFFF</td><td>All 16 object-specific bits</td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-blue" style="margin-top:10px">
+          <div class="callout-label">Why READ / WRITE / EXECUTE all equal READ_CONTROL</div>
+          The combined standard masks are intentionally identical — standard rights carry no intrinsic read/write/execute meaning. That semantics comes exclusively from the object-specific bits in [15:0].
+        </div>
+      </div>
+    </div>
+
+    <!-- GENERIC_MAPPING per object type -->
+    <div class="card" style="margin-top:14px">
+      <div class="card-title c-blue">GENERIC_MAPPING — Per-Object Resolution</div>
+      <p class="note" style="margin-bottom:10px">Each kernel object type registers a <code>GENERIC_MAPPING</code> structure in its type object. <code>RtlMapGenericMask()</code> uses it to expand generic bits into object-specific combinations before the access check. The generic bits are consumed and never appear in a stored ACE or a returned granted-access mask.</p>
+      <table class="ref-table">
+        <thead>
+          <tr><th>Object type</th><th>GENERIC_READ resolves to</th><th>GENERIC_WRITE resolves to</th><th>GENERIC_ALL resolves to</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono-cell blue">File</td>
+            <td><code>FILE_READ_DATA | FILE_READ_EA | FILE_READ_ATTRIBUTES | READ_CONTROL | SYNCHRONIZE</code></td>
+            <td><code>FILE_WRITE_DATA | FILE_WRITE_EA | FILE_WRITE_ATTRIBUTES | FILE_APPEND_DATA | READ_CONTROL | SYNCHRONIZE</code></td>
+            <td><code>FILE_ALL_ACCESS</code> (0x1F01FF)</td>
+          </tr>
+          <tr>
+            <td class="mono-cell blue">Directory</td>
+            <td><code>FILE_LIST_DIRECTORY | FILE_READ_EA | FILE_READ_ATTRIBUTES | READ_CONTROL | SYNCHRONIZE</code></td>
+            <td><code>FILE_ADD_FILE | FILE_ADD_SUBDIRECTORY | FILE_WRITE_EA | FILE_WRITE_ATTRIBUTES | READ_CONTROL | SYNCHRONIZE</code></td>
+            <td><code>FILE_ALL_ACCESS</code> (0x1F01FF)</td>
+          </tr>
+          <tr>
+            <td class="mono-cell blue">Registry key</td>
+            <td><code>KEY_READ</code> (0x20019)</td>
+            <td><code>KEY_WRITE</code> (0x20006)</td>
+            <td><code>KEY_ALL_ACCESS</code> (0xF003F)</td>
+          </tr>
+          <tr>
+            <td class="mono-cell blue">Process</td>
+            <td><code>PROCESS_VM_READ | PROCESS_QUERY_INFORMATION | READ_CONTROL</code></td>
+            <td><code>PROCESS_VM_WRITE | PROCESS_SET_INFORMATION | READ_CONTROL</code></td>
+            <td><code>PROCESS_ALL_ACCESS</code> (0x1FFFFF)</td>
+          </tr>
+          <tr>
+            <td class="mono-cell blue">Thread</td>
+            <td><code>THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION | READ_CONTROL</code></td>
+            <td><code>THREAD_SET_CONTEXT | THREAD_SET_INFORMATION | READ_CONTROL</code></td>
+            <td><code>THREAD_ALL_ACCESS</code> (0x1FFFFF)</td>
+          </tr>
+          <tr>
+            <td class="mono-cell blue">Token</td>
+            <td><code>TOKEN_READ</code> = <code>TOKEN_QUERY | READ_CONTROL</code></td>
+            <td><code>TOKEN_WRITE</code> = <code>TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT | READ_CONTROL</code></td>
+            <td><code>TOKEN_ALL_ACCESS</code> (0xF01FF)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Object-specific rights: File, Process, Token -->
+    <div class="grid-3" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title c-teal">File Object-Specific Rights &nbsp;[15:0]</div>
+        <ul class="field-list">
+          <li><span class="field-key">0x0001</span><span class="field-val"><code>FILE_READ_DATA</code> / <code>FILE_LIST_DIRECTORY</code></span></li>
+          <li><span class="field-key">0x0002</span><span class="field-val"><code>FILE_WRITE_DATA</code> / <code>FILE_ADD_FILE</code></span></li>
+          <li><span class="field-key">0x0004</span><span class="field-val"><code>FILE_APPEND_DATA</code> / <code>FILE_ADD_SUBDIRECTORY</code></span></li>
+          <li><span class="field-key">0x0008</span><span class="field-val"><code>FILE_READ_EA</code></span></li>
+          <li><span class="field-key">0x0010</span><span class="field-val"><code>FILE_WRITE_EA</code></span></li>
+          <li><span class="field-key">0x0020</span><span class="field-val"><code>FILE_EXECUTE</code> / <code>FILE_TRAVERSE</code></span></li>
+          <li><span class="field-key">0x0040</span><span class="field-val"><code>FILE_DELETE_CHILD</code> (dir)</span></li>
+          <li><span class="field-key">0x0080</span><span class="field-val"><code>FILE_READ_ATTRIBUTES</code></span></li>
+          <li><span class="field-key">0x0100</span><span class="field-val"><code>FILE_WRITE_ATTRIBUTES</code></span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-blue">Process Object-Specific Rights &nbsp;[15:0]</div>
+        <ul class="field-list">
+          <li><span class="field-key blue">0x0001</span><span class="field-val"><code>PROCESS_TERMINATE</code></span></li>
+          <li><span class="field-key blue">0x0002</span><span class="field-val"><code>PROCESS_CREATE_THREAD</code></span></li>
+          <li><span class="field-key blue">0x0008</span><span class="field-val"><code>PROCESS_VM_OPERATION</code></span></li>
+          <li><span class="field-key blue">0x0010</span><span class="field-val"><code>PROCESS_VM_READ</code></span></li>
+          <li><span class="field-key blue">0x0020</span><span class="field-val"><code>PROCESS_VM_WRITE</code></span></li>
+          <li><span class="field-key blue">0x0040</span><span class="field-val"><code>PROCESS_DUP_HANDLE</code></span></li>
+          <li><span class="field-key blue">0x0200</span><span class="field-val"><code>PROCESS_CREATE_PROCESS</code></span></li>
+          <li><span class="field-key blue">0x0400</span><span class="field-val"><code>PROCESS_QUERY_INFORMATION</code></span></li>
+          <li><span class="field-key blue">0x0800</span><span class="field-val"><code>PROCESS_SUSPEND_RESUME</code></span></li>
+          <li><span class="field-key blue">0x1000</span><span class="field-val"><code>PROCESS_QUERY_LIMITED_INFO</code></span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title c-amber">Token Object-Specific Rights &nbsp;[15:0]</div>
+        <ul class="field-list">
+          <li><span class="field-key amber">0x0001</span><span class="field-val"><code>TOKEN_ASSIGN_PRIMARY</code></span></li>
+          <li><span class="field-key amber">0x0002</span><span class="field-val"><code>TOKEN_DUPLICATE</code> — create derived token</span></li>
+          <li><span class="field-key amber">0x0004</span><span class="field-val"><code>TOKEN_IMPERSONATE</code> — attach to thread</span></li>
+          <li><span class="field-key amber">0x0008</span><span class="field-val"><code>TOKEN_QUERY</code> — read token contents</span></li>
+          <li><span class="field-key amber">0x0010</span><span class="field-val"><code>TOKEN_QUERY_SOURCE</code></span></li>
+          <li><span class="field-key amber">0x0020</span><span class="field-val"><code>TOKEN_ADJUST_PRIVILEGES</code></span></li>
+          <li><span class="field-key amber">0x0040</span><span class="field-val"><code>TOKEN_ADJUST_GROUPS</code></span></li>
+          <li><span class="field-key amber">0x0080</span><span class="field-val"><code>TOKEN_ADJUST_DEFAULT</code></span></li>
+          <li><span class="field-key amber">0x0100</span><span class="field-val"><code>TOKEN_ADJUST_SESSIONID</code></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-teal" style="margin-top:14px">
+      <div class="callout-label">Key invariants</div>
+      Generic bits are never stored in an ACE and never returned in a granted-access mask — <code>RtlMapGenericMask()</code> always expands them first. <code>MAXIMUM_ALLOWED</code> is similarly never stored. Every <code>AccessAllowed</code> and <code>AccessDenied</code> ACE uses only object-specific bits [15:0] combined with standard rights [23:16].
+    </div>
+
+  </section>

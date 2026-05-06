@@ -117,6 +117,7 @@ const SECTIONS = [
   'sections/02-sids.html',
   'sections/03-tokens.html',
   'sections/04-descriptors.html',
+  'sections/04b-access-masks.html',
   'sections/05-access-check.html',
   'sections/06-privileges.html',
   'sections/07-service-accounts.html',
